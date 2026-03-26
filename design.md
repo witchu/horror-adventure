@@ -1,8 +1,8 @@
-# WAKE — Game Design Document
+# Panic : Home Episode — Game Design Document
 
 ## ภาพรวมเกม
 
-**ชื่อ:** WAKE (ตื่น)
+**ชื่อ:** Panic : Home Episode
 **แนว:** Point-and-Click Adventure / Psychological Horror
 **มุมมอง:** 2.5D Side-scroll / Fixed-angle perspective
 **แพลตฟอร์ม:** PC
