@@ -10,9 +10,15 @@
   <div id="game-container">
     <!-- Top HUD -->
     <div id="hud">
-      <div id="hp-bar-container">
-        <div id="hp-bar-fill"></div>
-        <span id="hp-text">3.00 / 3</span>
+      <div class="hud-left">
+        <div id="hp-bar-container">
+          <div id="hp-bar-fill"></div>
+          <span id="hp-text">3.00 / 3</span>
+        </div>
+        <div id="battery-bar-container" class="hidden">
+          <div id="battery-bar-fill"></div>
+          <span id="battery-text">100%</span>
+        </div>
       </div>
       <button id="hint-btn">เปิด/ปิดแสงนำทาง (Hint)</button>
     </div>
@@ -73,8 +79,36 @@
       </div>
     </div>
 
+    <!-- Kitchen Ingredient UI -->
+    <div id="kitchen-ui-container" class="ui-overlay hidden">
+      <div class="ui-panel">
+        <h3>ชั้นวางเครื่องปรุง</h3>
+        <div id="ingredient-options" class="pill-grid">
+           <!-- Buttons will be injected via JS -->
+        </div>
+        <button class="close-ui-btn" onclick="closeKitchenUI()">ปิดชั้นวาง</button>
+      </div>
+    </div>
+
+    <!-- Dining Room Drinks UI -->
+    <div id="dining-ui-container" class="ui-overlay hidden">
+      <div class="ui-panel">
+        <h3>ชุดเครื่องดื่มบนโต๊ะ</h3>
+        <p style="margin-bottom: 20px; font-size: 14px;">เลือกเครื่องดื่มเพื่อรับประทาน หรือเทใส่แก้ว</p>
+        <div id="drink-options" class="pill-grid">
+           <!-- Buttons will be injected via JS -->
+        </div>
+        <button class="close-ui-btn" onclick="closeDiningUI()">ออกจากโต๊ะ</button>
+      </div>
+    </div>
+
+    <!-- Storage Room Anomaly UI (Darkness overlay via style) -->
+    
     <!-- Interactive Scene System -->
     <div id="scene" class="room-bedroom">
+      <!-- Flashlight spot mask -->
+      <div id="flashlight-mask" class="hidden"></div>
+      
       <!-- Interactive objects injected here -->
       <div id="interactive-layer"></div>
       
@@ -94,7 +128,7 @@
       <!-- Win Screen -->
       <div id="win-screen" class="hidden overlay-screen">
         <h1>DEMO CLEARED</h1>
-        <p>คุณรอดพ้นจากห้องนอนและห้องน้ำได้สำเร็จ</p>
+        <p>คุณรอดพ้นมาถึงห้องเก็บของและได้ค้อนมาแล้ว ถือเป็นอันจบตัวเดโม่ในปัจจุบัน!</p>
       </div>
     </div>
 

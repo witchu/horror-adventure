@@ -60,6 +60,42 @@ body {
   transition: width 0.1s linear;
 }
 
+.hud-left {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+#battery-bar-container {
+  width: 200px;
+  height: 15px;
+  background-color: #1a1a1a;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+#battery-bar-fill {
+  height: 100%;
+  width: 100%;
+  background-color: #f1c40f;
+  transition: width 0.1s linear;
+}
+
+#battery-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  line-height: 13px;
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px black;
+  pointer-events: none;
+}
+
 #hp-text {
   position: absolute;
   top: 0;
@@ -140,6 +176,22 @@ body {
   background-image: url('assets/bathroom_bg.png');
 }
 
+.room-hallway {
+  background-color: #1a1515; /* Dim, dusty feel */
+}
+
+.room-kitchen {
+  background-color: #2a221f; /* Warm but claustrophobic */
+}
+
+.room-dining_room {
+  background-color: #1f2a24; /* Moody, tea room feel */
+}
+
+.room-storage {
+  background-color: #050505; /* Pitch black */
+}
+
 /* Interactive Layer */
 #interactive-layer {
   position: absolute;
@@ -213,6 +265,31 @@ body {
 
 .flickering {
   animation: flicker 1s infinite;
+}
+
+.flicker-dining {
+  animation: flicker 3s infinite;
+}
+
+@keyframes smokePulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 0.6; }
+}
+
+.smoke-effect {
+  animation: smokePulse 2s infinite ease-in-out;
+  background-color: rgba(50, 50, 50, 0.4);
+  border-radius: 50%;
+  filter: blur(10px);
+}
+
+#flashlight-mask {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 50% 50%, transparent 10%, rgba(0, 0, 0, 0.95) 40%);
+  pointer-events: none;
+  z-index: 5;
 }
 
 /* Dialogue Box */
