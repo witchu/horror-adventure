@@ -5,7 +5,8 @@ const GameState = {
   hpDrainRate: 0,
   inventory: [], // Array of item objects: { id, name }
   logs: [], // Array of log text strings
-  currentRoom: 'bedroom'
+  currentRoom: 'bedroom',
+  inventoryCheckpoints: { bedroom: [], bathroom: [] }
 };
 
 const RoomFlags = {
@@ -37,6 +38,15 @@ let roomTimers = {
   bathroomSoap: 0
 };
 
+// Bathtub state
+const bathtubState = {
+  active: false,
+  volume: 0,
+  hotAmt: 0,
+  coldAmt: 0,
+  mode: 'close' // hot, cold, close
+};
+
 const RoomData = {
   bedroom: {
     objects: [
@@ -44,11 +54,11 @@ const RoomData = {
       { id: 'alarm', name: 'นาฬิกาปลุก', bounds: { left: 55, top: 55, width: 10, height: 10 } },
       { id: 'window', name: 'หน้าต่าง', bounds: { left: 40, top: 20, width: 20, height: 30 }, classes: 'swinging' },
       { id: 'wardrobe', name: 'ตู้เสื้อผ้า', bounds: { left: 70, top: 15, width: 20, height: 60 }, classes: 'heavy-shake' },
-      { id: 'door', name: 'ประตูห้องน้ำ', bounds: { left: 5, top: 20, width: 15, height: 40 } }
+      { id: 'fan', name: 'พัดลมเพดาน (ลอดผ่าน)', bounds: { left: 30, top: 0, width: 40, height: 15 } },
+      { id: 'door_bathroom', name: 'ประตูห้องน้ำ', bounds: { left: 5, top: 20, width: 15, height: 40 } },
+      { id: 'door_hallway', name: 'ประตูออกโถง', bounds: { left: 85, top: 20, width: 15, height: 40 } }
     ],
-    decorations: [
-      { id: 'fan', name: 'พัดลมเพดาน (กำลังหมุนเอื่อยๆ)', bounds: { left: 30, top: 0, width: 40, height: 15 } }
-    ]
+    decorations: []
   },
   bathroom: {
     objects: [
@@ -56,7 +66,7 @@ const RoomData = {
       { id: 'cabinet', name: 'ตู้ยา', bounds: { left: 45, top: 15, width: 15, height: 20 } },
       { id: 'dryer', name: 'ไดร์เป่าผม (เสียบปลั๊ก)', bounds: { left: 60, top: 80, width: 15, height: 10 } },
       { id: 'bathtub', name: 'อ่างอาบน้ำ', bounds: { left: 65, top: 40, width: 30, height: 40 } },
-      { id: 'door_out', name: 'ประตูออกโถง', bounds: { left: 5, top: 15, width: 15, height: 60 } }
+      { id: 'door_back', name: 'กลับเข้าห้องนอน', bounds: { left: 5, top: 15, width: 15, height: 60 } }
     ],
     decorations: [
       { id: 'soap-spill', name: 'ฟองสบู่บนพื้น (กองเล็ก)', bounds: { left: 20, top: 90, width: 20, height: 10 } }
@@ -82,7 +92,13 @@ const els = {
   actionLogToggle: document.getElementById('toggle-action-log'),
   actionLogContainer: document.getElementById('action-log-container'),
   actionLogList: document.getElementById('action-log-list'),
-  actionLogContent: document.getElementById('action-log-content')
+  actionLogContent: document.getElementById('action-log-content'),
+  pillUiContainer: document.getElementById('pill-ui-container'),
+  pillOptions: document.getElementById('pill-options'),
+  faucetUiContainer: document.getElementById('faucet-ui-container'),
+  waterGaugeFill: document.getElementById('water-gauge-fill'),
+  waterVolText: document.getElementById('water-volume-text'),
+  waterTempText: document.getElementById('water-temp-text')
 };
 
 // --- Initialization ---
@@ -150,11 +166,17 @@ function restartRoom() {
   els.deathScreen.classList.remove('hidden'); // Ensure we can remove it
   els.deathScreen.classList.add('hidden');
   
-  // Reset just the current room states (per GDD: die -> restart room)
+  // Reset just the current room states and restore inventory checkpoint
   if (GameState.currentRoom === 'bedroom') {
     RoomFlags.bedroom = { stoodUp: false, alarmOff: false, windowClosed: false, wardrobeClosed: false, gotTowel: false, doorUnlocked: false, windowClosingState: false };
+    GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.bedroom));
   } else {
     RoomFlags.bathroom = { soapPicked: false, pillTaken: false, dryerUnplugged: false, dryerStored: false, waterFilled: false, bathed: false, dried: false, waterDrained: false, gotKey: false, doorUnlocked: false };
+    bathtubState.volume = 0; bathtubState.hotAmt = 0; bathtubState.coldAmt = 0; bathtubState.active = false; bathtubState.mode = 'close';
+    closeFaucetUI();
+    closePillUI();
+    closeBathtubChoiceUI();
+    GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.bathroom));
   }
   
   GameState.hp = GameState.maxHp; // Restore HP
@@ -162,7 +184,16 @@ function restartRoom() {
   roomTimers.bedroom = 0;
   roomTimers.bathroomSoap = 0;
   timeInBathroom = 0;
+  
+  renderInventory();
   renderHUD();
+  
+  // Log the restart cleanly
+  const li = document.createElement('li');
+  li.innerText = `[RESTART] เริ่มต้นห้อง ${GameState.currentRoom} ใหม่อีกครั้ง`;
+  li.style.color = "yellow";
+  els.actionLogList.appendChild(li);
+  if(els.actionLogContent) els.actionLogContent.scrollTop = els.actionLogContent.scrollHeight;
   
   closeDialogue();
   loadRoom(GameState.currentRoom);
@@ -180,6 +211,11 @@ function addItem(id, name) {
 
 function hasItem(id) {
   return GameState.inventory.some(item => item.id === id);
+}
+
+function removeItem(id) {
+  GameState.inventory = GameState.inventory.filter(item => item.id !== id);
+  renderInventory();
 }
 
 function renderInventory() {
@@ -278,7 +314,7 @@ function updateRoomVisuals(roomId) {
   if (roomId === 'bedroom') {
     const windowEl = document.getElementById('obj-window');
     const wardrobeEl = document.getElementById('obj-wardrobe');
-    const fanEl = document.getElementById('deco-fan');
+    const fanEl = document.getElementById('obj-fan');
     
     if (flags.windowClosed && windowEl) {
       windowEl.classList.remove('swinging', 'timing-safe', 'timing-unsafe');
@@ -287,7 +323,6 @@ function updateRoomVisuals(roomId) {
     }
     if (flags.windowClosed && fanEl) {
       fanEl.innerText = 'พัดลมเพดาน (หมุนเอื่อย ปลอดภัยแล้ว)';
-      fanEl.className = 'non-interactive-object';
     }
     if (flags.wardrobeClosed && wardrobeEl) {
       wardrobeEl.classList.remove('heavy-shake');
@@ -298,9 +333,14 @@ function updateRoomVisuals(roomId) {
       wardrobeEl.classList.add('light-shake');
     }
     
-    const doorEl = document.getElementById('obj-door');
-    if (flags.doorUnlocked && doorEl) {
-      doorEl.innerText = 'ประตูห้องน้ำ (เปิดออกไปได้)';
+    const doorBathEl = document.getElementById('obj-door_bathroom');
+    if (flags.gotTowel && doorBathEl) {
+      doorBathEl.innerText = 'ประตูห้องน้ำ (เปิดแง้มอยู่)';
+    }
+    
+    const doorHallEl = document.getElementById('obj-door_hallway');
+    if (hasItem('key') && doorHallEl) {
+      doorHallEl.innerText = 'ประตูออกโถง (ปลดล็อคแล้ว)';
     }
   } else if (roomId === 'bathroom') {
     if (flags.pillTaken) {
@@ -397,6 +437,164 @@ function checkBathroomLight() {
   }
 }
 
+// Bathtub Interval Logic
+setInterval(() => {
+  if (GameState.hp <= 0 || !bathtubState.active) return;
+  if (bathtubState.mode === 'close') return;
+
+  // Add water
+  bathtubState.volume += 10;
+  if (bathtubState.mode === 'hot') {
+     bathtubState.hotAmt += 10;
+  } else if (bathtubState.mode === 'cold') {
+     bathtubState.coldAmt += 10;
+  }
+  
+  updateFaucetUI();
+
+  if (bathtubState.volume > 100) {
+      bathtubState.active = false;
+      closeFaucetUI();
+      if (!RoomFlags.bathroom.dryerUnplugged) {
+          die("ปล่อยน้ำล้นอ่าง ท่วมพื้นไหลไปโดนไดร์เป่าผมที่เสียบปลั๊กอยู่ ไฟช็อตตายคาที่!");
+      } else {
+          die("ปล่อยน้ำล้นอ่าง ท่วมพื้นจำนวนมากจนคุณลื่นล้มหัวฟาดพื้นตาย!");
+      }
+  }
+}, 1000);
+
+// --- Medicine Cabinet UI Logic ---
+const pills = [
+  { id: 1, name: "กระปุกที่ 1 : เม็ดเคลือบ สีชมพูเข้ม" },
+  { id: 2, name: "กระปุกที่ 2 : แคปซูล สีเหลืองสด" },
+  { id: 3, name: "กระปุกที่ 3 : ยาชนิดน้ำ สีฟ้า" },
+  { id: 4, name: "กระปุกที่ 4 : แคปซูล สีดำ" },
+  { id: 5, name: "กระปุกที่ 5 : เม็ดใหญ่ทรงรี สีส้ม" },
+  { id: 6, name: "กระปุกที่ 6 : ยาชนิดน้ำ สีน้ำตาลเข้ม" }
+];
+
+function openPillUI() {
+  els.pillOptions.innerHTML = '';
+  pills.forEach(pill => {
+    const btn = document.createElement('button');
+    btn.className = 'pill-btn';
+    btn.innerText = pill.name;
+    btn.onclick = () => selectPill(pill.id);
+    els.pillOptions.appendChild(btn);
+  });
+  els.pillUiContainer.classList.remove('hidden');
+}
+
+function closePillUI() {
+  els.pillUiContainer.classList.add('hidden');
+}
+
+function selectPill(id) {
+  closePillUI();
+  if (id === 1) {
+    RoomFlags.bathroom.pillTaken = true;
+    showDialogue("คุณทานยาสีชมพูเข้ม... ทันใดนั้นไฟห้องน้ำที่กะพริบก็กลับมาสว่างเป็นปกติ จิตใจคุณสงบลง");
+    updateRoomVisuals('bathroom');
+  } else if (id === 2 || id === 5) {
+    takeDamage("เกิดผลข้างเคียง มึนงง/สำลักเม็ดยา!", 0.25);
+  } else {
+    die("สารเคมีหรือพิษทำลายระบบภายในร่างกายอย่างรุนแรง... ตายทันที");
+  }
+}
+
+// --- Faucet UI Logic ---
+function openFaucetUI() {
+  els.faucetUiContainer.classList.remove('hidden');
+  updateFaucetUI();
+}
+
+function closeFaucetUI() {
+  els.faucetUiContainer.classList.add('hidden');
+  if (bathtubState.volume >= 100 && bathtubState.mode === 'close') {
+    bathtubState.active = false;
+    RoomFlags.bathroom.waterFilled = true;
+    showDialogue("น้ำเต็มอ่างแล้ว คุณเตรียมตัวลงไปแช่");
+    updateRoomVisuals('bathroom');
+  }
+}
+
+function setFaucetMode(mode) {
+  if (bathtubState.volume >= 100 && mode !== 'close') {
+      showDialogue("น้ำเต็มอ่างแล้ว ต้องกดปิดเท่านั้น!");
+      return;
+  }
+  bathtubState.mode = mode;
+  
+  // Update button active states
+  document.querySelectorAll('.faucet-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.faucet-btn.${mode}`).classList.add('active');
+  
+  if (mode === 'close' && bathtubState.volume >= 100) {
+      closeFaucetUI();
+  }
+}
+
+function updateFaucetUI() {
+  const tot = Math.max(1, bathtubState.hotAmt + bathtubState.coldAmt);
+  const hotPct = Math.round((bathtubState.hotAmt / tot) * 100);
+  const coldPct = Math.round((bathtubState.coldAmt / tot) * 100);
+  
+  els.waterGaugeFill.style.width = `${Math.min(100, bathtubState.volume)}%`;
+  
+  if (bathtubState.volume > 0) {
+      els.waterGaugeFill.style.background = `linear-gradient(90deg, #aa3333 ${hotPct}%, #3333aa ${hotPct}%)`;
+  }
+  
+  els.waterVolText.innerText = `ปริมาตร: ${Math.min(100, bathtubState.volume)}%`;
+  els.waterTempText.innerText = `ร้อน: ${hotPct}% | เย็น: ${coldPct}%`;
+  
+  if (bathtubState.volume >= 100 && bathtubState.mode !== 'close') {
+      els.waterVolText.innerText = `ปริมาตร: 100% (กำลังล้น!)`;
+      els.waterVolText.style.color = "red";
+  } else {
+      els.waterVolText.style.color = "#ccc";
+  }
+}
+
+function openBathtubChoiceUI() {
+  document.getElementById('bathtub-choice-ui').classList.remove('hidden');
+}
+
+function closeBathtubChoiceUI() {
+  document.getElementById('bathtub-choice-ui').classList.add('hidden');
+}
+
+function bathtubChoice(choice) {
+  closeBathtubChoiceUI();
+  
+  const flags = RoomFlags.bathroom;
+  const tot = bathtubState.hotAmt + bathtubState.coldAmt;
+  const hotPct = Math.round((bathtubState.hotAmt / tot) * 100);
+  const coldPct = Math.round((bathtubState.coldAmt / tot) * 100);
+  
+  if (hotPct > 80) {
+      die("สัมผัสผิวน้ำอุณหภูมิที่ร้อนจัด ผิวหนังพุพองถูกลวกอย่างรุนแรงทนทานความเจ็บปวดไม่ไหว...");
+      return;
+  }
+  if (coldPct > 80) {
+      die("ร่างกายช็อคหัวใจวายจากการสูญเสียความร้อนอย่างเฉียบพลันในน้ำยะเยือก!");
+      return;
+  }
+  
+  if (choice === 'bathe') {
+      flags.bathed = true;
+      showDialogue("คุณลงแช่น้ำจนเสร็จ แล้วขึ้นจากอ่าง (ตอนนี้ตัวคุณเปียกชุ่ม)");
+      updateRoomVisuals('bathroom');
+  } else if (choice === 'drain') {
+      flags.waterDrained = true;
+      flags.gotKey = true;
+      addItem('key', 'กุญแจห้องนอน');
+      flags.doorUnlocked = true; // Unlocks hallway door
+      showDialogue("คุณดึงจุกระบายน้ำออก น้ำแรงดันสูงไหลทิ้ง ช่วยผลักกุญแจลอยขึ้นมาให้คุณหยิบ!");
+      updateRoomVisuals('bathroom');
+  }
+}
+
 // --- Interaction Logic ---
 
 function handleInteraction(room, objId, element) {
@@ -451,8 +649,17 @@ function handleInteraction(room, objId, element) {
         break;
 
       case 'wardrobe':
+        if (!flags.stoodUp) {
+           takeDamage("รีบร้อนลุกไปที่ตู้เสื้อผ้าจนกลิ้งตกเตียง");
+           return;
+        }
+        if (!flags.alarmOff) {
+           takeDamage("เดินสะดุดขอบเตียง เพราะยังไม่ได้ปิดนาฬิกาให้ตื่นดี");
+           return;
+        }
         if (!flags.windowClosed) {
-          takeDamage("ประตูตู้สั่นแรงหนีบมือ!");
+          takeDamage("ตู้เสื้อผ้าสั่นแรงหนีบมือ!");
+          return;
         } else if (!flags.wardrobeClosed) {
           flags.wardrobeClosed = true;
           showDialogue("คุณปิดประตูตู้เสื้อผ้าจนสนิท... มี 'ผ้าเช็ดตัว' แขวนอยู่ที่ประตู คุณจึงหยิบมา");
@@ -465,18 +672,42 @@ function handleInteraction(room, objId, element) {
         }
         break;
 
-      case 'door':
+      case 'fan':
+        if (!flags.stoodUp) {
+           showDialogue("ยังนอนอยู่บนเตียง รอดพ้นจากพัดลมไปได้");
+           return;
+        }
+        if (!flags.windowClosed) {
+           die("คุณเดินเข้าไปใกล้พัดลมที่กำลังส่ายแรง ใบพัดหลุดกระเด็นใส่คุณตายคาที่...");
+        } else {
+           showDialogue("พัดลมหมุนเบาลงแล้ว คุณเดินลอดผ่านไปได้อย่างปลอดภัยเพื่อทำธุระต่อ");
+        }
+        break;
+
+      case 'door_bathroom':
         if (!flags.stoodUp) {
            takeDamage("รีบร้อนลุกไปที่ประตูจนกลิ้งตกเตียง");
            return;
         }
-        if (!flags.doorUnlocked) {
-          showDialogue("ประตูล็อคอยู่... ต้องหาทางเตรียมตัวให้พร้อมก่อน (ได้ผ้าเช็ดตัวแล้วประตูจะแง้มเอง)");
+        if (!flags.gotTowel) {
+           showDialogue("ประตูล็อคอยู่... ต้องหาทางเตรียมตัวให้พร้อมก่อน (ได้ผ้าเช็ดตัวแล้วประตูจะแง้มเอง)");
         } else {
-          // Go to bathroom
-          showDialogue("คุณเดินเข้าสู่ห้องน้ำ");
-          timeInBathroom = 0; // reset for light logic
-          loadRoom('bathroom');
+           // Go to bathroom
+           showDialogue("คุณลงมือผลักประตูเดินเข้าสู่ห้องน้ำ");
+           timeInBathroom = 0; // reset for light logic
+           // Snapshot inventory for entering bathroom
+           GameState.inventoryCheckpoints.bathroom = JSON.parse(JSON.stringify(GameState.inventory));
+           loadRoom('bathroom');
+        }
+        break;
+
+      case 'door_hallway':
+        if (!flags.stoodUp) return;
+        if (!hasItem('key')) {
+           showDialogue("ประตูล็อคแน่นหนา ต้องหากุญแจมาไขเปิดเท่านั้น");
+        } else {
+           removeItem('key');
+           els.winScreen.classList.remove('hidden'); // Win Demo
         }
         break;
     }
@@ -490,7 +721,7 @@ function handleInteraction(room, objId, element) {
         }
         break;
 
-      case 'door_out': // Walk around area checking soap slip
+      case 'door_back': // Walk around area checking soap slip
         if (!flags.soapPicked && roomTimers.bathroomSoap > 25) {
           die("คุณเหยียบสบู่ที่ไหลลามจนเต็มพื้น ลื่นล้มหัวฟาดพื้นตายคาที่...");
           return;
@@ -498,23 +729,15 @@ function handleInteraction(room, objId, element) {
           takeDamage("ลื่นฟองสบู่เล็กน้อย โชคดีที่ยังไหลออกมาไม่เยอะ");
         }
         
-        if (flags.doorUnlocked) {
-           els.winScreen.classList.remove('hidden');
-        } else {
-           showDialogue("ประตูล็อคออกไปโถงทางเดินไม่ได้... กุญแจนอนนิ่งอยู่ก้นอ่างอาบน้ำ");
-        }
+        showDialogue("คุณเดินย้อนกลับเข้ามาในห้องนอน");
+        // Snapshot inventory for returning to bedroom
+        GameState.inventoryCheckpoints.bedroom = JSON.parse(JSON.stringify(GameState.inventory));
+        loadRoom('bedroom');
         break;
 
       case 'cabinet':
         if (!flags.pillTaken) {
-            const takePink = confirm("ในตู้มียาหลายชนิด... มี 'ยาสีชมพูเข้ม' ตามโน้ต คุณจะกินมันไหม?\n(OK = กินยาสีชมพู, Cancel = กินวิตามินมั่วๆ)");
-            if (takePink) {
-                flags.pillTaken = true;
-                showDialogue("คุณทานยาสีชมพูเข้ม... ทันใดนั้นไฟห้องน้ำที่กะพริบก็กลับมาสว่างเป็นปกติ จิตใจคุณสงบลง");
-                updateRoomVisuals('bathroom');
-            } else {
-                takeDamage("วิตามินติดคอ สำลักอย่างรุนแรง!");
-            }
+            openPillUI();
         } else {
             showDialogue("คุณกินยาไปแล้ว ไม่มียาอื่นที่ต้องกินอีก");
         }
@@ -538,24 +761,22 @@ function handleInteraction(room, objId, element) {
 
       case 'bathtub':
         if (!flags.doorUnlocked) {
-          if (!flags.waterFilled) {
+          if (!bathtubState.active && !flags.waterFilled) {
              const fill = confirm("เปิดน้ำใส่อ่างอาบน้ำไหม?");
              if (fill) {
-                 flags.waterFilled = true;
-                 showDialogue("น้ำไหลเต็มอ่างแล้ว (คุณสลับร้อนเย็นเพื่อความพอดีแล้ว)");
-                 updateRoomVisuals('bathroom');
+                 bathtubState.active = true;
+                 bathtubState.mode = 'hot';
+                 openFaucetUI();
              }
-          } else if (!flags.bathed) {
-             const bathe = confirm("ลงแช่น้ำเลยไหม?");
-             if (bathe) {
-                 flags.bathed = true;
-                 showDialogue("คุณแช่น้ำชำระล้างร่างกายจนเสร็จ และขึ้นจากอ่าง (ตอนนี้ตัวคุณเปียกชุ่ม)");
-                 updateRoomVisuals('bathroom');
-             }
+          } else if (bathtubState.active && !flags.waterFilled) {
+             openFaucetUI();
+          } else if (flags.waterFilled && !flags.bathed && !flags.waterDrained) {
+             openBathtubChoiceUI();
           } else if (flags.bathed && !flags.dried) {
              if (hasItem('towel')) {
                  flags.dried = true;
-                 showDialogue("คุณใช้ผ้าเช็ดตัวที่หยิบมาเช็ดจนแห้งสนิท ปลอดภัยจากไฟดูดแล้ว!");
+                 removeItem('towel');
+                 showDialogue("คุณใช้ผ้าเช็ดตัวเช็ดตัวจนแห้งสนิท (ของถูกใช้ไปแล้ว) ปลอดภัยจากไฟดูด!");
              } else {
                  showDialogue("ขึ้นจากอ่างแล้วแต่คุณไม่มีผ้าเช็ดตัว ตัวยังเปียกชุ่ม... ระวังอุปกรณ์ไฟฟ้าให้ดี!");
              }
@@ -563,15 +784,14 @@ function handleInteraction(room, objId, element) {
              const drain = confirm("ดึงจุกระบายน้ำทิ้งไหม?");
              if (drain) {
                  flags.waterDrained = true;
-                 showDialogue("น้ำแรงดันสูงระบายออก พัดเอากุญแจที่ติดอยู่ในท่อลอยขึ้นมาให้เห็น!");
+                 flags.gotKey = true;
+                 addItem('key', 'กุญแจห้องนอน');
+                 flags.doorUnlocked = true;
+                 showDialogue("คุณดึงจุกระบายน้ำออก น้ำแรงดันสูงระบายทิ้ง พัดเอากุญแจลอยขึ้นมาให้คุณหยิบ!");
                  updateRoomVisuals('bathroom');
              }
-          } else if (flags.waterDrained && !flags.gotKey) {
-             flags.gotKey = true;
-             addItem('key', 'กุญแจห้องนอน');
-             flags.doorUnlocked = true;
-             showDialogue("หยิบกุญแจแล้ว! ตอนนี้สามารถปลดล็อคประตูออกห้องโถงได้แล้ว");
-             updateRoomVisuals('bathroom');
+          } else if (flags.waterDrained && flags.gotKey) {
+             showDialogue("คุณได้กุญแจจากการระบายน้ำไปเรียบร้อยแล้ว");
           }
         } else {
             showDialogue("ได้กุญแจแล้ว... ไม่ต้องยุ่งกับอ่างอีก");
