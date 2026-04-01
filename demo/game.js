@@ -5,7 +5,7 @@ const GameState = {
   inventory: [], // Array of item objects: { id, name }
   logs: [], // Array of log text strings
   currentRoom: 'bedroom',
-  inventoryCheckpoints: { bedroom: [], bathroom: [], hallway: [], kitchen: [], dining_room: [], storage: [] },
+  inventoryCheckpoints: { bedroom: [], bathroom: [], hallway_f2: [], hallway_f1: [], kitchen: [], dining_room: [], storage: [] },
   smartphoneBattery: 100 // Flashlight battery for storage
 };
 
@@ -31,13 +31,15 @@ const RoomFlags = {
     gotKey: false,
     doorUnlocked: false
   },
-  hallway: {
+  hallway_f2: {
     curtainClosed: false,
     rugSorted: false,
     lightOn: false,
-    backpackSearched1: false,
-    backpackSearched2: false,
     chandelierSwinging: true
+  },
+  hallway_f1: {
+    backpackSearched1: false,
+    backpackSearched2: false
   },
   kitchen: {
     sinkOff: false,
@@ -123,20 +125,26 @@ const RoomData = {
       { id: 'soap-spill', name: 'ฟองสบู่บนพื้น (กองเล็ก)', bounds: { left: 20, top: 90, width: 20, height: 10 } }
     ]
   },
-  hallway: {
+  hallway_f2: {
     objects: [
       { id: 'curtain', name: 'ผ้าม่านหน้าต่างบานใหญ่', bounds: { left: 40, top: 20, width: 30, height: 50 } },
       { id: 'rug', name: 'พรมเช็ดเท้า', bounds: { left: 30, top: 80, width: 40, height: 15 } },
       { id: 'light_switch', name: 'สวิตช์ไฟขั้นบันได', bounds: { left: 80, top: 30, width: 10, height: 20 } },
+      { id: 'stairs_down', name: 'บันไดลงไปชั้นล่าง', bounds: { left: 20, top: 50, width: 60, height: 50 } }
+    ],
+    decorations: [
+      { id: 'chandelier', name: 'โคมไฟระย้า', bounds: { left: 30, top: -10, width: 40, height: 30 }, classes: 'chandelier-swing swinging' }
+    ]
+  },
+  hallway_f1: {
+    objects: [
       { id: 'backpack', name: 'กระเป๋าสะพาย', bounds: { left: 10, top: 40, width: 15, height: 25 } },
       { id: 'door_living', name: 'ประตูห้องนั่งเล่น', bounds: { left: 60, top: 10, width: 15, height: 50 } },
       { id: 'door_storage', name: 'ประตูห้องเก็บของ', bounds: { left: 80, top: 10, width: 15, height: 50 } },
-      { id: 'door_kitchen', name: 'ทางเข้าไปยังห้องครัว', bounds: { left: 5, top: 10, width: 15, height: 80 } }
+      { id: 'door_kitchen', name: 'ทางเข้าไปยังห้องครัว', bounds: { left: 5, top: 10, width: 15, height: 80 } },
+      { id: 'stairs_up', name: 'บันไดขึ้นชั้น 2', bounds: { left: 40, top: 60, width: 40, height: 40 } }
     ],
-    decorations: [
-      { id: 'chandelier', name: 'โคมไฟระย้า', bounds: { left: 30, top: -10, width: 40, height: 30 }, classes: 'chandelier-swing swinging' },
-      { id: 'stairs', name: 'บันไดลงไปชั้นล่าง', bounds: { left: 20, top: 50, width: 60, height: 50 } }
-    ]
+    decorations: []
   },
   kitchen: {
     objects: [
@@ -310,9 +318,12 @@ function restartRoom() {
     closePillUI();
     closeBathtubChoiceUI();
     GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.bathroom));
-  } else if (GameState.currentRoom === 'hallway') {
-    RoomFlags.hallway = { curtainClosed: false, rugSorted: false, lightOn: false, backpackSearched1: false, backpackSearched2: false, chandelierSwinging: true };
-    GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.hallway));
+  } else if (GameState.currentRoom === 'hallway_f2') {
+    RoomFlags.hallway_f2 = { curtainClosed: false, rugSorted: false, lightOn: false, chandelierSwinging: true };
+    GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.hallway_f2));
+  } else if (GameState.currentRoom === 'hallway_f1') {
+    RoomFlags.hallway_f1 = { backpackSearched1: false, backpackSearched2: false };
+    GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.hallway_f1));
   } else if (GameState.currentRoom === 'kitchen') {
     RoomFlags.kitchen = { sinkOff: false, kettleOff: false, cabinetClosed: false, gasNotesFound: false, gasStep: 0, gasOff: false, tastedFirst: false, ingredientsAdded: false, tastedSecond: false, drawerRightOpened: false, cabinetOpenLevel: 0 };
     closeKitchenUI();
@@ -536,7 +547,7 @@ function updateRoomVisuals(roomId) {
     } else if (flags.waterFilled && bathtubEl) {
         bathtubEl.innerText = 'อ่างอาบน้ำ (น้ำเต็มอ่าง)';
     }
-  } else if (roomId === 'hallway') {
+  } else if (roomId === 'hallway_f2') {
     const curtain = document.getElementById('obj-curtain');
     const ch = document.getElementById('deco-chandelier');
     const rug = document.getElementById('obj-rug');
@@ -554,6 +565,8 @@ function updateRoomVisuals(roomId) {
         switchEl.innerText = 'สวิตช์ไฟ (เปิด)';
         switchEl.style.backgroundColor = 'rgba(255,255,200,0.2)';
     }
+  } else if (roomId === 'hallway_f1') {
+    // Add visual states here if needed for f1
   } else if (roomId === 'kitchen') {
     if (flags.gasOff) {
         const smoke = document.getElementById('deco-smoke');
@@ -1161,7 +1174,9 @@ function handleInteraction(room, objId, element) {
            showDialogue("ประตูล็อคแน่นหนา ต้องหากุญแจมาไขเปิดเท่านั้น");
         } else {
            removeItem('key');
-           els.winScreen.classList.remove('hidden'); // Win Demo
+           showDialogue("คุณไขกุญแจและผลักประตูเปิดออกไปสู่โถงทางเดินชั้น 2...");
+           GameState.inventoryCheckpoints.hallway_f2 = JSON.parse(JSON.stringify(GameState.inventory));
+           loadRoom('hallway_f2');
         }
         break;
     }
@@ -1252,13 +1267,13 @@ function handleInteraction(room, objId, element) {
         }
         break;
     }
-  } else if (room === 'hallway') {
+  } else if (room === 'hallway_f2') {
     switch (objId) {
       case 'curtain':
         if (!flags.curtainClosed) {
           flags.curtainClosed = true;
           showDialogue("คุณปิดผ้าม่านบานใหญ่... โคมไฟระย้าหยุดแกว่ง โถงทางเดินเริ่มมืดลง");
-          updateRoomVisuals('hallway');
+          updateRoomVisuals('hallway_f2');
         } else {
           showDialogue("ผ้าม่านปิดสนิทแล้ว");
         }
@@ -1267,7 +1282,7 @@ function handleInteraction(room, objId, element) {
         if (!flags.chandelierSwinging && !flags.rugSorted) {
           flags.rugSorted = true;
           showDialogue("คุณจัดพรมเช็ดเท้าให้เรียบร้อยเพื่อไม่ให้สะดุดเวลาเดิน");
-          updateRoomVisuals('hallway');
+          updateRoomVisuals('hallway_f2');
         } else if (flags.chandelierSwinging) {
            takeDamage("ขณะเอื้อมไปจัดพรม โคมไฟระย้าที่แกว่งอยู่ร่วงลงมาเฉี่ยวคุณอย่างหวุดหวิด!");
         } else {
@@ -1285,17 +1300,33 @@ function handleInteraction(room, objId, element) {
         }
         if (!flags.lightOn) {
             flags.lightOn = true;
-            showDialogue("คุณกดเปิดสวิตช์ไฟ ไฟทางเดินบันไดสว่างขึ้น มองเห็นกระเป๋าสะพายที่ตกอยู่ริมทางเดิน");
-            updateRoomVisuals('hallway');
+            showDialogue("คุณกดเปิดสวิตช์ไฟ ไฟทางเดินบันไดสว่างขึ้น มองเห็นเส้นทางลงไปชั้น 1 ชัดเจน");
+            updateRoomVisuals('hallway_f2');
         } else {
             showDialogue("ไฟสว่างอยู่แล้ว");
         }
         break;
-      case 'backpack':
-        if (!flags.lightOn) {
-            showDialogue("ตรงนี้มืดเกินไป มองอะไรไม่เห็นเลย ต้องเปิดไฟก่อน");
+      case 'stairs_down':
+        if (flags.chandelierSwinging) {
+            die("ยังไม่ทันก้าวลงบันได โคมไฟระย้าก็หลุดร่วงลงมาทับคุณตายทันที!");
             return;
         }
+        if (!flags.rugSorted) {
+            die("คุณสะดุดพรมที่ยับยู่ยี่ หัวคะมำตกบันไดคอหักตาย!");
+            return;
+        }
+        if (!flags.lightOn) {
+            die("ทางลงบันไดมืดเกินไป คุณก้าวพลาดลื่นตกบันไดหัวฟาดพื้นตาย!");
+            return;
+        }
+        showDialogue("คุณเดินลงบันไดมายังโถงทางเดินชั้น 1");
+        GameState.inventoryCheckpoints.hallway_f1 = JSON.parse(JSON.stringify(GameState.inventory));
+        loadRoom('hallway_f1');
+        break;
+    }
+  } else if (room === 'hallway_f1') {
+    switch (objId) {
+      case 'backpack':
         if (!flags.backpackSearched1) {
             flags.backpackSearched1 = true;
             showDialogue("ค้นคันแรกเจอบัตรพนักงานเขียนว่า 'Employee ID: 4022'");
@@ -1318,9 +1349,12 @@ function handleInteraction(room, objId, element) {
             showDialogue("ประตูนี้ต้องใช้บัตรพนักงานสแกนเพื่อเปิด");
         }
         break;
+      case 'stairs_up':
+        showDialogue("คุณเดินขึ้นบันไดกลับไปยังชั้น 2");
+        loadRoom('hallway_f2');
+        break;
       case 'door_living':
       case 'door_storage':
-      case 'stairs':
         showDialogue("ประตูล็อค หรือ ทางนี้ยังไปไม่ได้");
         break;
     }
@@ -1440,9 +1474,9 @@ function handleInteraction(room, objId, element) {
         }
         break;
       case 'door_hallway':
-        showDialogue("กลับออกไปโถงทางเดิน");
-        GameState.inventoryCheckpoints.hallway = JSON.parse(JSON.stringify(GameState.inventory));
-        loadRoom('hallway');
+        showDialogue("กลับออกไปโถงทางเดินชั้น 1");
+        GameState.inventoryCheckpoints.hallway_f1 = JSON.parse(JSON.stringify(GameState.inventory));
+        loadRoom('hallway_f1');
         break;
       case 'fridge_note':
       case 'door_laundry':
@@ -1536,8 +1570,8 @@ function handleInteraction(room, objId, element) {
              showDialogue("ประตูกลับโถงทางเดิน (ค้ำไม้ไว้แล้ว เปิดค้างตลอด)");
              const goBack = confirm("กลับไปโถงทางเดิน?");
              if (goBack) {
-                 GameState.inventoryCheckpoints.hallway = JSON.parse(JSON.stringify(GameState.inventory));
-                 loadRoom('hallway');
+                 GameState.inventoryCheckpoints.hallway_f1 = JSON.parse(JSON.stringify(GameState.inventory));
+                 loadRoom('hallway_f1');
              }
          } else if (flags.doorClosed) {
              showDialogue("ประตูถูกปิดตายจากภายนอก คุณออกไม่ได้แล้ว");

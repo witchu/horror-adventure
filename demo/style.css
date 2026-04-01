@@ -176,20 +176,25 @@ body {
   background-image: url('assets/bathroom_bg.png');
 }
 
-.room-hallway {
-  background-color: #1a1515; /* Dim, dusty feel */
+.room-hallway_f2 {
+  background-image: url('assets/hallway_f2_bg.png');
+}
+
+.room-hallway_f1 {
+  background-image: url('assets/hallway_f1_bg.png');
 }
 
 .room-kitchen {
-  background-color: #2a221f; /* Warm but claustrophobic */
+  background-image: url('assets/kitchen_bg.png');
 }
 
 .room-dining_room {
-  background-color: #1f2a24; /* Moody, tea room feel */
+  background-image: url('assets/dining_room_bg.png');
 }
 
 .room-storage {
-  background-color: #050505; /* Pitch black */
+  background-image: url('assets/storage_bg.png');
+  background-color: #050505; /* Fallback for pitch black areas */
 }
 
 /* Interactive Layer */
