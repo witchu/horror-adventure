@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panic: Home Episode - Demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-container">
+    <!-- Top HUD -->
+    <div id="hud">
+      <div id="hp-bar-container">
+        <div id="hp-bar-fill"></div>
+        <span id="hp-text">3.00 / 3</span>
+      </div>
+      <button id="hint-btn">เปิด/ปิดแสงนำทาง (Hint)</button>
+    </div>
+
+    <!-- Action Log -->
+    <div id="action-log-container" class="collapsed">
+      <button id="toggle-action-log">📋 บันทึกการกระทำ</button>
+      <div id="action-log-content">
+        <ul id="action-log-list">
+          <!-- Action logs will go here -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- Main Scene Area -->
+    <div id="scene" class="room-bedroom">
+      <!-- Interactive objects injected here -->
+      <div id="interactive-layer"></div>
+      
+      <!-- Dialogue Box -->
+      <div id="dialogue-box" class="hidden">
+        <p id="dialogue-text"></p>
+        <button id="dialogue-close" class="hidden">ตกลง</button>
+      </div>
+
+      <!-- Death Screen -->
+      <div id="death-screen" class="hidden overlay-screen">
+        <h1>YOU DIED</h1>
+        <p id="death-reason"></p>
+        <button id="restart-btn">Try Again</button>
+      </div>
+
+      <!-- Win Screen -->
+      <div id="win-screen" class="hidden overlay-screen">
+        <h1>DEMO CLEARED</h1>
+        <p>คุณรอดพ้นจากห้องนอนและห้องน้ำได้สำเร็จ</p>
+      </div>
+    </div>
+
+    <!-- Bottom Panel -->
+    <div id="bottom-panel">
+      <!-- Inventory (6 slots) -->
+      <div id="inventory">
+        <h3>ช่องเก็บของ</h3>
+        <div class="slots">
+          <div class="slot" data-index="0"></div>
+          <div class="slot" data-index="1"></div>
+          <div class="slot" data-index="2"></div>
+          <div class="slot" data-index="3"></div>
+          <div class="slot" data-index="4"></div>
+          <div class="slot" data-index="5"></div>
+        </div>
+      </div>
+      
+      <!-- Log / Notes -->
+      <div id="log-panel">
+        <h3>สมุดบันทึก</h3>
+        <ul id="log-list">
+          <!-- Logs will be injected here -->
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
