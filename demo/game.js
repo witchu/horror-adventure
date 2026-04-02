@@ -50,6 +50,7 @@ const RoomFlags = {
     gasOff: false,
     tastedFirst: false,
     ingredientsAdded: false,
+    poisonedFood: false,
     tastedSecond: false,
     drawerRightOpened: false,
     cabinetOpenLevel: 0
@@ -335,11 +336,12 @@ function restartRoom() {
     RoomFlags.hallway_f1 = { backpackSearched1: false, backpackSearched2: false };
     GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.hallway_f1));
   } else if (GameState.currentRoom === 'kitchen') {
-    RoomFlags.kitchen = { sinkOff: false, kettleOff: false, cabinetClosed: false, gasNotesFound: false, gasStep: 0, gasOff: false, tastedFirst: false, ingredientsAdded: false, tastedSecond: false, drawerRightOpened: false, cabinetOpenLevel: 0 };
+    RoomFlags.kitchen = { sinkOff: false, kettleOff: false, cabinetClosed: false, gasNotesFound: false, gasStep: 0, gasOff: false, tastedFirst: false, ingredientsAdded: false, poisonedFood: false, tastedSecond: false, drawerRightOpened: false, cabinetOpenLevel: 0 };
     closeKitchenUI();
     GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.kitchen));
   } else if (GameState.currentRoom === 'dining_room') {
-    RoomFlags.dining_room = { lightSwitchState: 1, teaDrank: false, coffeeDrank: false, waterDrank: false, newspaperRead: false, keyAcquired: false, wheelsChecked: false, clockMoved: false, drinksAppeared: false };
+    const wasAppeared = RoomFlags.dining_room.drinksAppeared;
+    RoomFlags.dining_room = { lightSwitchState: 1, teaDrank: false, coffeeDrank: false, waterDrank: false, newspaperRead: false, keyAcquired: false, wheelsChecked: false, clockMoved: false, tableClimbed: false, drinksAppeared: wasAppeared };
     closeDiningUI();
     GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.dining_room));
   } else if (GameState.currentRoom === 'storage') {
@@ -600,15 +602,18 @@ function updateRoomVisuals(roomId) {
 
     if (flags.lightSwitchState === 1) {
         els.scene.classList.add('flicker-dining');
-        if(lamp) lamp.className = 'interactive-object flickering';
+        if(lamp) { lamp.className = 'interactive-object flickering'; lamp.innerHTML = 'โคมไฟเพดาน'; }
     } else if (flags.lightSwitchState === 0) {
         els.scene.classList.remove('flicker-dining');
         els.scene.style.filter = 'brightness(0.3)';
-        if(lamp) lamp.className = 'interactive-object';
+        if(lamp) {
+            lamp.className = 'interactive-object';
+            lamp.innerHTML = !flags.keyAcquired ? 'โคมไฟเพดาน <span style="text-shadow: 0 0 5px yellow;">✨</span>' : 'โคมไฟเพดาน';
+        }
     } else if (flags.lightSwitchState === 2) {
         els.scene.classList.remove('flicker-dining');
         els.scene.style.filter = 'brightness(1)';
-        if(lamp) lamp.className = 'interactive-object';
+        if(lamp) { lamp.className = 'interactive-object'; lamp.innerHTML = 'โคมไฟเพดาน'; }
     }
     
     if (flags.clockMoved && clock) {
@@ -1032,20 +1037,19 @@ function selectIngredient(id) {
       return;
   }
   
+  kf.ingredientsAdded = true;
   if (id === 3) {
       // Poison
-      die("พิษเคมีทำลายระบบร่างกายอย่างรุนแรง นำไปสู่ความตาย");
-  } else {
-      // Safe 1, 2, 4, 5, 6
-      kf.ingredientsAdded = true;
-      showDialogue("คุณใส่เครื่องปรุงลงไปในอาหาร... ลองชิมดูอีกครั้งเพื่อความแน่ใจ");
+      kf.poisonedFood = true;
   }
+  
+  showDialogue("คุณใส่เครื่องปรุงลงไปในอาหาร... ลองชิมดูอีกครั้งเพื่อความแน่ใจ");
 }
 
 
 // --- Dining Room UI Logic ---
 const drinks = [
-  { id: 'tea', name: 'ชาร้อน' },
+  { id: 'tea', name: 'ชามิ้นต์' },
   { id: 'coffee', name: 'กาแฟดำ' },
   { id: 'water', name: 'น้ำเปล่าเย็น' }
 ];
@@ -1070,11 +1074,16 @@ function selectDrink(id) {
   closeDiningUI();
   const df = RoomFlags.dining_room;
   
+  if (df.lightSwitchState !== 2) {
+      takeDamage("มองไม่ถนัดในความมืด/แสงกะพริบ ทำให้ทำน้ำร้อนหกรดมือ ถูกลวกจนบาดเจ็บ!", 0.25);
+      if (GameState.hp <= 0) return;
+  }
+  
   if (id === 'tea') {
       if (!df.teaDrank) {
           df.teaDrank = true;
           GameState.hpDrainRate = 0;
-          showDialogue("ชาร้อนช่วยให้คุณผ่อนคลาย อาการ Panic สงบลงชั่วคราว คุณมีความกล้าพอที่จะทำสิ่งต่างๆ อย่างมีสติ");
+          showDialogue("คุณดื่มชามิ้นต์อุ่นๆ รสชาติเย็นซ่าและกลิ่นหอมสมุนไพรทำให้รู้สึกผ่อนคลายขึ้น");
       } else {
           showDialogue("ชามิ้นต์ถูกดื่มไปหมดแล้ว");
       }
@@ -1540,9 +1549,13 @@ function handleInteraction(room, objId, element) {
         } else if (!flags.ingredientsAdded && flags.tastedFirst) {
             openKitchenUI();
         } else if (flags.ingredientsAdded && !flags.tastedSecond) {
-            flags.tastedSecond = true;
-            RoomFlags.dining_room.drinksAppeared = true;
-            showDialogue("อาหารรสชาติดีและปลอดภัย... คุณรู้สึกว่ารอดจากพิษแล้ว");
+            if (flags.poisonedFood) {
+                die("พิษเคมีทำลายระบบร่างกายอย่างรุนแรง นำไปสู่ความตาย");
+            } else {
+                flags.tastedSecond = true;
+                RoomFlags.dining_room.drinksAppeared = true;
+                showDialogue("อาหารรสชาติดีและปลอดภัย... คุณรู้สึกว่ารอดจากพิษแล้ว");
+            }
         } else if (flags.ingredientsAdded && flags.tastedSecond) {
             showDialogue("อาหารรสชาติกำลังดีแล้ว นำไปทานได้เลย");
         }
@@ -1590,11 +1603,24 @@ function handleInteraction(room, objId, element) {
              showDialogue("มืดเกินไป หรือไฟกะพริบจนลายตา ไม่อยากขยับของใหญ่");
              return;
          }
+         
+         if (flags.clockMoved) {
+             showDialogue("นาฬิกาลูกตุ้มถูกเลื่อนพ้นทางประตูแล้ว");
+             return;
+         }
+
          if (!flags.wheelsChecked) {
-             showDialogue("ลองผลักดู... นาฬิกาน้ำหนักมากและแทบไม่ขยับเลย เหมือนจะต้องไปปลดล็อคล้อด้านล่างก่อน");
+             showDialogue("ลองตรวจสอบดู... พบว่าล้อเลื่อนด้านล่างพัง ต้องการชุดอุปกรณ์ซ่อมล้อมาซ่อมก่อนถึงจะขยับได้");
              flags.wheelsChecked = true;
          } else {
-             showDialogue("ล้อของนาฬิกาลูกตุ้มพัง ต้องหาชุดอุปกรณ์ซ่อมล้อจากห้องอื่นมาซ่อมก่อนถึงจะขยับได้");
+             if (hasItem('wheel_repair_kit')) {
+                 flags.clockMoved = true;
+                 removeItem('wheel_repair_kit');
+                 showDialogue("คุณใช้ชุดอุปกรณ์ซ่อมล้อจนเสร็จ และเลื่อนนาฬิกาลูกตุ้มออกจากทางประตูได้สำเร็จ!");
+                 updateRoomVisuals('dining_room');
+             } else {
+                 die("พยายามเลื่อนนาฬิกาลูกตุ้มที่ยังไม่ได้ซ่อมล้อ... ล้อที่พังทำให้นาฬิกาเอียงและล้มทับตัวคุณตายคาที่!");
+             }
          }
          break;
       case 'newspaper':
@@ -1603,41 +1629,39 @@ function handleInteraction(room, objId, element) {
              return;
          }
          flags.newspaperRead = true;
-         showDialogue("พาดหัวข่าว: 'ค้นพบพลังบำบัดของชาร้อน... ช่วยระงับอาการแพนิคได้ในทันที!'");
-         addLog("ชาร้อนช่วยระงับอาการ Panic ได้");
+         showDialogue("บนหน้ากระดาษหนังสือพิมพ์ มีรอยเขียนด้วยหมึกสีแดง... ลำดับที่สอง คือ 2");
+         addLog("Fence Code 2: 2");
          break;
       case 'drinks':
-         if (flags.lightSwitchState !== 2) {
-             showDialogue("ไฟไม่สว่างพอจะเลือกเครื่องดื่ม");
-             return;
-         }
          openDiningUI();
          break;
       case 'table':
-         if (flags.lightSwitchState !== 0) {
-             showDialogue("ไฟสว่างเกินไปหรือยังกะพริบอยู่ ทำให้คุณไม่กล้าปีนขึ้นไปบนโต๊ะ");
+         if (flags.tableClimbed) {
+             flags.tableClimbed = false;
+             showDialogue("คุณปีนลงมาจากโต๊ะทานข้าวอย่างระมัดระวัง");
              return;
          }
          if (!flags.teaDrank) {
-             die("คุณปีนขึ้นไปบนโต๊ะทานข้าวด้วยความตื่นตระหนกจากแพนิค... ทรงตัวไม่อยู่และตกลงมาหัวกระแทกพื้นอย่างรุนแรง!");
+             takeDamage("คุณปีนขึ้นไปบนโต๊ะทั้งที่ยังมีอาการแพนิค... ทรงตัวไม่อยู่และตกลงมาบาดเจ็บ!", 0.25);
              return;
          }
-         showDialogue("คุณปีนขึ้นไปบนโต๊ะทานข้าวอย่างมั่นคง สามารถเอื้อมถึงโคมไฟเพดานได้แล้ว");
          flags.tableClimbed = true;
+         showDialogue("คุณปีนขึ้นไปบนโต๊ะทานข้าวอย่างมั่นคง สามารถเอื้อมถึงโคมไฟเพดานได้แล้ว (กดที่โต๊ะอีกครั้งเพื่อลง)");
          break;
       case 'lamp':
          if (!flags.tableClimbed) {
-             showDialogue("โคมไฟอยู่สูงเกินไป คุณเอื้อมไม่ถึง");
+             showDialogue("โคมไฟอยู่สูงเกินไป คุณเอื้อมไม่ถึง (ลองปีนโต๊ะดูสิ)");
              return;
          }
          if (flags.lightSwitchState !== 0) {
-             die("คุณพยายามจับโคมไฟขณะที่ไฟสว่าง กระแสไฟฟ้าลัดวงจรช็อตคุณอย่างรุนแรง!");
+             die("คุณพยายามเอื้อมจับโคมไฟขณะที่ไฟยังมีกระแสไฟฟ้าวิ่งอยู่... ไฟลัดวงจรช็อตคุณอย่างรุนแรงจนสิ้นใจตายคาที่ และไม่ได้กุญแจ!");
              return;
          }
          if (!flags.keyAcquired) {
              flags.keyAcquired = true;
              addItem('key_storage', 'กุญแจห้องเก็บของ');
-             showDialogue("ในความมืด คุณเห็นเงาสะท้อนวิบวับบนขอบโคมไฟ... คุณหยิบมันมา เป็น กุญแจห้องเก็บของ!");
+             showDialogue("ในความมืด คุณหยิบของที่สะท้อนแสงวิบวับบนขอบโคมไฟ... มันคือ กุญแจห้องเก็บของ!");
+             updateRoomVisuals('dining_room'); // Hide the sparkle
          } else {
              showDialogue("ไม่มีอะไรอยู่บนโคมไฟแล้ว");
          }
