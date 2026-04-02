@@ -39,7 +39,8 @@ const RoomFlags = {
   },
   hallway_f1: {
     backpackSearched1: false,
-    backpackSearched2: false
+    backpackSearched2: false,
+    storageUnlocked: false
   },
   kitchen: {
     sinkOff: false,
@@ -253,6 +254,7 @@ function init() {
   if (els.flashlightChargeBtn) {
       els.flashlightChargeBtn.addEventListener('click', chargePowerbank);
   }
+  // NOTE: Battery drain is handled inside the 1-second hazard timer only (updateFlashlightBattery interval removed to prevent double-drain)
   
   // Start window timing loop for bedroom
   setInterval(toggleWindowSwing, 1500); // Window "closes" every 1.5s
@@ -260,8 +262,7 @@ function init() {
   // Start bathroom flicker loop
   setInterval(checkBathroomLight, 1000);
   
-  // Flashlight battery loop
-  setInterval(updateFlashlightBattery, 3000);
+  // NOTE: Flashlight battery is drained in the 1-second hazard timer (storageDoor block) — no separate interval needed
   
   renderHUD();
   loadRoom('bedroom');
@@ -342,7 +343,7 @@ function restartRoom() {
     RoomFlags.hallway_f2 = { curtainClosed: false, rugSorted: false, lightOn: false, chandelierSwinging: true };
     GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.hallway_f2));
   } else if (GameState.currentRoom === 'hallway_f1') {
-    RoomFlags.hallway_f1 = { backpackSearched1: false, backpackSearched2: false };
+    RoomFlags.hallway_f1 = { backpackSearched1: false, backpackSearched2: false, storageUnlocked: false };
     GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.hallway_f1));
   } else if (GameState.currentRoom === 'kitchen') {
     RoomFlags.kitchen = { sinkOff: false, kettleOff: false, cabinetClosed: false, gasNotesFound: false, gasStep: 0, gasOff: false, tastedFirst: false, ingredientsAdded: false, poisonedFood: false, tastedSecond: false, drawerRightOpened: false, cabinetOpenLevel: 0 };
@@ -354,8 +355,8 @@ function restartRoom() {
     closeDiningUI();
     GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.dining_room));
   } else if (GameState.currentRoom === 'storage') {
-    // Keep battery and found item state (based on design, storage doesn't fully reset puzzle state, but for death, reset puzzle logic that matters)
-    RoomFlags.storage = { flashLightOn: false, doorWedged: false, doorClosed: false, woodStickAcquired: false, foundNote: false, foundKey: false, foundPowerbank: false, boxOpened: false, gotHammer: false, doorTimerStarted: false };
+    // Reset all storage puzzle flags on death (including boxSearchView which was previously missing)
+    RoomFlags.storage = { flashLightOn: false, doorWedged: false, doorClosed: false, woodStickAcquired: false, foundNote: false, foundKey: false, foundPowerbank: false, boxOpened: false, gotHammer: false, doorTimerStarted: false, doorSmallOpenedCount: 0, boxSearchView: 0 };
     GameState.smartphoneBattery = 100; // restore battery on die
     GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.storage));
   }
@@ -456,6 +457,9 @@ function loadRoom(roomId) {
   els.interactiveLayer.innerHTML = ''; // clear objects
   els.interactiveLayer.style.display = 'block';
   els.scene.style.backgroundImage = '';
+  
+  // ซ่อน flashlightMask เสมอเมื่อเปลี่ยนห้อง — updateRoomVisuals จะแสดงอีกครั้งเฉพาะในห้องเก็บของเท่านั้น
+  if (els.flashlightMask) els.flashlightMask.classList.add('hidden');
   
   // Add dark overlay if light is flickering
   els.scene.classList.remove('flickering');
@@ -651,15 +655,15 @@ function updateRoomVisuals(roomId) {
     
     const dMain = document.getElementById('obj-door_main');
     if (dMain) {
-        dMain.classList.add('door-closing-animation');
-        if (!flags.doorWedged && !flags.doorClosed) {
-            // Apply closing class so the CSS transition starts
-            dMain.classList.add('closing');
-            dMain.classList.remove('wedged');
-        } else if (flags.doorWedged) {
-            dMain.classList.remove('closing');
+        if (flags.doorWedged) {
+            // ประตูถูกค้ำด้วยไม้แล้ว — ไม่มี animation พับปิด คงสถานะนี้ตลอดแม้ออก-กลับเข้ามาใหม่
+            dMain.classList.remove('door-closing-animation', 'closing');
             dMain.classList.add('wedged');
             dMain.innerText = 'ประตูทางเข้า (ค้ำด้วยไม้แล้ว)';
+        } else if (!flags.doorClosed) {
+            // ประตูกำลังค่อย ๆ พับปิดเอง
+            dMain.classList.add('door-closing-animation', 'closing');
+            dMain.classList.remove('wedged');
         }
     }
   }
@@ -1538,8 +1542,14 @@ function handleInteraction(room, objId, element) {
         showDialogue("ประตูล็อค หรือ ทางนี้ยังไปไม่ได้");
         break;
       case 'door_storage':
-        if (hasItem('key_storage')) {
+        if (flags.storageUnlocked) {
+            // ปลดล็อคแล้ว — เข้าได้เสมอโดยไม่ต้องใช้กุญแจอีก
+            showDialogue("ประตูห้องเก็บของถูกปลดล็อคแล้ว คุณเดินเข้าไปในความมืดที่รออยู่...");
+            GameState.inventoryCheckpoints.storage = JSON.parse(JSON.stringify(GameState.inventory));
+            loadRoom('storage');
+        } else if (hasItem('key_storage')) {
             removeItem('key_storage');
+            flags.storageUnlocked = true; // จำไว้ว่าปลดล็อคแล้ว
             showDialogue("คุณใช้กุญแจห้องเก็บของไขเปิดประตู และเดินเข้าไปในความมืดที่รออยู่...");
             GameState.inventoryCheckpoints.storage = JSON.parse(JSON.stringify(GameState.inventory));
             loadRoom('storage');
@@ -1736,40 +1746,58 @@ function handleInteraction(room, objId, element) {
          break;
       case 'door_kitchen':
          showDialogue("กลับสู่ห้องครัว");
-         GameState.inventoryCheckpoints.kitchen = JSON.parse(JSON.stringify(GameState.inventory));
+         GameState.inventoryCheckpoints.dining_room = JSON.parse(JSON.stringify(GameState.inventory));
          loadRoom('kitchen');
          break;
     }
   } else if (room === 'storage') {
     switch(objId) {
       case 'door_main':
-         if (flags.doorTimerStarted && !flags.doorWedged && !flags.doorClosed) {
+         if (flags.doorClosed) {
+             showDialogue("ประตูพับปิดสนิทแล้ว คุณออกไม่ได้แล้ว!");
+         } else if (flags.doorWedged) {
+             // Door is propped open — can exit freely
+             showDialogue("คุณใช้ไม้ขัดค้ำประตูไว้แล้ว เดินกลับออกไปโถงทางเดิน...");
+             GameState.inventoryCheckpoints.hallway_f1 = JSON.parse(JSON.stringify(GameState.inventory));
+             loadRoom('hallway_f1');
+         } else if (flags.doorTimerStarted && !flags.doorWedged && !flags.doorClosed) {
+             // Door closing — can use wood stick or exit quickly
              if (hasItem('wood_stick')) {
                  flags.doorWedged = true;
                  removeItem('wood_stick');
-                 showDialogue("คุณเอาท่อนไม้มาค้ำยันบานพับประตูไว้ ประตูจะไม่พับปิดลงมาอีกแล้ว!");
+                 showDialogue("คุณเอาไม้ขัดประตูมาค้ำยันบานพับไว้ ประตูจะไม่พับปิดลงมาอีกแล้ว!");
                  updateRoomVisuals('storage');
              } else {
-                 showDialogue("ประตูบานพับนี้มันค่อยๆ พับจะปิดลงมา! คุณต้องหา 'ไม้ขัด' มาค้ำยันเร็วเข้า");
-             }
-         } else if (flags.doorWedged) {
-             showDialogue("คุณใช้ไม้ค้ำพับประตูไว้แล้ว สามารถเดินกลับออกไปโถงทางเดินได้");
-             const goBack = confirm("กลับไปโถงทางเดิน?");
-             if (goBack) {
+                 showDialogue("ประตูบานพับนี้มันค่อยๆ พับจะปิดลงมา! ต้องหา 'ไม้ขัดประตู' มาค้ำยัน หรือรีบออกไปก่อนที่ประตูจะปิดสนิท");
+                 // Can still exit if the door is not yet closed
                  GameState.inventoryCheckpoints.hallway_f1 = JSON.parse(JSON.stringify(GameState.inventory));
                  loadRoom('hallway_f1');
              }
-         } else if (flags.doorClosed) {
-             showDialogue("ประตูถูกปิดตายจากภายนอก คุณออกไม่ได้แล้ว");
+         } else {
+             // Door not yet started closing — can exit freely
+             showDialogue("คุณเดินกลับออกไปโถงทางเดิน...");
+             GameState.inventoryCheckpoints.hallway_f1 = JSON.parse(JSON.stringify(GameState.inventory));
+             loadRoom('hallway_f1');
          }
          break;
       case 'door_small':
+         if (!flags.flashLightOn) {
+             showDialogue("มืดเกินไป มองไม่เห็นประตูเล็กที่พื้นชัดเจน เปิดไฟแฟชก่อน");
+             return;
+         }
          if (flags.doorSmallOpenedCount === 0) {
+             // First click: Inspect - discover wood stick
              flags.doorSmallOpenedCount = 1;
-             addItem('wood_stick', 'ท่อนไม้ค้ำยัน');
-             showDialogue("คุณเจอกับประตูเล็กๆ ที่พื้น ซึ่งมี 'ท่อนไม้ค้ำยัน' ขัดไว้อยู่... คุณดึงท่อนไม้นั้นออกมาเก็บไว้ในตัว");
+             showDialogue("คุณส่องแฟชไปที่ประตูเล็กฝั่งพื้นบริเวณมุมห้อง... พบว่ามี 'ไม้ขัดประตู' โดยขัดล็อคไว้ทางด้านนี้ (กดอีกครั้งเพื่อดึงออกมา)");
+         } else if (flags.doorSmallOpenedCount === 1 && !flags.woodStickAcquired) {
+             // Second click: Pull out the wood stick
+             flags.doorSmallOpenedCount = 2;
+             flags.woodStickAcquired = true;
+             addItem('wood_stick', 'ไม้ขัดประตู');
+             showDialogue("คุณดึงไม้ขัดออกจากประตูเล็ก... ได้รับ 'ไม้ขัดประตู' เก็บเข้ากระเป๋า (ใช้ค้ำยันประตูบานพับทางเข้าได้!)");
          } else {
-             die("คุณพยายามเปิดประตูขนาดเล็กฝั่งพื้นอีกครั้ง... บางอย่างจากด้านล่างกระชากดึงตัวคุณตกลงไปในความมืด!");
+             // Third click+: Try to open - death
+             die("คุณพยายามเปิดประตูขนาดเล็กฝั่งพื้นอีกครั้ง... บางอย่างจากด้านล่างกระชากดึงตัวคุณตกลงไปในความมืด ประตูพับปิดลงทันที!");
          }
          break;
       case 'box_open':
