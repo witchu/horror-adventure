@@ -1486,8 +1486,16 @@ function handleInteraction(room, objId, element) {
         loadRoom('hallway_f2');
         break;
       case 'door_living':
-      case 'door_storage':
         showDialogue("ประตูล็อค หรือ ทางนี้ยังไปไม่ได้");
+        break;
+      case 'door_storage':
+        if (hasItem('key_storage')) {
+            showDialogue("คุณใช้กุญแจห้องเก็บของไขเปิดประตู และเดินเข้าไปในความมืดที่รออยู่...");
+            GameState.inventoryCheckpoints.storage = JSON.parse(JSON.stringify(GameState.inventory));
+            loadRoom('storage');
+        } else {
+            showDialogue("ประตูล็อค หรือ ทางนี้ยังไปไม่ได้ (ต้องการกุญแจห้องเก็บของ)");
+        }
         break;
     }
   } else if (room === 'kitchen') {
