@@ -6,7 +6,7 @@ const GameState = {
   logs: [], // Array of log text strings
   currentRoom: 'bedroom',
   inventoryCheckpoints: { bedroom: [], bathroom: [], hallway_f2: [], hallway_f1: [], kitchen: [], dining_room: [], storage: [] },
-  smartphoneBattery: 100 // Flashlight battery for storage
+  smartphoneBattery: 52 // Flashlight battery for storage starts at 52%
 };
 
 const RoomFlags = {
@@ -75,7 +75,9 @@ const RoomFlags = {
     foundPowerbank: false,
     boxOpened: false,
     gotHammer: false,
-    doorTimerStarted: false
+    doorTimerStarted: false,
+    doorSmallOpenedCount: 0,
+    boxSearchView: 0
   }
 };
 
@@ -222,8 +224,8 @@ const els = {
   diningUiContainer: document.getElementById('dining-ui-container'),
   drinkOptions: document.getElementById('drink-options'),
   flashlightMask: document.getElementById('flashlight-mask'),
-  batteryBarContainer: document.getElementById('battery-bar-container'),
-  batteryBarFill: document.getElementById('battery-bar-fill'),
+  flashlightUiContainer: document.getElementById('flashlight-ui-container'),
+  flashlightToggleBtn: document.getElementById('flashlight-toggle-btn'),
   batteryText: document.getElementById('battery-text')
 };
 
@@ -241,11 +243,18 @@ function init() {
     els.actionLogContainer.classList.toggle('collapsed');
   });
   
+  if (els.flashlightToggleBtn) {
+      els.flashlightToggleBtn.addEventListener('click', toggleFlashlight);
+  }
+  
   // Start window timing loop for bedroom
   setInterval(toggleWindowSwing, 1500); // Window "closes" every 1.5s
   
   // Start bathroom flicker loop
   setInterval(checkBathroomLight, 1000);
+  
+  // Flashlight battery loop
+  setInterval(updateFlashlightBattery, 3000);
   
   renderHUD();
   loadRoom('bedroom');
@@ -263,19 +272,18 @@ function renderHUD() {
     hpText.innerText = `${Math.max(0, GameState.hp).toFixed(2)} / ${GameState.maxHp}`;
   }
   
-  if (els.batteryBarContainer && els.batteryBarFill && els.batteryText) {
+  if (els.flashlightUiContainer && els.batteryText) {
     if (GameState.currentRoom === 'storage' && !RoomFlags.storage.gotHammer) {
-       els.batteryBarContainer.classList.remove('hidden');
-       const bpct = Math.max(0, GameState.smartphoneBattery);
-       els.batteryBarFill.style.width = `${bpct}%`;
-       els.batteryText.innerText = `${Math.floor(bpct)}%`;
-       if (bpct < 20) {
-           els.batteryBarFill.style.backgroundColor = 'red';
+       els.flashlightUiContainer.classList.remove('hidden');
+       els.batteryText.innerText = `${Math.floor(GameState.smartphoneBattery)}%`;
+       
+       if (GameState.smartphoneBattery < 20) {
+           els.batteryText.classList.add('low');
        } else {
-           els.batteryBarFill.style.backgroundColor = '#f1c40f';
+           els.batteryText.classList.remove('low');
        }
     } else {
-       els.batteryBarContainer.classList.add('hidden');
+       els.flashlightUiContainer.classList.add('hidden');
     }
   }
   
@@ -622,8 +630,17 @@ function updateRoomVisuals(roomId) {
     }
     
     const dMain = document.getElementById('obj-door_main');
-    if (flags.doorWedged && dMain) {
-        dMain.innerText = 'ประตูทางเข้า (ค้ำด้วยไม้แล้ว)';
+    if (dMain) {
+        dMain.classList.add('door-closing-animation');
+        if (!flags.doorWedged && !flags.doorClosed) {
+            // Apply closing class so the CSS transition starts
+            dMain.classList.add('closing');
+            dMain.classList.remove('wedged');
+        } else if (flags.doorWedged) {
+            dMain.classList.remove('closing');
+            dMain.classList.add('wedged');
+            dMain.innerText = 'ประตูทางเข้า (ค้ำด้วยไม้แล้ว)';
+        }
     }
   }
 }
@@ -963,10 +980,12 @@ function bathtubChoice(choice) {
 
 // --- Kitchen UI Logic ---
 const ingredients = [
-  { id: 1, name: "กระปุกสีแดง (พริกป่น)" },
-  { id: 2, name: "กระปุกสีขาว (เกลือ)" },
-  { id: 3, name: "กระปุกสีดำ (พริกไทย)" },
-  { id: 4, name: "ขวดสีน้ำตาล (ซีอิ๊ว)" }
+  { id: 1, name: "กระปุกที่ 1 (เกล็ดสีน้ำตาลอ่อน มีกลิ่นหอมหวาน)" },
+  { id: 2, name: "กระปุกที่ 2 (เกล็ดใหญ่สีขาวขุ่น ไม่มีกลิ่น)" },
+  { id: 3, name: "กระปุกที่ 3 (ผงละเอียดสีดำ กลิ่นเคมี)" },
+  { id: 4, name: "กระปุกที่ 4 (เกล็ดละเอียดสีขาวใส ไม่มีกลิ่น)" },
+  { id: 5, name: "กระปุกที่ 5 (ผงหยาบสีน้ำตาลเข้ม กลิ่นฉุน)" },
+  { id: 6, name: "กระปุกที่ 6 (ผงหยาบสีแดง กลิ่นเผ็ดร้อน)" }
 ];
 
 function openKitchenUI() {
@@ -994,17 +1013,16 @@ function selectIngredient(id) {
       return;
   }
   
-  if (id === 1 || id === 3) {
-      // Success (Spicy/Pepper)
-      kf.ingredientsAdded = true;
-      kf.tastedSecond = true; // Skip to success since we didn't add multi-step spice in simplified demo, or keep it 1 step
-      showDialogue("คุณใส่เครื่องปรุงรสเผ็ดร้อนลงไป... กลิ่นฉุนเตะจมูก! (ผ่านการปรุงสำเร็จ)");
-      RoomFlags.dining_room.drinksAppeared = true; // unlocks dining room puzzle
+  if (id === 3) {
+      // Poison
+      die("พิษเคมีทำลายระบบร่างกายอย่างรุนแรง นำไปสู่ความตาย");
   } else {
-      // Fail
-      takeDamage("คุณเผลอชิมอาหารที่รสชาติแย่ลงกว่าเดิมอย่างรุนแรง!", 0.5);
+      // Safe 1, 2, 4, 5, 6
+      kf.ingredientsAdded = true;
+      showDialogue("คุณใส่เครื่องปรุงลงไปในอาหาร... ลองชิมดูอีกครั้งเพื่อความแน่ใจ");
   }
 }
+
 
 // --- Dining Room UI Logic ---
 const drinks = [
@@ -1037,22 +1055,27 @@ function selectDrink(id) {
       if (!df.teaDrank) {
           df.teaDrank = true;
           GameState.hpDrainRate = 0;
-          showDialogue("ชาร้อนช่วยให้คุณผ่อนคลาย อาการ Panic สงบลงชั่วคราว");
+          showDialogue("ชาร้อนช่วยให้คุณผ่อนคลาย อาการ Panic สงบลงชั่วคราว คุณมีความกล้าพอที่จะทำสิ่งต่างๆ อย่างมีสติ");
       } else {
-          showDialogue("ชาหมดแล้ว");
+          showDialogue("ชามิ้นต์ถูกดื่มไปหมดแล้ว");
       }
   } else if (id === 'coffee') {
       if (!df.coffeeDrank) {
           df.coffeeDrank = true;
-          showDialogue("กาแฟดำเข้มข้นทำให้ใจคุณเต้นแรงขึ้น... คุณได้ยินเสียงนาฬิกาดังชัดเจนมากขึ้น");
+          showDialogue("กาแฟดำเข้มข้นทำให้ใจคุณเต้นแรงขึ้น อาการแพนิคกำเริบ... คุณได้ยินเสียงนาฬิกาดังเคาะบอกเวลาอย่างรวดเร็ว (ต้องรีบดื่มน้ำ!)");
+          
+          roomTimers.diningCoffeeDeath = setTimeout(() => {
+              die("ระบบประสาทถูกกระตุ้นจากคาเฟอีนประกอบกับเสียงดัง อาการแพนิคกำเริบรุนแรงจนหัวใจวาย!");
+          }, 5000);
       } else {
           showDialogue("กาแฟหมดแล้ว");
       }
   } else if (id === 'water') {
       if (!df.waterDrank) {
+          df.waterDrank = true;
           if (df.coffeeDrank) {
-              df.waterDrank = true;
-              showDialogue("น้ำเย็นช่วยเจือจางฤทธิ์คาเฟอีน... อาการใจสั่นลดลง เสียงนาฬิกาดังเบาลง");
+              clearTimeout(roomTimers.diningCoffeeDeath);
+              showDialogue("น้ำเย็นช่วยเจือจางฤทธิ์คาเฟอีน... อาการใจสั่นลดลง เสียงนาฬิกาดังเบาลง รอดตายอย่างหวุดหวิด");
           } else {
               showDialogue("ดื่มน้ำเปล่าชื่นใจดี... (ไม่มีผลอะไรพิเศษ)");
           }
@@ -1063,6 +1086,39 @@ function selectDrink(id) {
 }
 
 // --- Interaction Logic ---
+
+function toggleFlashlight() {
+    const flags = RoomFlags.storage;
+    if (GameState.smartphoneBattery <= 0) {
+        showDialogue("แบตเตอรี่โทรศัพท์หมดเกลี้ยง เปิดแฟลชไม่ได้แล้ว!");
+        return;
+    }
+    
+    flags.flashLightOn = !flags.flashLightOn;
+    updateRoomVisuals('storage');
+    
+    if (flags.flashLightOn) {
+        showDialogue("คุณเปิดไฟแฟลชจากสมาร์ทโฟน");
+    } else {
+        showDialogue("คุณปิดไฟแฟลช");
+    }
+}
+
+function updateFlashlightBattery() {
+    if (GameState.currentRoom === 'storage' && RoomFlags.storage.flashLightOn) {
+        if (GameState.smartphoneBattery > 0) {
+            GameState.smartphoneBattery -= 1;
+            renderHUD();
+            
+            // Check if battery just died
+            if (GameState.smartphoneBattery <= 0) {
+                RoomFlags.storage.flashLightOn = false;
+                updateRoomVisuals('storage');
+                showDialogue("แบตเตอรี่โทรศัพท์หมดแล้ว... ความมืดมิดเข้าปกคลุม");
+            }
+        }
+    }
+}
 
 function handleInteraction(room, objId, element) {
   const flags = RoomFlags[room];
@@ -1408,7 +1464,7 @@ function handleInteraction(room, objId, element) {
             if (code === "4022") {
                 showDialogue("รหัสถูกต้อง! กล่องเปิดออก พบคู่มือหมุนวาล์วแก๊ส");
                 flags.gasNotesFound = true;
-                addLog("ลำดับหมุนวาล์ว: ขวา -> ซ้าย -> ขวา -> ซ้ายสุด");
+                addLog("ลำดับหมุนวาล์ว: ขวา -> ซ้าย -> ซ้าย -> ขวา");
             } else {
                 showDialogue("รหัสผิด กล่องยังล็อคอยู่");
                 flags.drawerRightOpened = false;
@@ -1423,7 +1479,7 @@ function handleInteraction(room, objId, element) {
             return;
         }
         if (!flags.gasOff) {
-            const stepName = ['ขวา', 'ซ้าย', 'ขวา', 'ซ้ายสุด'][flags.gasStep];
+            const stepName = ['ขวา', 'ซ้าย', 'ซ้าย', 'ขวา'][flags.gasStep];
             const confirmStep = confirm(`หมุนวาล์วไปทาง [${stepName}] ไหม?`);
             if (confirmStep) {
                 flags.gasStep++;
@@ -1450,9 +1506,13 @@ function handleInteraction(room, objId, element) {
             flags.tastedFirst = true;
             showDialogue("คุณใช้ช้อนตักชิม... 'รสชาติจืดชืดมาก ขาดความเผ็ดร้อน'");
         } else if (!flags.ingredientsAdded && flags.tastedFirst) {
-            showDialogue("ต้องเติมเครื่องปรุงรสเผ็ดร้อนสักหน่อย");
+            showDialogue("ต้องเติมเครื่องปรุงรสอีกสักหน่อย");
+        } else if (flags.ingredientsAdded && !flags.tastedSecond) {
+            flags.tastedSecond = true;
+            RoomFlags.dining_room.drinksAppeared = true;
+            showDialogue("อาหารรสชาติดีและปลอดภัย... คุณได้ยินเสียง 'คลิก' ดังมาจากประตูห้องทานข้าว");
         } else if (flags.ingredientsAdded && flags.tastedSecond) {
-            showDialogue("อาหารรสชาติเผ็ดร้อน กลมกล่อมลงตัว... คุณได้ยินเสียง 'คลิก' ดังมาจากประตูห้องทานข้าว");
+            showDialogue("อาหารรสชาติกำลังดีแล้ว นำไปทานได้เลย");
         }
         break;
       case 'spice_rack':
@@ -1479,8 +1539,15 @@ function handleInteraction(room, objId, element) {
         loadRoom('hallway_f1');
         break;
       case 'fridge_note':
+        showDialogue("กระดานโน๊ตมีกระดาษจดสูตรอาหารเก่าๆ ที่เลือนลาง");
+        break;
       case 'door_laundry':
-        showDialogue("ไม่มีอะไรน่าสนใจ / ประตูล็อค");
+        if (hasItem('hammer')) {
+            showDialogue("คุณใช้ค้อนพังประตูห้องซักล้างจนพังทลายลงมา! ทางหนีถูกเปิดออกแล้ว...");
+            els.winScreen.classList.remove('hidden'); // CLEARED END DEMO
+        } else {
+            showDialogue("ประตูล็อคสนิท ลูกบิดขึ้นสนิม... ต้องหาค้อนหรืออะไรบางอย่างมาพังมัน");
+        }
         break;
     }
   } else if (room === 'dining_room') {
@@ -1506,15 +1573,8 @@ function handleInteraction(room, objId, element) {
          if (!flags.wheelsChecked) {
              showDialogue("ลองผลักดู... นาฬิกาน้ำหนักมากและแทบไม่ขยับเลย เหมือนจะต้องไปปลดล็อคล้อด้านล่างก่อน");
              flags.wheelsChecked = true;
-         } else if (flags.wheelsChecked && !flags.clockMoved) {
-             const ans = confirm("ก้มลงไปปลดตัวล็อคล้อฐานนาฬิกา?");
-             if (ans) {
-                 flags.clockMoved = true;
-                 showDialogue("คุณปลดล็อคล้อและเลื่อนนาฬิกาออกพ้นทาง เผยให้เห็นประตูห้องนั่งเล่นที่ซ่อนอยู่ด้านหลัง!");
-                 updateRoomVisuals('dining_room');
-             }
          } else {
-             showDialogue("นาฬิกาถูกเลื่อนออกไปแล้ว");
+             showDialogue("ล้อของนาฬิกาลูกตุ้มพัง ต้องหาชุดอุปกรณ์ซ่อมล้อจากห้องอื่นมาซ่อมก่อนถึงจะขยับได้");
          }
          break;
       case 'newspaper':
@@ -1533,19 +1593,41 @@ function handleInteraction(room, objId, element) {
          }
          openDiningUI();
          break;
-      case 'door_living':
-         if (!flags.clockMoved) {
-             showDialogue("ยังมาไม่ถึงตรงนี้ (นาฬิกาบังอยู่)");
+      case 'table':
+         if (flags.lightSwitchState !== 0) {
+             showDialogue("ไฟสว่างเกินไปหรือยังกะพริบอยู่ ทำให้คุณไม่กล้าปีนขึ้นไปบนโต๊ะ");
              return;
          }
-         if (!hasItem('key')) {
-             if (!flags.keyAcquired) {
-                 flags.keyAcquired = true;
-                 addItem('key_living', 'กุญแจห้องนั่งเล่น'); // Just generic key, but we need specifically the hammer or go to storage
-                 showDialogue("ประตูล็อค คุณเจอกุญแจที่ฐานนาฬิกา... แต่มันเขียนว่า 'กุญแจห้องเก็บของ'"); // Corrected from design, it leads to storage context or we just let it be generic
-                 addItem('key_storage', 'กุญแจห้องเก็บของ');
-             }
-             showDialogue("ประตูล็อค ต้องไปหาทางอื่น (ในเกมนี้โถงบอกว่าทางไปหลุดพ้นคือโถง... อ้อต้องไปห้องเก็บของที่โถง!)");
+         if (!flags.teaDrank) {
+             die("คุณปีนขึ้นไปบนโต๊ะทานข้าวด้วยความตื่นตระหนกจากแพนิค... ทรงตัวไม่อยู่และตกลงมาหัวกระแทกพื้นอย่างรุนแรง!");
+             return;
+         }
+         showDialogue("คุณปีนขึ้นไปบนโต๊ะทานข้าวอย่างมั่นคง สามารถเอื้อมถึงโคมไฟเพดานได้แล้ว");
+         flags.tableClimbed = true;
+         break;
+      case 'lamp':
+         if (!flags.tableClimbed) {
+             showDialogue("โคมไฟอยู่สูงเกินไป คุณเอื้อมไม่ถึง");
+             return;
+         }
+         if (flags.lightSwitchState !== 0) {
+             die("คุณพยายามจับโคมไฟขณะที่ไฟสว่าง กระแสไฟฟ้าลัดวงจรช็อตคุณอย่างรุนแรง!");
+             return;
+         }
+         if (!flags.keyAcquired) {
+             flags.keyAcquired = true;
+             addItem('key_storage', 'กุญแจห้องเก็บของ');
+             showDialogue("ในความมืด คุณเห็นเงาสะท้อนวิบวับบนขอบโคมไฟ... คุณหยิบมันมา เป็น กุญแจห้องเก็บของ!");
+         } else {
+             showDialogue("ไม่มีอะไรอยู่บนโคมไฟแล้ว");
+         }
+         break;
+      case 'door_living':
+         if (!flags.clockMoved) {
+             showDialogue("นาฬิกาลูกตุ้มบังประตูห้องนั่งเล่นอยู่ คุณเข้าไม่ได้");
+         } else {
+             showDialogue("ประตูเปิดสู่ห้องนั่งเล่น...");
+             // Implement loadRoom('living_room') in the future
          }
          break;
       case 'door_kitchen':
@@ -1561,13 +1643,13 @@ function handleInteraction(room, objId, element) {
              if (hasItem('wood_stick')) {
                  flags.doorWedged = true;
                  removeItem('wood_stick');
-                 showDialogue("คุณเอาท่อนไม้มาค้ำยันบานพับประตูไว้ ประตูจะไม่ปิดมากระแทกอีกแล้ว!");
+                 showDialogue("คุณเอาท่อนไม้มาค้ำยันบานพับประตูไว้ ประตูจะไม่พับปิดลงมาอีกแล้ว!");
                  updateRoomVisuals('storage');
              } else {
-                 showDialogue("ประตูบานพับนี้มันพยายามจะงับปิดตลอดเวลา! คุณต้องหาอะไรมาค้ำมันไว้ (ต้องการไอเทมค้ำยัน)");
+                 showDialogue("ประตูบานพับนี้มันค่อยๆ พับจะปิดลงมา! คุณต้องหา 'ไม้ขัด' มาค้ำยันเร็วเข้า");
              }
          } else if (flags.doorWedged) {
-             showDialogue("ประตูกลับโถงทางเดิน (ค้ำไม้ไว้แล้ว เปิดค้างตลอด)");
+             showDialogue("คุณใช้ไม้ค้ำพับประตูไว้แล้ว สามารถเดินกลับออกไปโถงทางเดินได้");
              const goBack = confirm("กลับไปโถงทางเดิน?");
              if (goBack) {
                  GameState.inventoryCheckpoints.hallway_f1 = JSON.parse(JSON.stringify(GameState.inventory));
@@ -1578,74 +1660,71 @@ function handleInteraction(room, objId, element) {
          }
          break;
       case 'door_small':
-         if (!flags.doorWedged) {
-             showDialogue("คุณไม่กล้ามุดเข้าไปในประตูเล็กขณะที่ประตูใหญ่พร้อมหนีบคุณตลอดเวลา! ต้องจัดการประตูหลังก่อน");
-             return;
-         }
-         if (!flags.flashLightOn) {
-             showDialogue("ประตูนี้ลึกและมืดมาก ต้องหาแสงสว่างส่องเข้าไป");
-             return;
-         }
-         if (!flags.smdoorOpen) {
-             flags.smdoorOpen = true;
-             showDialogue("คุณเปิดประตูเล็กเข้าไป... เจอโน้ตเขียนว่า 'ลังกระดาษหมายเลข 2 ซ่อนแบตสำรองไว้'");
-             addLog("ลังกระดาษหมายเลข 2 มีแบตสำรอง");
+         if (flags.doorSmallOpenedCount === 0) {
+             flags.doorSmallOpenedCount = 1;
+             addItem('wood_stick', 'ท่อนไม้ค้ำยัน');
+             showDialogue("คุณเจอกับประตูเล็กๆ ที่พื้น ซึ่งมี 'ท่อนไม้ค้ำยัน' ขัดไว้อยู่... คุณดึงท่อนไม้นั้นออกมาเก็บไว้ในตัว");
          } else {
-             showDialogue("ไม่มีอะไรซ่อนอยู่ในนี้แล้ว");
+             die("คุณพยายามเปิดประตูขนาดเล็กฝั่งพื้นอีกครั้ง... บางอย่างจากด้านล่างกระชากดึงตัวคุณตกลงไปในความมืด!");
          }
          break;
       case 'box_open':
-         // Box 1 (Open)
-         if (!flags.woodStickAcquired) {
-             flags.woodStickAcquired = true;
-             addItem('wood_stick', 'ท่อนไม้ค้ำยัน');
-             showDialogue("คุณค้นลังกระดาษที่เปิดอยู่ เจอ 'ท่อนไม้' แข็งๆ หนึ่งอัน");
+         if (!flags.flashLightOn) {
+             showDialogue("ห้องมืดเกินไป คุณมองไม่เห็นว่ามีอะไรอยู่ในลัง");
+             return;
+         }
+         if (flags.boxSearchView === 0) {
+             flags.boxSearchView = 1;
+             showDialogue("ค้นลังกระดาษครั้งแรก เจอ 'กระดาษโน้ต' เขียนว่า 'สิ่งที่ถูกซ่อนไว้ในส่วนลึก ไม่ควรเปิดมันออกมา'");
+             addLog("ประตูเล็กฝั่งพื้นมีอันตรายซ่อนอยู่ ห้ามเปิด!");
+         } else if (flags.boxSearchView === 1) {
+             flags.boxSearchView = 2;
+             flags.foundKey = true;
+             addItem('key_toolbox', 'กุญแจกล่องอุปกรณ์');
+             showDialogue("ค้นลังกระดาษครั้งที่สอง คุณเจอ 'กุญแจกล่องอุปกรณ์ช่าง'");
+         } else if (flags.boxSearchView === 2) {
+             flags.boxSearchView = 3;
+             flags.foundPowerbank = true;
+             addItem('powerbank', 'พาวเวอร์แบงค์เก่า');
+             showDialogue("ค้นลังกระดาษครั้งที่สาม คุณเจอ 'พาวเวอร์แบงค์เก่า' (สามารถใช้เพิ่มแบตเตอรี่ได้ทั้นที)");
+             if (GameState.smartphoneBattery < 100) {
+                 GameState.smartphoneBattery = 100;
+                 removeItem('powerbank');
+                 showDialogue("คุณรีบเสียบสายชาร์จพาวเวอร์แบงค์ทันที แบตเตอรี่กลับมาเต็ม 100%!");
+             }
          } else {
-             showDialogue("ลังเปิดโล่ง ไม่มีอะไรแล้ว");
+             showDialogue("ลังเปิดโล่ง ไม่มีอะไรให้ค้นอีกแล้ว");
          }
          break;
       case 'box_closed':
-         // Box 2 (Closed)
          if (!flags.boxOpened) {
              flags.boxOpened = true;
-             showDialogue("เปิดฝาลังออก... ดันมีค้างคาวบินสวนขึ้นมาเฉี่ยวหน้า!");
-             takeDamage("ค้างคาวบินพุ่งชนหน้า!", 0.25);
-             if (flags.smdoorOpen) {
-                 showDialogue("ในลังนี้มี 'แบตเตอรี่สำรอง' ตามที่โน้ตบอก!");
-                 addItem('powerbank', 'แบตสำรอง');
-                 flags.foundPowerbank = true;
-                 // Refill battery
-                 if (hasItem('smartphone')) {
-                     GameState.smartphoneBattery = 100;
-                     showDialogue("คุณใช้แบตสำรองชาร์จสมาร์ทโฟน แบตเต็ม 100% อีกครั้ง!");
-                     removeItem('powerbank');
-                 }
-             }
+             showDialogue("เปิดฝาลังออก... ดันมีหนูตัวใหญ่กระโดดสวนขึ้นมาเฉี่ยวแขนคุณ!");
+             takeDamage("โดนหนูกัดหรือข่วนด้วยความตกใจ", 0.5);
          } else {
-             showDialogue("ลังกระดาษหมายเลข 2 ว่างเปล่า");
+             showDialogue("ลังกระดาษมีฝาปิด มีแต่เศษฝุ่นและกลิ่นสาบหนู");
          }
          break;
       case 'toolbox':
          if (!flags.flashLightOn) {
-             showDialogue("มืดเกินไป มองรหัสล็อคกล่องไม่ออก เปิดไฟฉายก่อน");
+             showDialogue("มืดเกินไป คุณคลำหากุญแจล็อคไม่เจอ เปิดไฟฉายก่อน");
              return;
          }
          if (!flags.gotHammer) {
-             const pin = prompt("กล่องมีแม่กุญแจรหัส 3 หลัก (สัญลักษณ์หน้ากล่องเหมือนจำนวนยาในห้องน้ำ? หรือเลข 402?): ลองเดาว่ารหัสคือสวิตช์ไฟที่พังในห้อง = 13 (หรือ 31?)... ไม่ใช่สิ (จาก GDD รหัสคือ 144)");
-             if (pin === "144") {
+             if (hasItem('key_toolbox')) {
                  flags.gotHammer = true;
-                 showDialogue("รหัสถูกต้องแม่กุญแจปลดล็อค! คุณได้รับ 'ค้อน' ไว้สำหรับพังกำแพง/ประตูใหญ่เพื่อหนีออกไปสุดเกม!");
+                 removeItem('key_toolbox');
+                 showDialogue("คุณใช้กุญแจไขแม่กุญแจออกสำเร็จ! หยิบ 'ค้อน' ออกมาได้แล้ว (ตอนนี้คุณพังประตูใดก็ได้ที่แข็งๆ ได้แล้ว)");
                  addItem('hammer', 'ค้อน');
-                 els.winScreen.classList.remove('hidden'); // CLEARED END DEMO
              } else {
-                 showDialogue("รหัสผิด... ลองนึกถึงคำใบ้หรือรหัสอื่นๆ (คำใบ้คือ วันวาเลนไทน์ 14 หรืออะไรสักอย่าง? เรามีเลข 144 จาก GDD)");
+                 showDialogue("กล่องถูกล็อคด้วยแม่กุญแจแน่นหนา ต้องหากุญแจมาไข");
              }
          } else {
-             showDialogue("กล่องว่างเปล่า");
+             showDialogue("กล่องอุปกรณ์ว่างเปล่า คุณเอาค้อนมาแล้ว");
          }
          break;
       case 'switch':
-         showDialogue("สวิตช์ไฟพังและช็อตอยู่ อย่าไปยุ่งดีกว่า");
+         die("คุณพยายามกดสวิตช์ใฟที่พัง กระแสไฟฟ้าลัดวงจรช็อตคุณอย่างรุนแรงจนสิ้นใจ!");
          break;
     }
   }
