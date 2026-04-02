@@ -158,7 +158,6 @@ const RoomData = {
       { id: 'drawer_right', name: 'ลิ้นชักขวา', bounds: { left: 30, top: 75, width: 15, height: 20 } },
       { id: 'stove', name: 'เตาแก๊ส', bounds: { left: 55, top: 45, width: 20, height: 20 } },
       { id: 'food', name: 'อาหารบนเตา', bounds: { left: 60, top: 35, width: 10, height: 10 } },
-      { id: 'spice_rack', name: 'ชั้นวางเครื่องปรุง', bounds: { left: 75, top: 20, width: 20, height: 20 } },
       { id: 'fridge_note', name: 'กระดานโน๊ตบนตู้เย็น', bounds: { left: 85, top: 40, width: 10, height: 30 } },
       { id: 'door_laundry', name: 'ประตูห้องซักล้าง', bounds: { left: 80, top: 70, width: 15, height: 25 } },
       { id: 'door_dining', name: 'ทางไปห้องทานข้าว', bounds: { left: 0, top: 20, width: 10, height: 60 } },
@@ -222,6 +221,8 @@ const els = {
   waterTempText: document.getElementById('water-temp-text'),
   kitchenUiContainer: document.getElementById('kitchen-ui-container'),
   ingredientOptions: document.getElementById('ingredient-options'),
+  stoveUiContainer: document.getElementById('stove-ui-container'),
+  stoveInputDisplay: document.getElementById('stove-input-display'),
   diningUiContainer: document.getElementById('dining-ui-container'),
   drinkOptions: document.getElementById('drink-options'),
   flashlightMask: document.getElementById('flashlight-mask'),
@@ -445,6 +446,8 @@ function loadRoom(roomId) {
   
   // Add dark overlay if light is flickering
   els.scene.classList.remove('flickering');
+  els.scene.classList.remove('flicker-dining');
+  els.scene.style.filter = 'brightness(1)';
   if (roomId === 'bathroom' && !RoomFlags.bathroom.pillTaken) {
     els.scene.classList.add('flickering');
   }
@@ -481,12 +484,7 @@ function loadRoom(roomId) {
   // reset room timer
   if (roomId === 'bedroom') roomTimers.bedroom = 0;
   if (roomId === 'bathroom') roomTimers.bathroomSoap = 0;
-  if (roomId === 'kitchen') {
-      roomTimers.kitchenWater = 0;
-      roomTimers.kitchenKettle = 0;
-      roomTimers.kitchenCabinet = 0;
-      roomTimers.kitchenGas = 0;
-  }
+  // NOTE: Kitchen timers deliberately DO NOT reset here to preserve state across rooms
   if (roomId === 'dining_room') roomTimers.diningClock = 0;
   if (roomId === 'storage') {
       if(!RoomFlags.storage.doorTimerStarted && !RoomFlags.storage.gotHammer){
@@ -716,6 +714,10 @@ setInterval(() => {
   }
 
   // Kitchen Hazards
+  if (GameState.currentRoom !== 'kitchen') {
+      if (GameState.hpDrainRate === 0.5) GameState.hpDrainRate = 0;
+  }
+  
   if (GameState.currentRoom === 'kitchen') {
       const kf = RoomFlags.kitchen;
       if (!kf.sinkOff) {
@@ -1102,6 +1104,58 @@ function selectDrink(id) {
   }
 }
 
+let stoveInputSeq = [];
+
+function openStoveUI() {
+    stoveInputSeq = [];
+    updateStoveDisplay();
+    els.stoveUiContainer.classList.remove('hidden');
+}
+
+function closeStoveUI() {
+    els.stoveUiContainer.classList.add('hidden');
+}
+
+function inputStove(dir) {
+    if (stoveInputSeq.length < 4) {
+        stoveInputSeq.push(dir);
+        updateStoveDisplay();
+        
+        if (stoveInputSeq.length === 4) {
+            checkStoveSequence();
+        }
+    }
+}
+
+function updateStoveDisplay() {
+    let displayStr = "";
+    for(let i=0; i<4; i++) {
+        if(i < stoveInputSeq.length) {
+            displayStr += (stoveInputSeq[i] === 'left' ? 'L ' : 'R ');
+        } else {
+            displayStr += '_ ';
+        }
+    }
+    if (els.stoveInputDisplay) els.stoveInputDisplay.innerText = displayStr.trim();
+}
+
+function checkStoveSequence() {
+    const seqStr = stoveInputSeq.join(',');
+    const correctSeq = 'right,left,left,right';
+    
+    setTimeout(() => {
+        closeStoveUI();
+        if (seqStr === correctSeq) {
+            RoomFlags.kitchen.gasOff = true;
+            showDialogue("คุณหมุนวาล์วเตาแก๊สได้ถูกต้อง! เตาแก๊สถูกปิด อาหารบนเตาหยุดเดือด ควันและกลิ่นไหม้ค่อยๆ จางหายไป");
+            updateRoomVisuals('kitchen');
+        } else {
+            takeDamage("หมุนผิดจังหวะ ไฟพุ่งพึ่บใส่แขนคุณ!", 0.25);
+            stoveInputSeq = []; // Reset sequence
+        }
+    }, 400);
+}
+
 // --- Interaction Logic ---
 
 function toggleFlashlight() {
@@ -1439,10 +1493,6 @@ function handleInteraction(room, objId, element) {
         }
         break;
       case 'kettle':
-        if (!flags.sinkOff) {
-            takeDamage("คุณเหยียบแอ่งน้ำที่นองพื้นจนลื่น ไถลไปชนเคาน์เตอร์เจ็บตัว!");
-            return;
-        }
         if (!flags.kettleOff) {
             flags.kettleOff = true;
             showDialogue("คุณปิดและยกกาต้มน้ำออกจากเตา เสียงหวีดร้องเงียบลงแล้ว");
@@ -1452,10 +1502,6 @@ function handleInteraction(room, objId, element) {
         }
         break;
       case 'cabinet':
-        if (!flags.kettleOff) {
-            takeDamage("มัวแต่ไปปิดตู้ เสียงหวีดร้องของกาดังทะลุแก้วหูจนคุณมึนงง!");
-            return;
-        }
         if (!flags.cabinetClosed) {
             flags.cabinetClosed = true;
             showDialogue("คุณดันบานตู้กลับเข้าที่จนล็อคสนิท ไม่มีจานชามตกลงมาแล้ว");
@@ -1465,10 +1511,6 @@ function handleInteraction(room, objId, element) {
         }
         break;
       case 'drawer_left':
-        if (!flags.cabinetClosed) {
-            takeDamage("ระหว่างก้มเปิดลิ้นชัก จานกระเบื้องร่วงจากตู้ด้านบนใส่หัวคุณเต็มๆ!");
-            return;
-        }
         if (!flags.gasNotesFound) {
             flags.gasNotesFound = true;
             showDialogue("เปิดลิ้นชักออก พบสมุดโน๊ตเขียนวิธีปิดเตาแก๊ส คุณจดไว้ในบันทึก");
@@ -1478,34 +1520,13 @@ function handleInteraction(room, objId, element) {
         }
         break;
       case 'drawer_right':
-        if (!flags.cabinetClosed) {
-            takeDamage("ระหว่างก้มเปิดลิ้นชัก จานกระเบื้องร่วงจากตู้ด้านบนใส่หัวคุณเต็มๆ!");
-            return;
-        }
         takeDamage("เปิดลิ้นชักออกอย่างรวดเร็ว โดนของมีคมด้านในบาดมือ!", 0.25);
         break;
       case 'stove':
-        if (!flags.gasNotesFound) {
-            takeDamage("พยายามบิดวาล์วมั่วๆ ไฟลุกพึ่บใส่แขน!");
-            return;
-        }
         if (!flags.gasOff) {
-            const stepName = ['ขวา', 'ซ้าย', 'ซ้าย', 'ขวา'][flags.gasStep];
-            const confirmStep = confirm(`หมุนวาล์วไปทาง [${stepName}] ไหม?`);
-            if (confirmStep) {
-                flags.gasStep++;
-                showDialogue(`คุณหมุนไปทาง ${stepName}...`);
-                if (flags.gasStep >= 4) {
-                    flags.gasOff = true;
-                    showDialogue("คุณปิดแก๊สสำเร็จ! ควันเริ่มจางหาย อาหารปลอดภัยแล้ว");
-                    updateRoomVisuals('kitchen');
-                }
-            } else {
-                takeDamage("หมุนผิดจังหวะ แก๊สรั่วใส่ตา!");
-                flags.gasStep = 0;
-            }
+            openStoveUI();
         } else {
-            showDialogue("แก๊สปิดสนิทแล้ว");
+            showDialogue("วาล์วแก๊สถูกปิดสนิทแล้ว");
         }
         break;
       case 'food':
@@ -1515,24 +1536,15 @@ function handleInteraction(room, objId, element) {
         }
         if (!flags.tastedFirst) {
             flags.tastedFirst = true;
-            showDialogue("คุณใช้ช้อนตักชิม... 'รสชาติจืดชืดมาก ขาดความเผ็ดร้อน'");
+            showDialogue("คุณใช้ช้อนตักชิม... 'เป็นซุปที่จืดชืดมาก'");
         } else if (!flags.ingredientsAdded && flags.tastedFirst) {
-            showDialogue("ต้องเติมเครื่องปรุงรสอีกสักหน่อย");
+            openKitchenUI();
         } else if (flags.ingredientsAdded && !flags.tastedSecond) {
             flags.tastedSecond = true;
             RoomFlags.dining_room.drinksAppeared = true;
             showDialogue("อาหารรสชาติดีและปลอดภัย... คุณรู้สึกว่ารอดจากพิษแล้ว");
         } else if (flags.ingredientsAdded && flags.tastedSecond) {
             showDialogue("อาหารรสชาติกำลังดีแล้ว นำไปทานได้เลย");
-        }
-        break;
-      case 'spice_rack':
-        if (flags.tastedFirst && !flags.ingredientsAdded) {
-            openKitchenUI();
-        } else if (flags.ingredientsAdded) {
-            showDialogue("ปรุงเสร็จแล้ว ไม่ต้องยุ่งกับเครื่องปรุงอีก");
-        } else {
-            showDialogue("ชั้นวางเครื่องปรุง... แต่ตอนนี้ยังไม่รู้จะปรุงอะไร");
         }
         break;
       case 'door_dining':
@@ -1546,7 +1558,8 @@ function handleInteraction(room, objId, element) {
         loadRoom('hallway_f1');
         break;
       case 'fridge_note':
-        showDialogue("กระดานโน๊ตมีกระดาษจดสูตรอาหารเก่าๆ ที่เลือนลาง");
+        showDialogue("กระดานโน๊ตเขียนว่า: 'ทานอาหารด้วยนะ ฉันอุ่นเตรียมไว้ให้แล้ว...แต่รสชาติอาจไม่ถูกใจคุณเท่าไหร่ และอย่าลืมตรวจสอบทุกอย่างให้เรียบร้อยก่อนออกไปด้วยล่ะ'");
+        addLog("พ่อบ้าน/แม่บ้านโน๊ตไว้: ทานอาหารด้วยนะ ฉันอุ่นเตรียมไว้ให้แล้ว...");
         break;
       case 'door_laundry':
         if (hasItem('hammer')) {

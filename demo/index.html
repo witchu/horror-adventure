@@ -82,11 +82,27 @@
     <!-- Kitchen Ingredient UI -->
     <div id="kitchen-ui-container" class="ui-overlay hidden">
       <div class="ui-panel">
-        <h3>ชั้นวางเครื่องปรุง</h3>
+        <h3>เติมเครื่องปรุง</h3>
         <div id="ingredient-options" class="pill-grid">
            <!-- Buttons will be injected via JS -->
         </div>
-        <button class="close-ui-btn" onclick="closeKitchenUI()">ปิดชั้นวาง</button>
+        <button class="close-ui-btn" onclick="closeKitchenUI()">ปิด</button>
+      </div>
+    </div>
+
+    <!-- Stove Gas UI -->
+    <div id="stove-ui-container" class="ui-overlay hidden">
+      <div class="ui-panel">
+        <h3>วาล์วเตาแก๊ส</h3>
+        <p style="margin-bottom: 10px; font-size: 14px; color: #ffcccc;">ต้องหมุนให้ถูกลำดับ 4 ขั้นตอนเพื่อปิดแก๊ส!</p>
+        <div id="stove-input-display" style="font-size: 24px; letter-spacing: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; min-height: 30px;">
+          _ _ _ _
+        </div>
+        <div class="pill-grid">
+           <button class="pill-btn" onclick="inputStove('left')">หมุนซ้าย (L)</button>
+           <button class="pill-btn" onclick="inputStove('right')">หมุนขวา (R)</button>
+        </div>
+        <button class="close-ui-btn" onclick="closeStoveUI()" style="margin-top: 15px;">ยกเลิก</button>
       </div>
     </div>
 
