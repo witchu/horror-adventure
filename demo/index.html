@@ -119,7 +119,15 @@
     </div>
 
     <!-- Storage Room Anomaly UI (Darkness overlay via style) -->
-    
+
+    <!-- Dialogue Box (global, above all UI layers) -->
+    <div id="dialogue-box" class="hidden">
+      <div class="dialogue-inner">
+        <p id="dialogue-text"></p>
+        <button id="dialogue-close" class="hidden">ตกลง</button>
+      </div>
+    </div>
+
     <!-- Interactive Scene System -->
     <div id="scene" class="room-bedroom">
       <!-- Flashlight spot mask -->
@@ -137,11 +145,7 @@
       <!-- Interactive objects injected here -->
       <div id="interactive-layer"></div>
       
-      <!-- Dialogue Box -->
-      <div id="dialogue-box" class="hidden">
-        <p id="dialogue-text"></p>
-        <button id="dialogue-close" class="hidden">ตกลง</button>
-      </div>
+
 
       <!-- Death Screen -->
       <div id="death-screen" class="hidden overlay-screen">

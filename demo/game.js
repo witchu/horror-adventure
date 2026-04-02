@@ -1420,12 +1420,9 @@ function handleInteraction(room, objId, element) {
       case 'bathtub':
         if (!flags.doorUnlocked) {
           if (!bathtubState.active && !flags.waterFilled) {
-             const fill = confirm("เปิดน้ำใส่อ่างอาบน้ำไหม?");
-             if (fill) {
-                 bathtubState.active = true;
-                 bathtubState.mode = 'hot';
-                 openFaucetUI();
-             }
+             bathtubState.active = true;
+             bathtubState.mode = 'hot';
+             openFaucetUI();
           } else if (bathtubState.active && !flags.waterFilled) {
              openFaucetUI();
           } else if (flags.waterFilled && !flags.bathed && !flags.waterDrained) {
@@ -1439,15 +1436,7 @@ function handleInteraction(room, objId, element) {
                  showDialogue("ขึ้นจากอ่างแล้วแต่คุณไม่มีผ้าเช็ดตัว ตัวยังเปียกชุ่ม... ระวังอุปกรณ์ไฟฟ้าให้ดี!");
              }
           } else if (flags.bathed && flags.dried && !flags.waterDrained) {
-             const drain = confirm("ดึงจุกระบายน้ำทิ้งไหม?");
-             if (drain) {
-                 flags.waterDrained = true;
-                 flags.gotKey = true;
-                 addItem('key', 'กุญแจห้องนอน');
-                 flags.doorUnlocked = true;
-                 showDialogue("คุณดึงจุกระบายน้ำออก น้ำแรงดันสูงระบายทิ้ง พัดเอากุญแจลอยขึ้นมาให้คุณหยิบ!");
-                 updateRoomVisuals('bathroom');
-             }
+             openBathtubChoiceUI();
           } else if (flags.waterDrained && flags.gotKey) {
              showDialogue("คุณได้กุญแจจากการระบายน้ำไปเรียบร้อยแล้ว");
           }
@@ -1455,6 +1444,7 @@ function handleInteraction(room, objId, element) {
             showDialogue("ได้กุญแจแล้ว... ไม่ต้องยุ่งกับอ่างอีก");
         }
         break;
+
     }
   } else if (room === 'hallway_f2') {
     switch (objId) {

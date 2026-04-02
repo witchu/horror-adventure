@@ -298,28 +298,56 @@ body {
   z-index: 5;
 }
 
-/* Dialogue Box */
+/* Dialogue Box — full-screen overlay modal */
 #dialogue-box {
   position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  background-color: var(--panel-bg);
-  border: 1px solid var(--border);
-  padding: 15px 20px;
-  z-index: 20;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.72);
+  z-index: 500;
+  padding: 20px;
+}
+
+#dialogue-box .dialogue-inner {
+  background-color: #1a1f1c;
+  border: 1px solid #3a4a42;
+  border-top: 3px solid var(--accent);
+  padding: 28px 32px;
+  max-width: 480px;
+  width: 90%;
   text-align: center;
-  box-shadow: 0 0 15px rgba(0,0,0,0.8);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 12px rgba(179, 57, 57, 0.25);
 }
 
 #dialogue-text {
   font-size: 16px;
-  line-height: 1.5;
-  margin-bottom: 10px;
+  line-height: 1.7;
+  color: #d3d9d6;
+  margin-bottom: 22px;
 }
 
-#dialogue-box button, .overlay-screen button {
+#dialogue-close {
+  background-color: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 10px 36px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#dialogue-close:hover {
+  background-color: #cc4444;
+  transform: scale(1.04);
+}
+
+.overlay-screen button {
   background-color: var(--bg-dark);
   color: var(--text-main);
   border: 1px solid var(--border);
@@ -329,7 +357,7 @@ body {
   transition: background 0.2s;
 }
 
-#dialogue-box button:hover, .overlay-screen button:hover {
+.overlay-screen button:hover {
   background-color: #1a221f;
   border-color: var(--text-main);
 }
