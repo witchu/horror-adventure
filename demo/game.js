@@ -171,14 +171,14 @@ const RoomData = {
   },
   dining_room: {
     objects: [
-      { id: 'switch', name: 'สวิตช์ไฟ', bounds: { left: 85, top: 40, width: 5, height: 10 } },
+      { id: 'switch', name: 'สวิตช์ไฟ', bounds: { left: 10, top: 40, width: 5, height: 10 } },
       { id: 'table', name: 'โต๊ะทานข้าว', bounds: { left: 20, top: 60, width: 60, height: 30 } },
       { id: 'drinks', name: 'ชุดเครื่องดื่ม', bounds: { left: 25, top: 45, width: 25, height: 15 }, classes: 'hidden' },
       { id: 'newspaper', name: 'หนังสือพิมพ์', bounds: { left: 55, top: 45, width: 15, height: 15 } },
       { id: 'lamp', name: 'โคมไฟเพดาน', bounds: { left: 35, top: 0, width: 30, height: 30 } },
-      { id: 'clock', name: 'นาฬิกาลูกตุ้ม', bounds: { left: 5, top: 20, width: 15, height: 60 } },
-      { id: 'door_living', name: 'ประตูห้องนั่งเล่น', bounds: { left: 0, top: 20, width: 10, height: 60 } },
-      { id: 'door_kitchen', name: 'กลับห้องครัว', bounds: { left: 85, top: 70, width: 15, height: 30 } }
+      { id: 'clock', name: 'นาฬิกาลูกตุ้ม', bounds: { left: 80, top: 20, width: 15, height: 60 } },
+      { id: 'door_living', name: 'ประตูห้องนั่งเล่น', bounds: { left: 90, top: 20, width: 10, height: 60 } },
+      { id: 'door_kitchen', name: 'กลับห้องครัว', bounds: { left: 0, top: 70, width: 15, height: 30 } }
     ],
     decorations: []
   },
@@ -618,7 +618,7 @@ function updateRoomVisuals(roomId) {
     
     if (flags.clockMoved && clock) {
         clock.innerText = 'นาฬิกาลูกตุ้ม (เลื่อนพ้นทางแล้ว)';
-        clock.style.left = '15%'; // moved aside
+        clock.style.left = '70%'; // moved aside
     }
 
     if (flags.drinksAppeared && drinks) {
@@ -1594,8 +1594,10 @@ function handleInteraction(room, objId, element) {
              flags.lightSwitchState = 2;
              showDialogue("คุณกดสวิตช์อีกครั้ง... ไฟสว่างเต็มที่แล้ว! เห็นชุดเครื่องดื่มและหนังสือพิมพ์ชัดเจน");
              updateRoomVisuals('dining_room');
-         } else { // On
-             showDialogue("ไฟสว่างเต็มที่แล้ว ไม่จำเป็นต้องกดอีก");
+         } else { // On -> Off
+             flags.lightSwitchState = 0;
+             showDialogue("คุณกดสวิตช์ปิดไฟ... ห้องกลับมามืดสนิทอีกครั้ง");
+             updateRoomVisuals('dining_room');
          }
          break;
       case 'clock':
