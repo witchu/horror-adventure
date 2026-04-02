@@ -229,6 +229,7 @@ const els = {
   flashlightMask: document.getElementById('flashlight-mask'),
   flashlightUiContainer: document.getElementById('flashlight-ui-container'),
   flashlightToggleBtn: document.getElementById('flashlight-toggle-btn'),
+  flashlightChargeBtn: document.getElementById('flashlight-charge-btn'),
   batteryText: document.getElementById('battery-text')
 };
 
@@ -248,6 +249,9 @@ function init() {
   
   if (els.flashlightToggleBtn) {
       els.flashlightToggleBtn.addEventListener('click', toggleFlashlight);
+  }
+  if (els.flashlightChargeBtn) {
+      els.flashlightChargeBtn.addEventListener('click', chargePowerbank);
   }
   
   // Start window timing loop for bedroom
@@ -284,6 +288,11 @@ function renderHUD() {
            els.batteryText.classList.add('low');
        } else {
            els.batteryText.classList.remove('low');
+       }
+       if (hasItem('powerbank') && els.flashlightChargeBtn) {
+           els.flashlightChargeBtn.disabled = false;
+       } else if (els.flashlightChargeBtn) {
+           els.flashlightChargeBtn.disabled = true;
        }
     } else {
        els.flashlightUiContainer.classList.add('hidden');
@@ -445,6 +454,8 @@ function loadRoom(roomId) {
   GameState.currentRoom = roomId;
   els.scene.className = `room-${roomId}`;
   els.interactiveLayer.innerHTML = ''; // clear objects
+  els.interactiveLayer.style.display = 'block';
+  els.scene.style.backgroundImage = '';
   
   // Add dark overlay if light is flickering
   els.scene.classList.remove('flickering');
@@ -497,6 +508,7 @@ function loadRoom(roomId) {
   }
   
   updateRoomVisuals(roomId);
+  renderHUD();
 }
 
 function updateRoomVisuals(roomId) {
@@ -627,10 +639,14 @@ function updateRoomVisuals(roomId) {
   } else if (roomId === 'storage') {
     if (flags.flashLightOn) {
         els.flashlightMask.classList.remove('hidden');
+        els.scene.style.backgroundImage = '';
         els.scene.style.backgroundColor = 'transparent';
+        els.interactiveLayer.style.display = 'block';
     } else {
         els.flashlightMask.classList.add('hidden');
-        els.scene.style.backgroundColor = '#000'; // Pure dark
+        els.scene.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('assets/storage_bg.png')";
+        els.scene.style.backgroundColor = '#000';
+        els.interactiveLayer.style.display = 'none';
     }
     
     const dMain = document.getElementById('obj-door_main');
@@ -1184,6 +1200,39 @@ function toggleFlashlight() {
     }
 }
 
+let powerbankChargeTicks = 0;
+let powerbankInterval = null;
+
+function chargePowerbank() {
+    if (hasItem('powerbank')) {
+        removeItem('powerbank');
+        if (els.flashlightChargeBtn) els.flashlightChargeBtn.disabled = true;
+        showDialogue("คุณเสียบชาร์จพาวเวอร์แบงค์... แบตเตอรี่จะค่อยๆ เพิ่มขึ้น (1% ทุก 5 วินาที)");
+        powerbankChargeTicks = 0;
+        
+        if (powerbankInterval) clearInterval(powerbankInterval);
+        
+        powerbankInterval = setInterval(() => {
+            if (GameState.hp <= 0) {
+                clearInterval(powerbankInterval);
+                return;
+            }
+            if (GameState.smartphoneBattery < 100 && powerbankChargeTicks < 15) {
+                GameState.smartphoneBattery += 1;
+                powerbankChargeTicks++;
+                renderHUD();
+                
+                if (GameState.smartphoneBattery >= 100 || powerbankChargeTicks >= 15) {
+                    clearInterval(powerbankInterval);
+                    showDialogue("พาวเวอร์แบงค์พลังงานหมดแล้ว!");
+                }
+            } else {
+                clearInterval(powerbankInterval);
+            }
+        }, 5000);
+    }
+}
+
 function updateFlashlightBattery() {
     if (GameState.currentRoom === 'storage' && RoomFlags.storage.flashLightOn) {
         if (GameState.smartphoneBattery > 0) {
@@ -1490,6 +1539,7 @@ function handleInteraction(room, objId, element) {
         break;
       case 'door_storage':
         if (hasItem('key_storage')) {
+            removeItem('key_storage');
             showDialogue("คุณใช้กุญแจห้องเก็บของไขเปิดประตู และเดินเข้าไปในความมืดที่รออยู่...");
             GameState.inventoryCheckpoints.storage = JSON.parse(JSON.stringify(GameState.inventory));
             loadRoom('storage');
@@ -1729,8 +1779,8 @@ function handleInteraction(room, objId, element) {
          }
          if (flags.boxSearchView === 0) {
              flags.boxSearchView = 1;
-             showDialogue("ค้นลังกระดาษครั้งแรก เจอ 'กระดาษโน้ต' เขียนว่า 'สิ่งที่ถูกซ่อนไว้ในส่วนลึก ไม่ควรเปิดมันออกมา'");
-             addLog("ประตูเล็กฝั่งพื้นมีอันตรายซ่อนอยู่ ห้ามเปิด!");
+             showDialogue("ค้นลังกระดาษครั้งแรก เจอ 'กระดาษโน้ต' เขียนคำเตือนว่า 'สิ่งที่ถูกซ่อนไว้ในส่วนลึก ไม่ควรเปิดเผยมันออกมา'");
+             addLog("กระดาษโน้ต: สิ่งที่ถูกซ่อนไว้ในส่วนลึก ไม่ควรเปิดเผยมันออกมา");
          } else if (flags.boxSearchView === 1) {
              flags.boxSearchView = 2;
              flags.foundKey = true;
@@ -1740,12 +1790,7 @@ function handleInteraction(room, objId, element) {
              flags.boxSearchView = 3;
              flags.foundPowerbank = true;
              addItem('powerbank', 'พาวเวอร์แบงค์เก่า');
-             showDialogue("ค้นลังกระดาษครั้งที่สาม คุณเจอ 'พาวเวอร์แบงค์เก่า' (สามารถใช้เพิ่มแบตเตอรี่ได้ทั้นที)");
-             if (GameState.smartphoneBattery < 100) {
-                 GameState.smartphoneBattery = 100;
-                 removeItem('powerbank');
-                 showDialogue("คุณรีบเสียบสายชาร์จพาวเวอร์แบงค์ทันที แบตเตอรี่กลับมาเต็ม 100%!");
-             }
+             showDialogue("ค้นลังกระดาษครั้งที่สาม คุณเจอ 'พาวเวอร์แบงค์เก่า' (เก็บเข้ากระเป๋า สามารถกดชาร์จได้ที่เมนูไฟฉาย)");
          } else {
              showDialogue("ลังเปิดโล่ง ไม่มีอะไรให้ค้นอีกแล้ว");
          }
