@@ -102,7 +102,7 @@ const RoomData = {
           } else {
              showDialogue("คุณลงมือผลักประตูเดินเข้าสู่ห้องน้ำ");
              timeInBathroom = 0;
-             GameState.inventoryCheckpoints.bathroom = JSON.parse(JSON.stringify(GameState.inventory));
+             inventory.saveCheckpoint('bathroom');
              loadRoom('bathroom');
           }
         }
@@ -116,7 +116,7 @@ const RoomData = {
           } else {
              removeItem('key');
              showDialogue("คุณไขกุญแจและผลักประตูเปิดออกไปสู่โถงทางเดินชั้น 2...");
-             GameState.inventoryCheckpoints.hallway_f2 = JSON.parse(JSON.stringify(GameState.inventory));
+             inventory.saveCheckpoint('hallway_f2');
              loadRoom('hallway_f2');
           }
         }
@@ -204,7 +204,7 @@ const RoomData = {
             takeDamage("ลื่นฟองสบู่เล็กน้อย โชคดีที่ยังไหลออกมาไม่เยอะ");
           }
           showDialogue("คุณเดินย้อนกลับเข้ามาในห้องนอน");
-          GameState.inventoryCheckpoints.bedroom = JSON.parse(JSON.stringify(GameState.inventory));
+          inventory.saveCheckpoint('bedroom');
           loadRoom('bedroom');
         }
       }
@@ -279,7 +279,7 @@ const RoomData = {
               return;
           }
           showDialogue("คุณเดินลงบันไดมายังโถงทางเดินชั้น 1");
-          GameState.inventoryCheckpoints.hallway_f1 = JSON.parse(JSON.stringify(GameState.inventory));
+          inventory.saveCheckpoint('hallway_f1');
           loadRoom('hallway_f1');
         }
       }
@@ -319,13 +319,13 @@ const RoomData = {
           const flags = RoomFlags.hallway_f1;
           if (flags.storageUnlocked) {
               showDialogue("ประตูห้องเก็บของถูกปลดล็อคแล้ว คุณเดินเข้าไปในความมืดที่รออยู่...");
-              GameState.inventoryCheckpoints.storage = JSON.parse(JSON.stringify(GameState.inventory));
+              inventory.saveCheckpoint('storage');
               loadRoom('storage');
           } else if (hasItem('key_storage')) {
               removeItem('key_storage');
               flags.storageUnlocked = true;
               showDialogue("คุณใช้กุญแจห้องเก็บของไขเปิดประตู และเดินเข้าไปในความมืดที่รออยู่...");
-              GameState.inventoryCheckpoints.storage = JSON.parse(JSON.stringify(GameState.inventory));
+              inventory.saveCheckpoint('storage');
               loadRoom('storage');
           } else {
               showDialogue("ประตูล็อค หรือ ทางนี้ยังไปไม่ได้ (ต้องการกุญแจห้องเก็บของ)");
@@ -335,7 +335,7 @@ const RoomData = {
       { id: 'door_kitchen', name: 'ทางเข้าไปยังห้องครัว', bounds: { left: 0, top: 20, width: 15, height: 70 },
         onInteract: (element) => {
           showDialogue("ประตูเปิดออกสู่ห้องครัว...");
-          GameState.inventoryCheckpoints.kitchen = JSON.parse(JSON.stringify(GameState.inventory));
+          inventory.saveCheckpoint('kitchen');
           loadRoom('kitchen');
         }
       },
@@ -457,14 +457,14 @@ const RoomData = {
       { id: 'door_dining', name: 'ทางไปห้องทานข้าว', bounds: { left: 0, top: 20, width: 10, height: 60 },
         onInteract: (element) => {
           showDialogue("คุณเดินเปิดประตูเข้าไปยังห้องทานข้าว...");
-          GameState.inventoryCheckpoints.dining_room = JSON.parse(JSON.stringify(GameState.inventory));
+          inventory.saveCheckpoint('dining_room');
           loadRoom('dining_room');
         }
       },
       { id: 'door_hallway', name: 'กลับโถงทางเดิน', bounds: { left: 40, top: 85, width: 20, height: 10 },
         onInteract: (element) => {
           showDialogue("กลับออกไปโถงทางเดินชั้น 1");
-          GameState.inventoryCheckpoints.hallway_f1 = JSON.parse(JSON.stringify(GameState.inventory));
+          inventory.saveCheckpoint('hallway_f1');
           loadRoom('hallway_f1');
         }
       }
@@ -591,7 +591,7 @@ const RoomData = {
       { id: 'door_kitchen', name: 'กลับห้องครัว', bounds: { left: 0, top: 70, width: 15, height: 30 },
         onInteract: (element) => {
            showDialogue("กลับสู่ห้องครัว");
-           GameState.inventoryCheckpoints.dining_room = JSON.parse(JSON.stringify(GameState.inventory));
+           inventory.saveCheckpoint('dining_room');
            loadRoom('kitchen');
         }
       }
@@ -607,7 +607,7 @@ const RoomData = {
                showDialogue("ประตูพับปิดสนิทแล้ว คุณออกไม่ได้แล้ว!");
            } else if (flags.doorWedged) {
                showDialogue("คุณใช้ไม้ขัดค้ำประตูไว้แล้ว เดินกลับออกไปโถงทางเดิน...");
-               GameState.inventoryCheckpoints.hallway_f1 = JSON.parse(JSON.stringify(GameState.inventory));
+               inventory.saveCheckpoint('hallway_f1');
                loadRoom('hallway_f1');
            } else if (flags.doorTimerStarted && !flags.doorWedged && !flags.doorClosed) {
                if (hasItem('wood_stick')) {
@@ -617,12 +617,12 @@ const RoomData = {
                    updateRoomVisuals('storage');
                } else {
                    showDialogue("ประตูบานพับนี้มันค่อยๆ พับจะปิดลงมา! ต้องหา 'ไม้ขัดประตู' มาค้ำยัน หรือรีบออกไปก่อนที่ประตูจะปิดสนิท");
-                   GameState.inventoryCheckpoints.hallway_f1 = JSON.parse(JSON.stringify(GameState.inventory));
+                   inventory.saveCheckpoint('hallway_f1');
                    loadRoom('hallway_f1');
                }
            } else {
                showDialogue("คุณเดินกลับออกไปโถงทางเดิน...");
-               GameState.inventoryCheckpoints.hallway_f1 = JSON.parse(JSON.stringify(GameState.inventory));
+               inventory.saveCheckpoint('hallway_f1');
                loadRoom('hallway_f1');
            }
         }

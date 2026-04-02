@@ -12,11 +12,19 @@
 |------|---------|
 | `index.html` | Layout for HUD, Scene, UI overlays (pill, faucet, stove, drinks, flashlight), Death/Win screens, Inventory, Log panel |
 | `style.css` | Horror theme in muted green tones, animation classes (`swinging`, `flickering`, `danger-low/high`, `smoke-effect`, `chandelier-swing`), responsive layout |
-| `game.js` | Core engine — State, UI rendering, timers, and interaction bridging |
+| `state.js` | Global state (GameState, RoomFlags, timers, bathtubState) |
+| `ui_elements.js`| DOM Element map (`els`) |
+| `inventory.js`  | Object-Oriented InventoryManager class handling items, capacity and checkpoints |
+| `ui.js` | HUD rendering, logs, and dialogue functions |
+| `player.js` | Player status logic (`takeDamage`, `die`) |
+| `minigames.js` | Custom UI interactions (Pills, Faucet, Kitchen, Stove, Drinks) |
+| `room_logic.js` | Room manager (`loadRoom`, `updateRoomVisuals`, `handleInteraction`, `toggleFlashlight`) |
+| `timers.js` | Game loops (HP drain, hazard timers, bathtub fill interval) |
 | `room.js` | Room declarations — `RoomData` containing room objects and their inline `onInteract(element)` callback logic |
+| `main.js` | `init()`, `restartRoom()`, and window listeners |
 | `assets/` | Room background images (`bedroom_bg.png`, `bathroom_bg.png`, ...) |
 
-No frameworks — self-contained vanilla HTML/CSS/JS.
+No frameworks — self-contained vanilla HTML/CSS/JS loaded sequentially as global scripts.
 
 ---
 
@@ -29,13 +37,13 @@ GameState = {
   hp: 3,               // 0 → dead, max 3
   maxHp: 3,
   hpDrainRate: 0,       // units/sec, drained every 100ms (÷10)
-  inventory: [],        // [{id, name}], max 6 items
   logs: [],             // log text strings (deduped)
   currentRoom: 'bedroom',
-  inventoryCheckpoints: { bedroom: [], bathroom: [], ... },
   smartphoneBattery: 52 // flashlight battery % (used only in storage)
 }
 ```
+
+(Note: Inventory is now managed via `InventoryManager` inside `inventory.js`)
 
 ### 2.2 RoomFlags (boolean/number state per room)
 
@@ -98,10 +106,10 @@ click object → handleInteraction(roomId, objId, element)
 
 Before entering a new room, **snapshot inventory**:
 ```js
-GameState.inventoryCheckpoints[nextRoom] = JSON.parse(JSON.stringify(GameState.inventory));
+inventory.saveCheckpoint(nextRoom);
 loadRoom(nextRoom);
 ```
-This allows restoring inventory to the room's starting state on death.
+This allows restoring inventory to the room's starting state on death during `restartRoom()`.
 
 ---
 
@@ -141,10 +149,10 @@ RoomData.laundry = {
 ### Step 3: Add roomTimers (if the room has hazards)
 
 ```js
-// Add key to the roomTimers object in game.js
+// Add key to the roomTimers object in state.js
 roomTimers.laundryFlood = 0;
 
-// Add logic inside the existing 1-second hazard setInterval block
+// Add logic inside the existing 1-second hazard setInterval block in timers.js
 if (GameState.currentRoom === 'laundry') {
   if (!RoomFlags.laundry.someFlag) {
     roomTimers.laundryFlood++;
@@ -158,7 +166,7 @@ if (GameState.currentRoom === 'laundry') {
 ### Step 4: Add updateRoomVisuals
 
 ```js
-// Inside function updateRoomVisuals(roomId)
+// Inside function updateRoomVisuals(roomId) in room_logic.js
 } else if (roomId === 'laundry') {
   const flags = RoomFlags.laundry;
   // update element text, classes based on state
@@ -168,10 +176,10 @@ if (GameState.currentRoom === 'laundry') {
 ### Step 5: Add restartRoom reset
 
 ```js
-// Inside function restartRoom()
+// Inside function restartRoom() in main.js
 } else if (GameState.currentRoom === 'laundry') {
   RoomFlags.laundry = { /* reset all values */ };
-  GameState.inventory = JSON.parse(JSON.stringify(GameState.inventoryCheckpoints.laundry));
+  inventory.loadCheckpoint('laundry');
 }
 ```
 
@@ -181,7 +189,7 @@ In the source room (e.g. kitchen) in `room.js`, add within `door_laundry`'s `onI
 ```js
 case 'door_laundry':
   if (/* unlock condition met */) {
-    GameState.inventoryCheckpoints.laundry = JSON.parse(JSON.stringify(GameState.inventory));
+    inventory.saveCheckpoint('laundry');
     loadRoom('laundry');
   }
   break;
@@ -190,8 +198,8 @@ case 'door_laundry':
 ### Step 7: Add UI overlay (if the room has a mini-game)
 
 1. Add HTML in `index.html` (see `pill-ui-container` or `stove-ui-container` as examples)
-2. Cache the element in the `els` object in `game.js`
-3. Create open/close UI functions in `game.js`
+2. Cache the element in the `els` object in `ui_elements.js`
+3. Create open/close UI functions in `minigames.js`
 4. Invoke these UI functions from `room.js` `onInteract` callbacks
 
 ---
@@ -275,10 +283,10 @@ renderHUD()               – update HP bar + battery display
 ## 8. Development Rules
 
 1. **Read the GDD before implementing** — files at `../design/rooms/XX_name.md` contain full details on interactables, win flow, death/injury conditions.
-2. **Do not create new JS files** — core tracking logic goes in `game.js`, room data interactions go in `room.js`.
-3. **inventoryCheckpoints** — must be saved before every `loadRoom()` call.
-4. **restartRoom** — must reset flags + restore inventory checkpoint.
-5. **Hazard timers** — add to the existing 1-second `setInterval` block; do not create new intervals.
+2. **Global Scripts usage** — core tracking logic is divided across specific JS files (`state.js`, `player.js`, `room_logic.js`, etc.), while room data interactions go in `room.js`. Do not put everything in one file.
+3. **inventoryCheckpoints** — must be saved (`inventory.saveCheckpoint('room_name')`) before every `loadRoom()` call.
+4. **restartRoom** — (located in `main.js`) must reset flags + restore inventory checkpoint (`inventory.loadCheckpoint('room_name')`).
+5. **Hazard timers** — add to the existing 1-second `setInterval` block in `timers.js`; do not create new intervals.
 6. **CSS classes** — use existing classes (`danger-low`, `danger-high`, etc.); avoid creating new ones unless necessary.
 7. **Background assets** — name as `{roomId}_bg.png` and store in `assets/`.
 8. **Test the death loop** — every room must restart cleanly with no state leaks.
