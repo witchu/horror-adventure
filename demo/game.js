@@ -90,7 +90,8 @@ let roomTimers = {
   kitchenGas: 0,
   diningClock: 0,
   storageDoor: 0,
-  storagePanic: 0
+  storagePanic: 0,
+  hallwayChandelier: 0
 };
 
 // Bathtub state
@@ -110,7 +111,7 @@ const RoomData = {
       { id: 'window', name: 'หน้าต่าง', bounds: { left: 40, top: 20, width: 20, height: 30 }, classes: 'swinging' },
       { id: 'wardrobe', name: 'ตู้เสื้อผ้า', bounds: { left: 70, top: 15, width: 20, height: 60 }, classes: 'heavy-shake' },
       { id: 'fan', name: 'พัดลมเพดาน (ลอดผ่าน)', bounds: { left: 30, top: 0, width: 40, height: 15 } },
-      { id: 'door_bathroom', name: 'ประตูห้องน้ำ', bounds: { left: 5, top: 20, width: 15, height: 40 } },
+      { id: 'door_bathroom', name: 'ประตูห้องน้ำ', bounds: { left: 5, top: 10, width: 15, height: 35 } },
       { id: 'door_hallway', name: 'ประตูออกโถง', bounds: { left: 85, top: 20, width: 15, height: 40 } }
     ],
     decorations: []
@@ -129,10 +130,10 @@ const RoomData = {
   },
   hallway_f2: {
     objects: [
-      { id: 'curtain', name: 'ผ้าม่านหน้าต่างบานใหญ่', bounds: { left: 40, top: 20, width: 30, height: 50 } },
+      { id: 'curtain', name: 'ผ้าม่านหน้าต่างบานใหญ่', bounds: { left: 20, top: 20, width: 30, height: 50 } },
       { id: 'rug', name: 'พรมเช็ดเท้า', bounds: { left: 30, top: 80, width: 40, height: 15 } },
       { id: 'light_switch', name: 'สวิตช์ไฟขั้นบันได', bounds: { left: 80, top: 30, width: 10, height: 20 } },
-      { id: 'stairs_down', name: 'บันไดลงไปชั้นล่าง', bounds: { left: 20, top: 50, width: 60, height: 50 } }
+      { id: 'stairs_down', name: 'บันไดลงไปชั้นล่าง', bounds: { left: 40, top: 40, width: 20, height: 40 } }
     ],
     decorations: [
       { id: 'chandelier', name: 'โคมไฟระย้า', bounds: { left: 30, top: -10, width: 40, height: 30 }, classes: 'chandelier-swing swinging' }
@@ -140,10 +141,10 @@ const RoomData = {
   },
   hallway_f1: {
     objects: [
-      { id: 'backpack', name: 'กระเป๋าสะพาย', bounds: { left: 10, top: 40, width: 15, height: 25 } },
-      { id: 'door_living', name: 'ประตูห้องนั่งเล่น', bounds: { left: 60, top: 10, width: 15, height: 50 } },
-      { id: 'door_storage', name: 'ประตูห้องเก็บของ', bounds: { left: 80, top: 10, width: 15, height: 50 } },
-      { id: 'door_kitchen', name: 'ทางเข้าไปยังห้องครัว', bounds: { left: 5, top: 10, width: 15, height: 80 } },
+      { id: 'backpack', name: 'กระเป๋าสะพาย', bounds: { left: 25, top: 70, width: 15, height: 15 } },
+      { id: 'door_living', name: 'ประตูห้องนั่งเล่น', bounds: { left: 80, top: 10, width: 15, height: 50 } },
+      { id: 'door_storage', name: 'ประตูห้องเก็บของ', bounds: { left: 60, top: 10, width: 15, height: 50 } },
+      { id: 'door_kitchen', name: 'ทางเข้าไปยังห้องครัว', bounds: { left: 0, top: 20, width: 15, height: 70 } },
       { id: 'stairs_up', name: 'บันไดขึ้นชั้น 2', bounds: { left: 40, top: 60, width: 40, height: 40 } }
     ],
     decorations: []
@@ -172,8 +173,8 @@ const RoomData = {
     objects: [
       { id: 'switch', name: 'สวิตช์ไฟ', bounds: { left: 85, top: 40, width: 5, height: 10 } },
       { id: 'table', name: 'โต๊ะทานข้าว', bounds: { left: 20, top: 60, width: 60, height: 30 } },
-      { id: 'drinks', name: 'ชุดเครื่องดื่ม', bounds: { left: 25, top: 50, width: 25, height: 20 }, classes: 'hidden' },
-      { id: 'newspaper', name: 'หนังสือพิมพ์', bounds: { left: 55, top: 55, width: 15, height: 15 } },
+      { id: 'drinks', name: 'ชุดเครื่องดื่ม', bounds: { left: 25, top: 45, width: 25, height: 15 }, classes: 'hidden' },
+      { id: 'newspaper', name: 'หนังสือพิมพ์', bounds: { left: 55, top: 45, width: 15, height: 15 } },
       { id: 'lamp', name: 'โคมไฟเพดาน', bounds: { left: 35, top: 0, width: 30, height: 30 } },
       { id: 'clock', name: 'นาฬิกาลูกตุ้ม', bounds: { left: 5, top: 20, width: 15, height: 60 } },
       { id: 'door_living', name: 'ประตูห้องนั่งเล่น', bounds: { left: 0, top: 20, width: 10, height: 60 } },
@@ -694,6 +695,22 @@ setInterval(() => {
       } else if (roomTimers.bathroomSoap > 10) {
          spillEl.innerText = 'ฟองสบู่บนพื้น (เริ่มไหลลามกว้างขึ้น)';
          spillEl.className = 'non-interactive-object danger-low';
+      }
+    }
+  }
+
+  if (GameState.currentRoom === 'hallway_f2' && RoomFlags.hallway_f2.chandelierSwinging) {
+    roomTimers.hallwayChandelier++;
+    const chandelierEl = document.getElementById('deco-chandelier');
+    if (chandelierEl) {
+      if (roomTimers.hallwayChandelier > 45) { 
+         die("โคมไฟระย้าที่แกว่งไปมาทนสภาพไม่ไหวหลุดร่วงลงมาทับคุณตายคาที่...");
+      } else if (roomTimers.hallwayChandelier > 30) {
+         chandelierEl.innerText = 'โคมไฟระย้า (แกว่งรุนแรง สายสะบัดจะขาดแล้ว!)';
+         chandelierEl.className = 'non-interactive-object chandelier-swing swinging danger-high';
+      } else if (roomTimers.hallwayChandelier > 15) {
+         chandelierEl.innerText = 'โคมไฟระย้า (แกว่งแรงขึ้น เสียงเอี๊ยดอ๊าดดังมาก)';
+         chandelierEl.className = 'non-interactive-object chandelier-swing swinging danger-low';
       }
     }
   }
@@ -1385,8 +1402,8 @@ function handleInteraction(room, objId, element) {
       case 'backpack':
         if (!flags.backpackSearched1) {
             flags.backpackSearched1 = true;
-            showDialogue("ค้นคันแรกเจอบัตรพนักงานเขียนว่า 'Employee ID: 4022'");
-            addItem('id_card', 'บัตรพนักงาน');
+            showDialogue("ค้นครั้งแรกพบบอดี้พาสพนักงาน... คุณจดเบาะแสรั้วลำดับที่ 1 ลงสมุดบันทึก");
+            addLog("เบาะแสรั้วลำดับที่ 1 จากบัตรพนักงาน");
         } else if (!flags.backpackSearched2) {
             flags.backpackSearched2 = true;
             showDialogue("ค้นต่อ... เจอสมาร์ทโฟน! (แบต 100%) ใช้เปิดไฟฉายได้ถ้าจำเป็น");
@@ -1397,13 +1414,9 @@ function handleInteraction(room, objId, element) {
         }
         break;
       case 'door_kitchen':
-        if (hasItem('id_card')) {
-            showDialogue("คุณนำบัตรพนักงานสแกนที่ประตู... ประตูเปิดออกสู่ห้องครัว");
-            GameState.inventoryCheckpoints.kitchen = JSON.parse(JSON.stringify(GameState.inventory));
-            loadRoom('kitchen');
-        } else {
-            showDialogue("ประตูนี้ต้องใช้บัตรพนักงานสแกนเพื่อเปิด");
-        }
+        showDialogue("ประตูเปิดออกสู่ห้องครัว...");
+        GameState.inventoryCheckpoints.kitchen = JSON.parse(JSON.stringify(GameState.inventory));
+        loadRoom('kitchen');
         break;
       case 'stairs_up':
         showDialogue("คุณเดินขึ้นบันไดกลับไปยังชั้น 2");
@@ -1451,27 +1464,25 @@ function handleInteraction(room, objId, element) {
             showDialogue("ตู้เก็บจานปิดสนิทแล้ว");
         }
         break;
-      case 'drawer_right':
       case 'drawer_left':
         if (!flags.cabinetClosed) {
             takeDamage("ระหว่างก้มเปิดลิ้นชัก จานกระเบื้องร่วงจากตู้ด้านบนใส่หัวคุณเต็มๆ!");
             return;
         }
-        if (objId === 'drawer_right' && !flags.drawerRightOpened) {
-            flags.drawerRightOpened = true;
-            showDialogue("พบกล่องปริศนา ต้องใส่รหัส 4 หลัก...");
-            const code = prompt("ใส่รหัส 4 หลัก (จากบัตรพนักงาน):");
-            if (code === "4022") {
-                showDialogue("รหัสถูกต้อง! กล่องเปิดออก พบคู่มือหมุนวาล์วแก๊ส");
-                flags.gasNotesFound = true;
-                addLog("ลำดับหมุนวาล์ว: ขวา -> ซ้าย -> ซ้าย -> ขวา");
-            } else {
-                showDialogue("รหัสผิด กล่องยังล็อคอยู่");
-                flags.drawerRightOpened = false;
-            }
+        if (!flags.gasNotesFound) {
+            flags.gasNotesFound = true;
+            showDialogue("เปิดลิ้นชักออก พบสมุดโน๊ตเขียนวิธีปิดเตาแก๊ส คุณจดไว้ในบันทึก");
+            addLog("ลำดับหมุนวาล์วเตาแก๊ส: ขวา -> ซ้าย -> ซ้าย -> ขวา");
         } else {
-            showDialogue("ลิ้นชักตู้ธรรมดา ไม่มีอะไรน่าสนใจ");
+            showDialogue("ในนี้มีแค่สมุดโน๊ตที่คุณอ่านแล้ว");
         }
+        break;
+      case 'drawer_right':
+        if (!flags.cabinetClosed) {
+            takeDamage("ระหว่างก้มเปิดลิ้นชัก จานกระเบื้องร่วงจากตู้ด้านบนใส่หัวคุณเต็มๆ!");
+            return;
+        }
+        takeDamage("เปิดลิ้นชักออกอย่างรวดเร็ว โดนของมีคมด้านในบาดมือ!", 0.25);
         break;
       case 'stove':
         if (!flags.gasNotesFound) {
@@ -1510,7 +1521,7 @@ function handleInteraction(room, objId, element) {
         } else if (flags.ingredientsAdded && !flags.tastedSecond) {
             flags.tastedSecond = true;
             RoomFlags.dining_room.drinksAppeared = true;
-            showDialogue("อาหารรสชาติดีและปลอดภัย... คุณได้ยินเสียง 'คลิก' ดังมาจากประตูห้องทานข้าว");
+            showDialogue("อาหารรสชาติดีและปลอดภัย... คุณรู้สึกว่ารอดจากพิษแล้ว");
         } else if (flags.ingredientsAdded && flags.tastedSecond) {
             showDialogue("อาหารรสชาติกำลังดีแล้ว นำไปทานได้เลย");
         }
@@ -1525,13 +1536,9 @@ function handleInteraction(room, objId, element) {
         }
         break;
       case 'door_dining':
-        if (RoomFlags.dining_room.drinksAppeared) {
-            showDialogue("คุณเปิดประตูห้องทานข้าวเข้าไป");
-            GameState.inventoryCheckpoints.dining_room = JSON.parse(JSON.stringify(GameState.inventory));
-            loadRoom('dining_room');
-        } else {
-            showDialogue("ประตูล็อคอยู่... เหมือนต้องทำให้อาหารมีรสชาติสมบูรณ์ก่อนถึงจะไปต่อได้");
-        }
+        showDialogue("คุณเดินเปิดประตูเข้าไปยังห้องทานข้าว...");
+        GameState.inventoryCheckpoints.dining_room = JSON.parse(JSON.stringify(GameState.inventory));
+        loadRoom('dining_room');
         break;
       case 'door_hallway':
         showDialogue("กลับออกไปโถงทางเดินชั้น 1");
