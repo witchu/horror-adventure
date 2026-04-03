@@ -30,6 +30,9 @@ function init() {
   setInterval(checkBathroomLight, 1000);
   
   renderHUD();
+  
+  // Save initial checkpoint for the very first room
+  saveCheckpoint();
   loadRoom('bedroom');
 }
 
@@ -39,35 +42,21 @@ function restartRoom() {
       els.deathScreen.classList.add('hidden');
   }
   
-  if (GameState.currentRoom === 'bedroom') {
-    RoomFlags.bedroom = { stoodUp: false, alarmOff: false, windowClosed: false, wardrobeClosed: false, gotTowel: false, doorUnlocked: false, windowClosingState: false };
-    inventory.loadCheckpoint('bedroom');
-  } else if (GameState.currentRoom === 'bathroom') {
-    RoomFlags.bathroom = { soapPicked: false, pillTaken: false, dryerUnplugged: false, dryerStored: false, waterFilled: false, bathed: false, dried: false, waterDrained: false, gotKey: false, doorUnlocked: false };
+  // Rely on the single global checkpoint to restore inventory and flat flags
+  loadCheckpoint();
+
+  // Handle specific room dynamic state clearing that aren't stored in checkpoint
+  if (GameState.currentRoom === 'bathroom') {
     bathtubState.volume = 0; bathtubState.hotAmt = 0; bathtubState.coldAmt = 0; bathtubState.active = false; bathtubState.mode = 'close';
     closeFaucetUI();
     closePillUI();
     closeBathtubChoiceUI();
-    inventory.loadCheckpoint('bathroom');
-  } else if (GameState.currentRoom === 'hallway_f2') {
-    RoomFlags.hallway_f2 = { curtainClosed: false, rugSorted: false, lightOn: false, chandelierSwinging: true };
-    inventory.loadCheckpoint('hallway_f2');
-  } else if (GameState.currentRoom === 'hallway_f1') {
-    RoomFlags.hallway_f1 = { backpackSearched1: false, backpackSearched2: false, storageUnlocked: false };
-    inventory.loadCheckpoint('hallway_f1');
   } else if (GameState.currentRoom === 'kitchen') {
-    RoomFlags.kitchen = { sinkOff: false, kettleOff: false, cabinetClosed: false, gasNotesFound: false, gasStep: 0, gasOff: false, tastedFirst: false, ingredientsAdded: false, poisonedFood: false, tastedSecond: false, drawerRightOpened: false, cabinetOpenLevel: 0 };
     closeKitchenUI();
-    inventory.loadCheckpoint('kitchen');
   } else if (GameState.currentRoom === 'dining_room') {
-    const wasAppeared = RoomFlags.dining_room.drinksAppeared;
-    RoomFlags.dining_room = { lightSwitchState: 1, teaDrank: false, coffeeDrank: false, waterDrank: false, newspaperRead: false, keyAcquired: false, wheelsChecked: false, clockMoved: false, tableClimbed: false, drinksAppeared: wasAppeared };
     closeDiningUI();
-    inventory.loadCheckpoint('dining_room');
   } else if (GameState.currentRoom === 'storage') {
-    RoomFlags.storage = { flashLightOn: false, doorWedged: false, doorClosed: false, woodStickAcquired: false, foundNote: false, foundKey: false, foundPowerbank: false, boxOpened: false, gotHammer: false, doorTimerStarted: false, doorSmallOpenedCount: 0, boxSearchView: 0 };
     GameState.smartphoneBattery = 100; // restore battery on die
-    inventory.loadCheckpoint('storage');
   }
   
   GameState.hp = GameState.maxHp; // Restore HP

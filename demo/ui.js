@@ -11,7 +11,7 @@ function renderHUD() {
   }
   
   if (els.flashlightUiContainer && els.batteryText) {
-    if (GameState.currentRoom === 'storage' && !RoomFlags.storage.gotHammer) {
+    if (GameState.currentRoom === 'storage' && !GameState.flags['storage_gotHammer']) {
        els.flashlightUiContainer.classList.remove('hidden');
        els.batteryText.innerText = `${Math.floor(GameState.smartphoneBattery)}%`;
        
@@ -31,7 +31,7 @@ function renderHUD() {
   }
   
   if (GameState.hp <= 0 && els.deathScreen && els.deathScreen.classList.contains('hidden')) {
-    if (typeof die === 'function') die("คุณบาดเจ็บทนพิษบาดแผลไม่ไหว... สิ้นใจตาย");
+    die("คุณบาดเจ็บทนพิษบาดแผลไม่ไหว... สิ้นใจตาย");
   }
 }
 

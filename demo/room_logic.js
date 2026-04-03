@@ -19,11 +19,11 @@ function loadRoom(roomId) {
       els.scene.style.filter = 'brightness(1)';
   }
   
-  if (roomId === 'bathroom' && !RoomFlags.bathroom.pillTaken) {
+  if (roomId === 'bathroom' && !GameState.flags['bathroom_pillTaken']) {
     if(els.scene) els.scene.classList.add('flickering');
   }
 
-  const room = RoomData[roomId];
+  const room = (window.RoomData && window.RoomData[roomId]) ? window.RoomData[roomId] : null;
   if(room && room.objects) {
       room.objects.forEach(obj => {
         const el = document.createElement('div');
@@ -63,9 +63,9 @@ function loadRoom(roomId) {
   // NOTE: Kitchen timers deliberately DO NOT reset here to preserve state across rooms
   if (roomId === 'dining_room') roomTimers.diningClock = 0;
   if (roomId === 'storage') {
-      if(!RoomFlags.storage.doorTimerStarted && !RoomFlags.storage.gotHammer){
+      if(!GameState.flags['storage_doorTimerStarted'] && !GameState.flags['storage_gotHammer']){
           roomTimers.storageDoor = 0;
-          RoomFlags.storage.doorTimerStarted = true;
+          GameState.flags['storage_doorTimerStarted'] = true;
       }
       roomTimers.storagePanic = 0;
   }
@@ -75,33 +75,32 @@ function loadRoom(roomId) {
 }
 
 function updateRoomVisuals(roomId) {
-  const flags = RoomFlags[roomId];
-  if (!flags) return;
+  const flags = GameState.flags;
   
   if (roomId === 'bedroom') {
     const windowEl = document.getElementById('obj-window');
     const wardrobeEl = document.getElementById('obj-wardrobe');
     const fanEl = document.getElementById('obj-fan');
     
-    if (flags.windowClosed && windowEl) {
+    if (flags['bedroom_windowClosed'] && windowEl) {
       windowEl.classList.remove('swinging', 'timing-safe', 'timing-unsafe');
       windowEl.innerText = 'หน้าต่าง (ปิดแล้ว)';
       windowEl.style.borderColor = 'transparent';
     }
-    if (flags.windowClosed && fanEl) {
+    if (flags['bedroom_windowClosed'] && fanEl) {
       fanEl.innerText = 'พัดลมเพดาน (หมุนเอื่อย ปลอดภัยแล้ว)';
     }
-    if (flags.wardrobeClosed && wardrobeEl) {
+    if (flags['bedroom_wardrobeClosed'] && wardrobeEl) {
       wardrobeEl.classList.remove('heavy-shake');
       wardrobeEl.classList.remove('light-shake');
       wardrobeEl.innerText = 'ตู้เสื้อผ้า (ปิดสนิท)';
-    } else if (flags.windowClosed && wardrobeEl) {
+    } else if (flags['bedroom_windowClosed'] && wardrobeEl) {
       wardrobeEl.classList.remove('heavy-shake');
       wardrobeEl.classList.add('light-shake');
     }
     
     const doorBathEl = document.getElementById('obj-door_bathroom');
-    if (flags.gotTowel && doorBathEl) {
+    if (flags['bedroom_gotTowel'] && doorBathEl) {
       doorBathEl.innerText = 'ประตูห้องน้ำ (เปิดแง้มอยู่)';
     }
     
@@ -110,27 +109,27 @@ function updateRoomVisuals(roomId) {
       doorHallEl.innerText = 'ประตูออกโถง (ปลดล็อคแล้ว)';
     }
   } else if (roomId === 'bathroom') {
-    if (flags.pillTaken && els.scene) {
+    if (flags['bathroom_pillTaken'] && els.scene) {
       els.scene.classList.remove('flickering');
     }
     const dryerEl = document.getElementById('obj-dryer');
-    if (flags.dryerUnplugged && dryerEl && !flags.dryerStored) {
+    if (flags['bathroom_dryerUnplugged'] && dryerEl && !flags['bathroom_dryerStored']) {
       dryerEl.innerText = 'ไดร์เป่าผม (ถอดปลั๊กแล้ว)';
-    } else if (flags.dryerStored && dryerEl) {
+    } else if (flags['bathroom_dryerStored'] && dryerEl) {
       dryerEl.style.display = 'none'; // Stored
     }
     const spillEl = document.getElementById('deco-soap-spill');
-    if (flags.soapPicked && spillEl) {
+    if (flags['bathroom_soapPicked'] && spillEl) {
        spillEl.innerText = 'พื้นห้องน้ำ (เช็ดสบู่แล้ว)';
        spillEl.className = 'non-interactive-object';
     }
     
     const bathtubEl = document.getElementById('obj-bathtub');
-    if (flags.waterDrained && bathtubEl) {
+    if (flags['bathroom_waterDrained'] && bathtubEl) {
         bathtubEl.innerText = 'อ่างอาบน้ำ (ระบายน้ำแล้ว มีกุญแจ)';
-    } else if (flags.bathed && bathtubEl) {
+    } else if (flags['bathroom_bathed'] && bathtubEl) {
         bathtubEl.innerText = 'อ่างอาบน้ำ (ลงแช่แล้ว)';
-    } else if (flags.waterFilled && bathtubEl) {
+    } else if (flags['bathroom_waterFilled'] && bathtubEl) {
         bathtubEl.innerText = 'อ่างอาบน้ำ (น้ำเต็มอ่าง)';
     }
   } else if (roomId === 'hallway_f2') {
@@ -138,37 +137,37 @@ function updateRoomVisuals(roomId) {
     const ch = document.getElementById('deco-chandelier');
     const rug = document.getElementById('obj-rug');
     const switchEl = document.getElementById('obj-light_switch');
-    if (flags.curtainClosed && curtain && ch) {
+    if (flags['hallway_f2_curtainClosed'] && curtain && ch) {
         curtain.innerText = 'ผ้าม่าน (ปิดสนิท)';
         ch.classList.remove('swinging');
         ch.classList.remove('chandelier-swing');
-        flags.chandelierSwinging = false;
+        flags['hallway_f2_chandelierSwinging'] = false;
     }
-    if (flags.rugSorted && rug) {
+    if (flags['hallway_f2_rugSorted'] && rug) {
         rug.innerText = 'พรมเช็ดเท้า (จัดระเบียบแล้ว)';
     }
-    if (flags.lightOn && switchEl) {
+    if (flags['hallway_f2_lightOn'] && switchEl) {
         switchEl.innerText = 'สวิตช์ไฟ (เปิด)';
         switchEl.style.backgroundColor = 'rgba(255,255,200,0.2)';
     }
   } else if (roomId === 'hallway_f1') {
     // Add visual states here if needed for f1
   } else if (roomId === 'kitchen') {
-    if (flags.gasOff) {
+    if (flags['kitchen_gasOff']) {
         const smoke = document.getElementById('deco-smoke');
         if(smoke) smoke.classList.add('hidden');
         const stove = document.getElementById('obj-stove');
         if(stove) stove.innerText = 'เตาแก๊ส (ปิดแล้ว)';
     }
-    if (flags.cabinetClosed) {
+    if (flags['kitchen_cabinetClosed']) {
         const cab = document.getElementById('obj-cabinet');
         if(cab) cab.innerText = 'ตู้เก็บจาน (ปิดสนิท)';
     }
-    if (flags.kettleOff) {
+    if (flags['kitchen_kettleOff']) {
         const kettle = document.getElementById('obj-kettle');
         if(kettle) { kettle.innerText = 'กาต้มน้ำ (ปิดแล้ว)'; kettle.classList.remove('light-shake'); }
     }
-    if (flags.sinkOff) {
+    if (flags['kitchen_sinkOff']) {
         const sink = document.getElementById('obj-sink');
         if(sink) sink.innerText = 'ก๊อกน้ำอ่างล้างจาน (ปิดแล้ว)';
     }
@@ -177,32 +176,32 @@ function updateRoomVisuals(roomId) {
     const clock = document.getElementById('obj-clock');
     const drinksObj = document.getElementById('obj-drinks');
 
-    if (flags.lightSwitchState === 1 && els.scene) {
+    if (flags['dining_room_lightSwitchState'] === 1 && els.scene) {
         els.scene.classList.add('flicker-dining');
         if(lamp) { lamp.className = 'interactive-object flickering'; lamp.innerHTML = 'โคมไฟเพดาน'; }
-    } else if (flags.lightSwitchState === 0 && els.scene) {
+    } else if (flags['dining_room_lightSwitchState'] === 0 && els.scene) {
         els.scene.classList.remove('flicker-dining');
         els.scene.style.filter = 'brightness(0.3)';
         if(lamp) {
             lamp.className = 'interactive-object';
-            lamp.innerHTML = !flags.keyAcquired ? 'โคมไฟเพดาน <span style="text-shadow: 0 0 5px yellow;">✨</span>' : 'โคมไฟเพดาน';
+            lamp.innerHTML = !flags['dining_room_keyAcquired'] ? 'โคมไฟเพดาน <span style="text-shadow: 0 0 5px yellow;">✨</span>' : 'โคมไฟเพดาน';
         }
-    } else if (flags.lightSwitchState === 2 && els.scene) {
+    } else if (flags['dining_room_lightSwitchState'] === 2 && els.scene) {
         els.scene.classList.remove('flicker-dining');
         els.scene.style.filter = 'brightness(1)';
         if(lamp) { lamp.className = 'interactive-object'; lamp.innerHTML = 'โคมไฟเพดาน'; }
     }
     
-    if (flags.clockMoved && clock) {
+    if (flags['dining_room_clockMoved'] && clock) {
         clock.innerText = 'นาฬิกาลูกตุ้ม (เลื่อนพ้นทางแล้ว)';
         clock.style.left = '70%'; // moved aside
     }
 
-    if (flags.drinksAppeared && drinksObj) {
+    if (flags['dining_room_drinksAppeared'] && drinksObj) {
         drinksObj.classList.remove('hidden');
     }
   } else if (roomId === 'storage') {
-    if (flags.flashLightOn && els.flashlightMask && els.scene && els.interactiveLayer) {
+    if (flags['storage_flashLightOn'] && els.flashlightMask && els.scene && els.interactiveLayer) {
         els.flashlightMask.classList.remove('hidden');
         els.scene.style.backgroundImage = '';
         els.scene.style.backgroundColor = 'transparent';
@@ -216,11 +215,11 @@ function updateRoomVisuals(roomId) {
     
     const dMain = document.getElementById('obj-door_main');
     if (dMain) {
-        if (flags.doorWedged) {
+        if (flags['storage_doorWedged']) {
             dMain.classList.remove('door-closing-animation', 'closing');
             dMain.classList.add('wedged');
             dMain.innerText = 'ประตูทางเข้า (ค้ำด้วยไม้แล้ว)';
-        } else if (!flags.doorClosed) {
+        } else if (!flags['storage_doorClosed']) {
             dMain.classList.add('door-closing-animation', 'closing');
             dMain.classList.remove('wedged');
         }
@@ -229,7 +228,7 @@ function updateRoomVisuals(roomId) {
 }
 
 function handleInteraction(room, objId, element) {
-  const roomData = RoomData[room];
+  const roomData = window.RoomData && window.RoomData[room];
   if (!roomData) return;
   
   let obj = roomData.objects.find(o => o.id === objId);
@@ -243,11 +242,11 @@ function handleInteraction(room, objId, element) {
 }
 
 function toggleWindowSwing() {
-  if (GameState.currentRoom === 'bedroom' && !RoomFlags.bedroom.windowClosed) {
-    RoomFlags.bedroom.windowClosingState = !RoomFlags.bedroom.windowClosingState;
+  if (GameState.currentRoom === 'bedroom' && !GameState.flags['bedroom_windowClosed']) {
+    GameState.flags['bedroom_windowClosingState'] = !GameState.flags['bedroom_windowClosingState'];
     const w = document.getElementById('obj-window');
     if (w) {
-      if (RoomFlags.bedroom.windowClosingState) {
+      if (GameState.flags['bedroom_windowClosingState']) {
         w.classList.remove('timing-unsafe');
         w.classList.add('timing-safe');
         w.innerText = 'หน้าต่าง (คลิกปิดตอนนี้!)';
@@ -262,29 +261,29 @@ function toggleWindowSwing() {
 
 let timeInBathroom = 0;
 function checkBathroomLight() {
-  if (GameState.currentRoom === 'bathroom' && !RoomFlags.bathroom.pillTaken) {
+  if (GameState.currentRoom === 'bathroom' && !GameState.flags['bathroom_pillTaken']) {
     timeInBathroom++;
     // Time limit before panic starts damaging
     if (timeInBathroom > 15 && GameState.hpDrainRate === 0) {
       showDialogue("ไฟกะพริบถี่ทำให้คุณเริ่มหลอน! (บาดเจ็บต่อเนื่อง)");
       GameState.hpDrainRate = 0.1; // 1 unit per 10 seconds
     }
-  } else if (GameState.currentRoom === 'bathroom' && RoomFlags.bathroom.pillTaken) {
+  } else if (GameState.currentRoom === 'bathroom' && GameState.flags['bathroom_pillTaken']) {
       GameState.hpDrainRate = 0; // stop panic
   }
 }
 
 function toggleFlashlight() {
-    const flags = RoomFlags.storage;
+    const flags = GameState.flags;
     if (GameState.smartphoneBattery <= 0) {
         showDialogue("แบตเตอรี่โทรศัพท์หมดเกลี้ยง เปิดแฟลชไม่ได้แล้ว!");
         return;
     }
     
-    flags.flashLightOn = !flags.flashLightOn;
+    flags['storage_flashLightOn'] = !flags['storage_flashLightOn'];
     updateRoomVisuals('storage');
     
-    if (flags.flashLightOn) {
+    if (flags['storage_flashLightOn']) {
         showDialogue("คุณเปิดไฟแฟลชจากสมาร์ทโฟน");
     } else {
         showDialogue("คุณปิดไฟแฟลช");

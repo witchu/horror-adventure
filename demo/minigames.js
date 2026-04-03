@@ -27,7 +27,7 @@ function closePillUI() {
 function selectPill(id) {
   closePillUI();
   if (id === 1) {
-    RoomFlags.bathroom.pillTaken = true;
+    GameState.flags['bathroom_pillTaken'] = true;
     showDialogue("คุณทานยาสีชมพูเข้ม... ทันใดนั้นไฟห้องน้ำที่กะพริบก็กลับมาสว่างเป็นปกติ จิตใจคุณสงบลง");
     updateRoomVisuals('bathroom');
   } else if (id === 2 || id === 5) {
@@ -47,7 +47,7 @@ function closeFaucetUI() {
   els.faucetUiContainer.classList.add('hidden');
   if (bathtubState.volume >= 100 && bathtubState.mode === 'close') {
     bathtubState.active = false;
-    RoomFlags.bathroom.waterFilled = true;
+    GameState.flags['bathroom_waterFilled'] = true;
     showDialogue("น้ำเต็มอ่างแล้ว คุณเตรียมตัวลงไปแช่");
     updateRoomVisuals('bathroom');
   }
@@ -107,7 +107,7 @@ function closeBathtubChoiceUI() {
 function bathtubChoice(choice) {
   closeBathtubChoiceUI();
   
-  const flags = RoomFlags.bathroom;
+  const flags = GameState.flags;
   const tot = bathtubState.hotAmt + bathtubState.coldAmt;
   const hotPct = Math.round((bathtubState.hotAmt / tot) * 100);
   const coldPct = Math.round((bathtubState.coldAmt / tot) * 100);
@@ -122,14 +122,14 @@ function bathtubChoice(choice) {
   }
   
   if (choice === 'bathe') {
-      flags.bathed = true;
+      flags['bathroom_bathed'] = true;
       showDialogue("คุณลงแช่น้ำจนเสร็จ แล้วขึ้นจากอ่าง (ตอนนี้ตัวคุณเปียกชุ่ม)");
       updateRoomVisuals('bathroom');
   } else if (choice === 'drain') {
-      flags.waterDrained = true;
-      flags.gotKey = true;
+      flags['bathroom_waterDrained'] = true;
+      flags['bathroom_gotKey'] = true;
       addItem('key', 'กุญแจห้องนอน');
-      flags.doorUnlocked = true; // Unlocks hallway door
+      flags['bathroom_doorUnlocked'] = true; // Unlocks hallway door
       showDialogue("คุณดึงจุกระบายน้ำออก น้ำแรงดันสูงไหลทิ้ง ช่วยผลักกุญแจลอยขึ้นมาให้คุณหยิบ!");
       updateRoomVisuals('bathroom');
   }
@@ -163,17 +163,17 @@ function closeKitchenUI() {
 
 function selectIngredient(id) {
   closeKitchenUI();
-  const kf = RoomFlags.kitchen;
+  const flags = GameState.flags;
   
-  if (kf.ingredientsAdded) {
+  if (flags['kitchen_ingredientsAdded']) {
       showDialogue("ปรุงไปแล้ว ไม่ควรใส่เพิ่มมั่วซั่ว");
       return;
   }
   
-  kf.ingredientsAdded = true;
+  flags['kitchen_ingredientsAdded'] = true;
   if (id === 3) {
       // Poison
-      kf.poisonedFood = true;
+      flags['kitchen_poisonedFood'] = true;
   }
   
   showDialogue("คุณใส่เครื่องปรุงลงไปในอาหาร... ลองชิมดูอีกครั้งเพื่อความแน่ใจ");
@@ -222,7 +222,7 @@ function checkStoveSequence() {
     setTimeout(() => {
         closeStoveUI();
         if (seqStr === correctSeq) {
-            RoomFlags.kitchen.gasOff = true;
+            GameState.flags['kitchen_gasOff'] = true;
             showDialogue("คุณหมุนวาล์วเตาแก๊สได้ถูกต้อง! เตาแก๊สถูกปิด อาหารบนเตาหยุดเดือด ควันและกลิ่นไหม้ค่อยๆ จางหายไป");
             updateRoomVisuals('kitchen');
         } else {
@@ -257,24 +257,24 @@ function closeDiningUI() {
 
 function selectDrink(id) {
   closeDiningUI();
-  const df = RoomFlags.dining_room;
+  const flags = GameState.flags;
   
-  if (df.lightSwitchState !== 2) {
+  if (flags['dining_room_lightSwitchState'] !== 2) {
       takeDamage("มองไม่ถนัดในความมืด/แสงกะพริบ ทำให้ทำน้ำร้อนหกรดมือ ถูกลวกจนบาดเจ็บ!", 0.25);
       if (GameState.hp <= 0) return;
   }
   
   if (id === 'tea') {
-      if (!df.teaDrank) {
-          df.teaDrank = true;
+      if (!flags['dining_room_teaDrank']) {
+          flags['dining_room_teaDrank'] = true;
           GameState.hpDrainRate = 0;
           showDialogue("คุณดื่มชามิ้นต์อุ่นๆ รสชาติเย็นซ่าและกลิ่นหอมสมุนไพรทำให้รู้สึกผ่อนคลายขึ้น");
       } else {
           showDialogue("ชามิ้นต์ถูกดื่มไปหมดแล้ว");
       }
   } else if (id === 'coffee') {
-      if (!df.coffeeDrank) {
-          df.coffeeDrank = true;
+      if (!flags['dining_room_coffeeDrank']) {
+          flags['dining_room_coffeeDrank'] = true;
           showDialogue("กาแฟดำเข้มข้นทำให้ใจคุณเต้นแรงขึ้น อาการแพนิคกำเริบ... คุณได้ยินเสียงนาฬิกาดังเคาะบอกเวลาอย่างรวดเร็ว (ต้องรีบดื่มน้ำ!)");
           
           roomTimers.diningCoffeeDeath = setTimeout(() => {
@@ -284,9 +284,9 @@ function selectDrink(id) {
           showDialogue("กาแฟหมดแล้ว");
       }
   } else if (id === 'water') {
-      if (!df.waterDrank) {
-          df.waterDrank = true;
-          if (df.coffeeDrank) {
+      if (!flags['dining_room_waterDrank']) {
+          flags['dining_room_waterDrank'] = true;
+          if (flags['dining_room_coffeeDrank']) {
               clearTimeout(roomTimers.diningCoffeeDeath);
               showDialogue("น้ำเย็นช่วยเจือจางฤทธิ์คาเฟอีน... อาการใจสั่นลดลง เสียงนาฬิกาดังเบาลง รอดตายอย่างหวุดหวิด");
           } else {
