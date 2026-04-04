@@ -7,10 +7,10 @@ const GameState = {
   logs: [], // Array of log text strings
   currentRoom: 'bedroom',
   smartphoneBattery: 52, // Flashlight battery for storage starts at 52%
-  
+
   // Flattened inventory
   items: [],
-  
+
   // Flattened RoomFlags
   flags: {
     bedroom_stoodUp: false,
@@ -75,9 +75,30 @@ const GameState = {
     storage_gotHammer: false,
     storage_doorTimerStarted: false,
     storage_doorSmallOpenedCount: 0,
-    storage_boxSearchView: 0
+    storage_boxSearchView: 0,
+
+    bathroom_timeInBathroom: 0,
+    bedroom_timer: 0,
+    bathroom_soapTimer: 0,
+    kitchen_waterTimer: 0,
+    kitchen_kettleTimer: 0,
+    kitchen_cabinetTimer: 0,
+    kitchen_gasTimer: 0,
+    dining_room_clockTimer: 0,
+    storage_doorTimer: 0,
+    storage_panicTimer: 0,
+    hallway_f2_chandelierTimer: 0,
+
+    bathroom_bathtubActive: false,
+    bathroom_bathtubVolume: 0,
+    bathroom_bathtubHotAmt: 0,
+    bathroom_bathtubColdAmt: 0,
+    bathroom_bathtubMode: 'close',
+
+    kitchen_stoveInputSeq: [],
+    bedroom_windowTick: 0
   },
-  
+
   // Single Checkpoint
   checkpoint: null
 };
@@ -146,26 +167,4 @@ function loadCheckpoint() {
   }
 }
 
-// --- Additional Trackers ---
-
-let roomTimers = {
-  bedroom: 0,
-  bathroomSoap: 0,
-  kitchenWater: 0,
-  kitchenKettle: 0,
-  kitchenCabinet: 0,
-  kitchenGas: 0,
-  diningClock: 0,
-  storageDoor: 0,
-  storagePanic: 0,
-  hallwayChandelier: 0
-};
-
-// Bathtub state
-const bathtubState = {
-  active: false,
-  volume: 0,
-  hotAmt: 0,
-  coldAmt: 0,
-  mode: 'close' // hot, cold, close
-};
+// --- Additional Trackers (Merged into GameState.flags) ---

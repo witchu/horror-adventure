@@ -33,90 +33,7 @@
       </div>
     </div>
 
-    <!-- UI Overlays -->
-    <div id="pill-ui-container" class="ui-overlay hidden">
-      <div class="ui-panel">
-        <h3>ตู้ยา: เลือกกระปุกยา</h3>
-        <div id="pill-options" class="pill-grid">
-           <!-- Buttons will be injected via JS -->
-        </div>
-        <button class="close-ui-btn" onclick="closePillUI()">ปิดตู้ยา</button>
-      </div>
-    </div>
-
-    <div id="faucet-ui-container" class="ui-overlay hidden">
-      <div class="ui-panel">
-        <h3>ก๊อกน้ำอ่างอาบน้ำ</h3>
-        
-        <div class="water-gauge-container">
-           <div class="water-gauge-bg">
-              <div id="water-gauge-fill"></div>
-           </div>
-           <div class="water-texts">
-             <span id="water-volume-text">ปริมาตร: 0%</span>
-             <span id="water-temp-text">ร้อน: 0% | เย็น: 0%</span>
-           </div>
-        </div>
-
-        <div class="faucet-controls">
-           <button class="faucet-btn cold" onclick="setFaucetMode('cold')">ก๊อกน้ำเย็น</button>
-           <button class="faucet-btn close" onclick="setFaucetMode('close')">ปิดน้ำ</button>
-           <button class="faucet-btn hot" onclick="setFaucetMode('hot')">ก๊อกน้ำร้อน</button>
-        </div>
-        
-      </div>
-    </div>
-
-    <div id="bathtub-choice-ui" class="ui-overlay hidden">
-      <div class="ui-panel">
-        <h3>อ่างอาบน้ำ (น้ำเต็ม)</h3>
-        <p style="margin-bottom: 20px; font-size: 14px;">คุณต้องการทำสิ่งใดต่อไป?</p>
-        <div class="pill-grid">
-           <button class="pill-btn" onclick="bathtubChoice('bathe')">ลงแช่น้ำ</button>
-           <button class="pill-btn" onclick="bathtubChoice('drain')">ดึงจุกระบายน้ำ</button>
-        </div>
-        <button class="close-ui-btn" onclick="closeBathtubChoiceUI()">ยกเลิก</button>
-      </div>
-    </div>
-
-    <!-- Kitchen Ingredient UI -->
-    <div id="kitchen-ui-container" class="ui-overlay hidden">
-      <div class="ui-panel">
-        <h3>เติมเครื่องปรุง</h3>
-        <div id="ingredient-options" class="pill-grid">
-           <!-- Buttons will be injected via JS -->
-        </div>
-        <button class="close-ui-btn" onclick="closeKitchenUI()">ปิด</button>
-      </div>
-    </div>
-
-    <!-- Stove Gas UI -->
-    <div id="stove-ui-container" class="ui-overlay hidden">
-      <div class="ui-panel">
-        <h3>วาล์วเตาแก๊ส</h3>
-        <p style="margin-bottom: 10px; font-size: 14px; color: #ffcccc;">ต้องหมุนให้ถูกลำดับ 4 ขั้นตอนเพื่อปิดแก๊ส!</p>
-        <div id="stove-input-display" style="font-size: 24px; letter-spacing: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; min-height: 30px;">
-          _ _ _ _
-        </div>
-        <div class="pill-grid">
-           <button class="pill-btn" onclick="inputStove('left')">หมุนซ้าย (L)</button>
-           <button class="pill-btn" onclick="inputStove('right')">หมุนขวา (R)</button>
-        </div>
-        <button class="close-ui-btn" onclick="closeStoveUI()" style="margin-top: 15px;">ยกเลิก</button>
-      </div>
-    </div>
-
-    <!-- Dining Room Drinks UI -->
-    <div id="dining-ui-container" class="ui-overlay hidden">
-      <div class="ui-panel">
-        <h3>ชุดเครื่องดื่มบนโต๊ะ</h3>
-        <p style="margin-bottom: 20px; font-size: 14px;">เลือกเครื่องดื่มเพื่อรับประทาน หรือเทใส่แก้ว</p>
-        <div id="drink-options" class="pill-grid">
-           <!-- Buttons will be injected via JS -->
-        </div>
-        <button class="close-ui-btn" onclick="closeDiningUI()">ออกจากโต๊ะ</button>
-      </div>
-    </div>
+    <!-- UI Overlays injected via JS -->
 
     <!-- Storage Room Anomaly UI (Darkness overlay via style) -->
 
@@ -130,18 +47,6 @@
 
     <!-- Interactive Scene System -->
     <div id="scene" class="room-bedroom">
-      <!-- Flashlight spot mask -->
-      <div id="flashlight-mask" class="hidden"></div>
-      
-      <!-- Flashlight UI element -->
-      <div id="flashlight-ui-container" class="hidden">
-          <button id="flashlight-toggle-btn" class="pill-btn">เปิดแฟลชสมาร์ทโฟน</button>
-          <button id="flashlight-charge-btn" class="pill-btn" disabled>ชาร์จแบตฯ</button>
-          <div id="battery-bar-container">
-              <span>แบตเตอรี่: </span>
-              <span id="battery-text">52%</span>
-          </div>
-      </div>
       <!-- Interactive objects injected here -->
       <div id="interactive-layer"></div>
       
@@ -187,10 +92,8 @@
   </div>
 
   <script src="state.js"></script>
-  <script src="ui_elements.js"></script>
   <script src="ui.js"></script>
-  <script src="minigames.js"></script>
-  <script src="room_logic.js"></script>
+  <script src="room.js"></script>
   <script src="timers.js"></script>
   <script src="rooms/bedroom.js"></script>
   <script src="rooms/bathroom.js"></script>

@@ -55,5 +55,8 @@ window.RoomData.hallway_f1 = {
       }
     }
   ],
-  decorations: []
+  decorations: [],
+  setupUI: function() {},
+  updateVisuals: function() {},
+  onSecondTimer: function() {}
 };

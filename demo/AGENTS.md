@@ -13,12 +13,10 @@
 | `index.html` | Layout for HUD, Scene, UI overlays, Inventory, Log panel, and script inclusions. |
 | `style.css` | Horror theme in muted green tones, animation classes, responsive layout |
 | `state.js` | Global state (GameState, flattened flags, items, checkpoint), Player logic, Inventory logic, timers |
-| `ui_elements.js`| DOM Element map (`els`) |
-| `ui.js` | HUD rendering, logs, and dialogue functions |
-| `minigames.js` | Custom UI interactions (Pills, Faucet, Kitchen, Stove, Drinks) |
-| `room_logic.js` | Room manager (`loadRoom`, `updateRoomVisuals`, `handleInteraction`, `toggleFlashlight`) |
-| `timers.js` | Game loops (HP drain, hazard timers, bathtub fill interval) |
-| `rooms/*.js` | Individual room declarations attached to `window.RoomData` containing `objects`, `decorations`, and interaction logic. |
+| `ui.js` | HUD rendering, logs, dialogue functions, and DOM Element map (`els`) |
+| `room.js` | Room manager (`loadRoom`, `updateRoomVisuals`, `handleInteraction`) |
+| `timers.js` | Game loop dispatchers (HP drain loop, hazard dispatcher) |
+| `rooms/*.js` | Individual rooms containing `objects`, `decorations`, `setupUI()`, `updateVisuals()`, and `onSecondTimer()` |
 | `main.js` | `init()`, `restartRoom()`, and window listeners |
 | `assets/` | Room background images (`bedroom_bg.png`, `bathroom_bg.png`, ...) |
 
@@ -89,8 +87,8 @@ loadRoom(roomId)
   ├─ clear & rebuild interactive-layer from window.RoomData[roomId]
   │   ├─ .objects → div.interactive-object (clickable → handleInteraction)
   │   └─ .decorations → div.non-interactive-object (non-clickable, status display)
-  ├─ reset room-specific timers
-  ├─ updateRoomVisuals(roomId) → update labels/classes based on flags
+  ├─ reset room-specific timers via GameState.flags
+  ├─ updateRoomVisuals(roomId) → delegates to room's local updateVisuals()
   └─ renderHUD()
 ```
 
@@ -102,7 +100,7 @@ click object → handleInteraction(roomId, objId, element)
   ├─ check if obj.onInteract exists → execute obj.onInteract(element)
   │    ├─ check GameState.flags / GameState.items → showDialogue / addItem / takeDamage / die
   │    ├─ modify GameState.flags['room_var'] = true
-  │    └─ updateRoomVisuals(roomId)
+  │    └─ window.RoomData[roomId].updateVisuals()
   └─ if changing rooms:
        ├─ saveCheckpoint()  // Replaces the old dictionary method
        └─ loadRoom(nextRoom)
@@ -125,10 +123,20 @@ window.RoomData.laundry = {
           const flags = GameState.flags;
           // Action logic here...
           flags['laundry_checkedMachine'] = true;
+          window.RoomData.laundry.updateVisuals();
       }
     }
   ],
-  decorations: []
+  decorations: [],
+  setupUI: function() {
+      // Dynamically inject custom room UI panels
+  },
+  updateVisuals: function() {
+      // Safely update specific DOM classes/text based on GameState.flags
+  },
+  onSecondTimer: function() {
+      // Custom per-second hazard timers
+  }
 };
 ```
 
@@ -148,25 +156,28 @@ Add to `GameState.flags`:
 
 ### Step 4: Add roomTimers (if the room has hazards)
 
-1. Add key to the `roomTimers` object in `state.js`.
-2. Add logic inside the existing 1-second `setInterval` block in `timers.js`:
+Store timer properties gracefully inside `GameState.flags` and implement the 1-second interval checks directly inside `onSecondTimer`:
 ```js
-if (GameState.currentRoom === 'laundry' && !flags['laundry_someFlag']) {
-  roomTimers.laundryFlood++;
-  if (roomTimers.laundryFlood > 30) die("...");
-}
+  onSecondTimer: function() {
+    if (GameState.currentRoom !== 'laundry') return;
+    const flags = GameState.flags;
+    if (!flags['laundry_someFlag']) {
+      flags.roomTimers_laundryFlood = (flags.roomTimers_laundryFlood || 0) + 1;
+      if (flags.roomTimers_laundryFlood > 30) die("...");
+    }
+  }
 ```
 
-### Step 5: Add updateRoomVisuals
+### Step 5: Update Visuals
 
+Inside your `updateVisuals` method, reference the object elements and flags:
 ```js
-// Inside function updateRoomVisuals(roomId) in room_logic.js
-} else if (roomId === 'laundry') {
-  const flags = GameState.flags; // flat flags
-  if (flags['laundry_checkedMachine']) {
-      // update text, CSS classes
+  updateVisuals: function() {
+      const flags = GameState.flags;
+      if (flags['laundry_checkedMachine']) {
+          // update text, CSS classes
+      }
   }
-}
 ```
 
 **(No need to update restartRoom!)** Because we now use a global checkpoint, as long as you use the `saveCheckpoint()` → `loadRoom()` pattern, state is restored automatically on death.
@@ -250,9 +261,9 @@ renderHUD()               – update HP bar + battery display
 ## 7. Development Rules
 
 1. **Read the GDD before implementing** — files at `../design/rooms/XX_name.md` contain full details on interactables, win flow, death/injury conditions.
-2. **Global Scripts usage** — core tracking logic is divided across specific JS files (`state.js`, `room_logic.js`, etc.), while room data interactions go in `rooms/*.js`.
+2. **Modular Scripts usage** — core tracking logic is divided across specific JS files (`state.js`, `room.js`, `main.js`), while room data goes in modular `rooms/*.js`. Ensure each room handles its own minigames, `setupUI`, `updateVisuals`, and `onSecondTimer`. Use IIFEs if you need local functions/variables to encapsulate minigame logic properly without leaking globals.
 3. **Checkpoints** — must be saved (`saveCheckpoint()`) before every `loadRoom()` call.
-4. **Hazard timers** — add to the existing 1-second `setInterval` block in `timers.js`; do not create new intervals.
+4. **Hazard timers** — incorporate them locally into `onSecondTimer()` on your specific room interface.
 5. **CSS classes** — use existing classes (`danger-low`, `danger-high`, etc.); avoid creating new ones unless necessary.
 6. **Background assets** — name as `{roomId}_bg.png` and store in `assets/`.
 7. **Test the death loop** — every room must restart cleanly using `loadCheckpoint()`.

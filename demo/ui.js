@@ -1,5 +1,26 @@
-// --- Core UI Functions ---
+// --- Core UIs ---
 
+const els = {
+  hpBar: document.getElementById('hp-bar'),
+  scene: document.getElementById('scene'),
+  interactiveLayer: document.getElementById('interactive-layer'),
+  dialogueBox: document.getElementById('dialogue-box'),
+  dialogueText: document.getElementById('dialogue-text'),
+  dialogueBtn: document.getElementById('dialogue-close'),
+  deathScreen: document.getElementById('death-screen'),
+  deathReason: document.getElementById('death-reason'),
+  restartBtn: document.getElementById('restart-btn'),
+  winScreen: document.getElementById('win-screen'),
+  logList: document.getElementById('log-list'),
+  inventorySlots: document.querySelectorAll('.slot'),
+  hintBtn: document.getElementById('hint-btn'),
+  actionLogToggle: document.getElementById('toggle-action-log'),
+  actionLogContainer: document.getElementById('action-log-container'),
+  actionLogList: document.getElementById('action-log-list'),
+  actionLogContent: document.getElementById('action-log-content')
+};
+
+// --- Core UI Functions ---
 function renderHUD() {
   const hpFill = document.getElementById('hp-bar-fill');
   const hpText = document.getElementById('hp-text');
@@ -8,26 +29,6 @@ function renderHUD() {
     const pct = Math.max(0, (GameState.hp / GameState.maxHp) * 100);
     hpFill.style.width = `${pct}%`;
     hpText.innerText = `${Math.max(0, GameState.hp).toFixed(2)} / ${GameState.maxHp}`;
-  }
-  
-  if (els.flashlightUiContainer && els.batteryText) {
-    if (GameState.currentRoom === 'storage' && !GameState.flags['storage_gotHammer']) {
-       els.flashlightUiContainer.classList.remove('hidden');
-       els.batteryText.innerText = `${Math.floor(GameState.smartphoneBattery)}%`;
-       
-       if (GameState.smartphoneBattery < 20) {
-           els.batteryText.classList.add('low');
-       } else {
-           els.batteryText.classList.remove('low');
-       }
-       if (hasItem('powerbank') && els.flashlightChargeBtn) {
-           els.flashlightChargeBtn.disabled = false;
-       } else if (els.flashlightChargeBtn) {
-           els.flashlightChargeBtn.disabled = true;
-       }
-    } else {
-       els.flashlightUiContainer.classList.add('hidden');
-    }
   }
   
   if (GameState.hp <= 0 && els.deathScreen && els.deathScreen.classList.contains('hidden')) {

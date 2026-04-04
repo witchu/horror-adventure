@@ -41,7 +41,7 @@ window.RoomData.bedroom = {
           if (flags['bedroom_windowClosingState']) {
             flags['bedroom_windowClosed'] = true;
             showDialogue("คุณดึงหน้าต่างปิดได้จังหวะพอดี พัดลมหมุนเบาลงแล้วและตู้เสื้อผ้าเริ่มนิ่งขึ้น");
-            updateRoomVisuals('bedroom');
+            updateRoomVisuals();
           } else {
             die("ดึงผิดจังหวะ! บานหน้าต่างอ้าออก พัดคุณตกลงไปข้างล่าง...");
           }
@@ -70,7 +70,7 @@ window.RoomData.bedroom = {
           addItem('towel', 'ผ้าเช็ดตัว');
           flags['bedroom_gotTowel'] = true;
           flags['bedroom_doorUnlocked'] = true;
-          updateRoomVisuals('bedroom');
+          updateRoomVisuals();
         } else {
           showDialogue("ตู้เสื้อผ้าปิดสนิทดีแล้ว");
         }
@@ -101,7 +101,7 @@ window.RoomData.bedroom = {
            showDialogue("ประตูล็อคอยู่... ต้องหาทางเตรียมตัวให้พร้อมก่อน (ได้ผ้าเช็ดตัวแล้วประตูจะแง้มเอง)");
         } else {
            showDialogue("คุณลงมือผลักประตูเดินเข้าสู่ห้องน้ำ");
-           timeInBathroom = 0;
+           GameState.flags.timeInBathroom = 0;
            saveCheckpoint();
            loadRoom('bathroom');
         }
@@ -122,5 +122,83 @@ window.RoomData.bedroom = {
       }
     }
   ],
-  decorations: []
+  decorations: [],
+  setupUI: function() {
+    // No dynamically injected UI required
+  },
+  updateVisuals: function() {
+    const flags = GameState.flags;
+    const windowEl = document.getElementById('obj-window');
+    const wardrobeEl = document.getElementById('obj-wardrobe');
+    const fanEl = document.getElementById('obj-fan');
+    
+    if (flags['bedroom_windowClosed'] && windowEl) {
+      windowEl.classList.remove('swinging', 'timing-safe', 'timing-unsafe');
+      windowEl.innerText = 'หน้าต่าง (ปิดแล้ว)';
+      windowEl.style.borderColor = 'transparent';
+    }
+    if (flags['bedroom_windowClosed'] && fanEl) {
+      fanEl.innerText = 'พัดลมเพดาน (หมุนเอื่อย ปลอดภัยแล้ว)';
+    }
+    if (flags['bedroom_wardrobeClosed'] && wardrobeEl) {
+      wardrobeEl.classList.remove('heavy-shake', 'light-shake');
+      wardrobeEl.innerText = 'ตู้เสื้อผ้า (ปิดสนิท)';
+    } else if (flags['bedroom_windowClosed'] && wardrobeEl) {
+      wardrobeEl.classList.remove('heavy-shake');
+      wardrobeEl.classList.add('light-shake');
+    }
+    
+    const doorBathEl = document.getElementById('obj-door_bathroom');
+    if (flags['bedroom_gotTowel'] && doorBathEl) {
+      doorBathEl.innerText = 'ประตูห้องน้ำ (เปิดแง้มอยู่)';
+    }
+    
+    const doorHallEl = document.getElementById('obj-door_hallway');
+    if (hasItem('key') && doorHallEl) {
+      doorHallEl.innerText = 'ประตูออกโถง (ปลดล็อคแล้ว)';
+    }
+  },
+  onSecondTimer: function() {
+    const flags = GameState.flags;
+
+    // Window swinging toggle (every 2 ticks = 2000ms)
+    flags['bedroom_windowTick'] = (flags['bedroom_windowTick'] || 0) + 1;
+    if (flags['bedroom_windowTick'] % 2 === 0) {
+      this.toggleWindowSwing();
+    }
+
+    if (!flags['bedroom_windowClosed']) {
+      flags.bedroom_timer++;
+      const fanEl = document.getElementById('obj-fan');
+      if (fanEl) {
+        if (flags.bedroom_timer > 45) { 
+           die("พัดลมเพดานหมุนส่ายอย่างรุนแรงจนใบพัดหลุดกระเด็นใส่คุณตายคาที่...");
+        } else if (flags.bedroom_timer > 30) {
+           fanEl.innerText = 'พัดลมเพดาน (สั่นแรงมาก อันตราย!)';
+           fanEl.classList.remove('danger-low');
+           fanEl.classList.add('danger-high');
+        } else if (flags.bedroom_timer > 15) {
+           fanEl.innerText = 'พัดลมเพดาน (ส่ายเริ่มแรงขึ้น)';
+           fanEl.classList.add('danger-low');
+        }
+      }
+    }
+  },
+  toggleWindowSwing: function() {
+    if (!GameState.flags['bedroom_windowClosed']) {
+      GameState.flags['bedroom_windowClosingState'] = !GameState.flags['bedroom_windowClosingState'];
+      const w = document.getElementById('obj-window');
+      if (w) {
+        if (GameState.flags['bedroom_windowClosingState']) {
+          w.classList.remove('timing-unsafe');
+          w.classList.add('timing-safe');
+          w.innerText = 'หน้าต่าง (คลิกปิดตอนนี้!)';
+        } else {
+          w.classList.remove('timing-safe');
+          w.classList.add('timing-unsafe');
+          w.innerText = 'หน้าต่าง (รอจังหวะ...)';
+        }
+      }
+    }
+  }
 };
