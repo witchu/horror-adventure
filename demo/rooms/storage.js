@@ -79,18 +79,15 @@ window.RoomData.storage = {
 }
 #flashlight-ui-container {
   position: absolute;
-  top: 15px;
-  left: 240px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 15px;
-  background: rgba(0,0,0,0.75);
-  padding: 5px 15px;
-  border: 1px solid #444;
-  border-radius: 8px;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 50;
   pointer-events: auto;
+}
+#flashlight-ui-container .ui-panel {
+  width: 280px;
+  max-width: 280px;
 }
 #battery-bar-container {
   font-size: 14px;
@@ -238,8 +235,8 @@ window.RoomData.storage = {
     setupUI: function() {
       const container = document.getElementById('game-container');
       const uiHTML = `
-        <div id="flashlight-ui-container" class="ui-overlay hidden" style="pointer-events: none;">
-          <div class="ui-panel" style="pointer-events: auto; position: absolute; top: 10px; right: 10px; left: auto; transform: none;">
+        <div id="flashlight-ui-container" class="hidden">
+          <div class="ui-panel">
              <h3>สมาร์ทโฟน</h3>
              <div class="pill-grid">
                <button class="pill-btn" id="flashlight-toggle-btn">เปิด/ปิดไฟฉาย</button>
