@@ -1,5 +1,6 @@
 (function() {
   let roomEls = {};
+  let stoveInputSeq = [];
 
   const ingredients = [
     { id: 1, name: "กระปุกที่ 1 (เกล็ดสีน้ำตาลอ่อน มีกลิ่นหอมหวาน)" },
@@ -45,7 +46,7 @@
   }
 
   function openStoveUI() {
-      GameState.flags.kitchen_stoveInputSeq = [];
+      stoveInputSeq = [];
       updateStoveDisplay();
       roomEls.stoveUiContainer.classList.remove('hidden');
   }
@@ -55,11 +56,11 @@
   }
 
   function inputStove(dir) {
-      if (GameState.flags.kitchen_stoveInputSeq.length < 4) {
-          GameState.flags.kitchen_stoveInputSeq.push(dir);
+      if (stoveInputSeq.length < 4) {
+          stoveInputSeq.push(dir);
           updateStoveDisplay();
           
-          if (GameState.flags.kitchen_stoveInputSeq.length === 4) {
+          if (stoveInputSeq.length === 4) {
               checkStoveSequence();
           }
       }
@@ -68,8 +69,8 @@
   function updateStoveDisplay() {
       let displayStr = "";
       for(let i=0; i<4; i++) {
-          if(i < GameState.flags.kitchen_stoveInputSeq.length) {
-              displayStr += (GameState.flags.kitchen_stoveInputSeq[i] === 'left' ? 'L ' : 'R ');
+          if(i < stoveInputSeq.length) {
+              displayStr += (stoveInputSeq[i] === 'left' ? 'L ' : 'R ');
           } else {
               displayStr += '_ ';
           }
@@ -78,7 +79,7 @@
   }
 
   function checkStoveSequence() {
-      const seqStr = GameState.flags.kitchen_stoveInputSeq.join(',');
+      const seqStr = stoveInputSeq.join(',');
       const correctSeq = 'right,left,left,right';
       
       setTimeout(() => {
@@ -89,7 +90,7 @@
               updateRoomVisuals();
           } else {
               takeDamage("หมุนผิดจังหวะ ไฟพุ่งพึ่บใส่แขนคุณ!", 0.25);
-              GameState.flags.kitchen_stoveInputSeq = []; // Reset sequence
+              stoveInputSeq = []; // Reset sequence
           }
       }, 400);
   }

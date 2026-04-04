@@ -77,7 +77,7 @@ const GameState = {
     storage_doorSmallOpenedCount: 0,
     storage_boxSearchView: 0,
 
-    bathroom_timeInBathroom: 0,
+    bathroom_timer: 0,
     bedroom_timer: 0,
     bathroom_soapTimer: 0,
     kitchen_waterTimer: 0,
@@ -95,7 +95,6 @@ const GameState = {
     bathroom_bathtubColdAmt: 0,
     bathroom_bathtubMode: 'close',
 
-    kitchen_stoveInputSeq: [],
     bedroom_windowTick: 0
   },
 

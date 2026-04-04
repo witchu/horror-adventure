@@ -54,12 +54,12 @@ window.RoomData.bedroom = {
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['bedroom_stoodUp']) {
-           takeDamage("รีบร้อนลุกไปที่ตู้เสื้อผ้าจนกลิ้งตกเตียง");
-           return;
+          takeDamage("รีบร้อนลุกไปที่ตู้เสื้อผ้าจนกลิ้งตกเตียง");
+          return;
         }
         if (!flags['bedroom_alarmOff']) {
-           takeDamage("เดินสะดุดขอบเตียง เพราะยังไม่ได้ปิดนาฬิกาให้ตื่นดี");
-           return;
+          takeDamage("เดินสะดุดขอบเตียง เพราะยังไม่ได้ปิดนาฬิกาให้ตื่นดี");
+          return;
         }
         if (!flags['bedroom_windowClosed']) {
           takeDamage("ตู้เสื้อผ้าสั่นแรงหนีบมือ!");
@@ -80,13 +80,13 @@ window.RoomData.bedroom = {
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['bedroom_stoodUp']) {
-           showDialogue("ยังนอนอยู่บนเตียง รอดพ้นจากพัดลมไปได้");
-           return;
+          showDialogue("ยังนอนอยู่บนเตียง รอดพ้นจากพัดลมไปได้");
+          return;
         }
         if (!flags['bedroom_windowClosed']) {
-           die("คุณเดินเข้าไปใกล้พัดลมที่กำลังส่ายแรง ใบพัดหลุดกระเด็นใส่คุณตายคาที่...");
+          die("คุณเดินเข้าไปใกล้พัดลมที่กำลังส่ายแรง ใบพัดหลุดกระเด็นใส่คุณตายคาที่...");
         } else {
-           showDialogue("พัดลมหมุนเบาลงแล้ว คุณเดินลอดผ่านไปได้อย่างปลอดภัยเพื่อทำธุระต่อ");
+          showDialogue("พัดลมหมุนเบาลงแล้ว คุณเดินลอดผ่านไปได้อย่างปลอดภัยเพื่อทำธุระต่อ");
         }
       }
     },
@@ -94,16 +94,15 @@ window.RoomData.bedroom = {
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['bedroom_stoodUp']) {
-           takeDamage("รีบร้อนลุกไปที่ประตูจนกลิ้งตกเตียง");
-           return;
+          takeDamage("รีบร้อนลุกไปที่ประตูจนกลิ้งตกเตียง");
+          return;
         }
         if (!flags['bedroom_gotTowel']) {
-           showDialogue("ประตูล็อคอยู่... ต้องหาทางเตรียมตัวให้พร้อมก่อน (ได้ผ้าเช็ดตัวแล้วประตูจะแง้มเอง)");
+          showDialogue("ประตูล็อคอยู่... ต้องหาทางเตรียมตัวให้พร้อมก่อน (ได้ผ้าเช็ดตัวแล้วประตูจะแง้มเอง)");
         } else {
-           showDialogue("คุณลงมือผลักประตูเดินเข้าสู่ห้องน้ำ");
-           GameState.flags.timeInBathroom = 0;
-           saveCheckpoint();
-           loadRoom('bathroom');
+          showDialogue("คุณลงมือผลักประตูเดินเข้าสู่ห้องน้ำ");
+          saveCheckpoint();
+          loadRoom('bathroom');
         }
       }
     },
@@ -112,12 +111,12 @@ window.RoomData.bedroom = {
         const flags = GameState.flags;
         if (!flags['bedroom_stoodUp']) return;
         if (!hasItem('key')) {
-           showDialogue("ประตูล็อคแน่นหนา ต้องหากุญแจมาไขเปิดเท่านั้น");
+          showDialogue("ประตูล็อคแน่นหนา ต้องหากุญแจมาไขเปิดเท่านั้น");
         } else {
-           removeItem('key');
-           showDialogue("คุณไขกุญแจและผลักประตูเปิดออกไปสู่โถงทางเดินชั้น 2...");
-           saveCheckpoint();
-           loadRoom('hallway_f2');
+          removeItem('key');
+          showDialogue("คุณไขกุญแจและผลักประตูเปิดออกไปสู่โถงทางเดินชั้น 2...");
+          saveCheckpoint();
+          loadRoom('hallway_f2');
         }
       }
     }
@@ -131,7 +130,7 @@ window.RoomData.bedroom = {
     const windowEl = document.getElementById('obj-window');
     const wardrobeEl = document.getElementById('obj-wardrobe');
     const fanEl = document.getElementById('obj-fan');
-    
+
     if (flags['bedroom_windowClosed'] && windowEl) {
       windowEl.classList.remove('swinging', 'timing-safe', 'timing-unsafe');
       windowEl.innerText = 'หน้าต่าง (ปิดแล้ว)';
@@ -147,12 +146,12 @@ window.RoomData.bedroom = {
       wardrobeEl.classList.remove('heavy-shake');
       wardrobeEl.classList.add('light-shake');
     }
-    
+
     const doorBathEl = document.getElementById('obj-door_bathroom');
     if (flags['bedroom_gotTowel'] && doorBathEl) {
       doorBathEl.innerText = 'ประตูห้องน้ำ (เปิดแง้มอยู่)';
     }
-    
+
     const doorHallEl = document.getElementById('obj-door_hallway');
     if (hasItem('key') && doorHallEl) {
       doorHallEl.innerText = 'ประตูออกโถง (ปลดล็อคแล้ว)';
@@ -171,15 +170,15 @@ window.RoomData.bedroom = {
       flags.bedroom_timer++;
       const fanEl = document.getElementById('obj-fan');
       if (fanEl) {
-        if (flags.bedroom_timer > 45) { 
-           die("พัดลมเพดานหมุนส่ายอย่างรุนแรงจนใบพัดหลุดกระเด็นใส่คุณตายคาที่...");
+        if (flags.bedroom_timer > 45) {
+          die("พัดลมเพดานหมุนส่ายอย่างรุนแรงจนใบพัดหลุดกระเด็นใส่คุณตายคาที่...");
         } else if (flags.bedroom_timer > 30) {
-           fanEl.innerText = 'พัดลมเพดาน (สั่นแรงมาก อันตราย!)';
-           fanEl.classList.remove('danger-low');
-           fanEl.classList.add('danger-high');
+          fanEl.innerText = 'พัดลมเพดาน (สั่นแรงมาก อันตราย!)';
+          fanEl.classList.remove('danger-low');
+          fanEl.classList.add('danger-high');
         } else if (flags.bedroom_timer > 15) {
-           fanEl.innerText = 'พัดลมเพดาน (ส่ายเริ่มแรงขึ้น)';
-           fanEl.classList.add('danger-low');
+          fanEl.innerText = 'พัดลมเพดาน (ส่ายเริ่มแรงขึ้น)';
+          fanEl.classList.add('danger-low');
         }
       }
     }
