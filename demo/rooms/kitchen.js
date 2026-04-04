@@ -117,6 +117,20 @@
   });
 
   window.RoomData.kitchen = {
+    styles: `
+.room-kitchen { background-image: url('assets/kitchen_bg.png'); }
+@keyframes smokePulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 0.6; }
+}
+.smoke-effect {
+  animation: smokePulse 2s infinite ease-in-out;
+  background-color: rgba(50, 50, 50, 0.4);
+  border-radius: 50%;
+  filter: blur(10px);
+}
+    `,
     objects: [
       { id: 'sink', name: 'ก๊อกน้ำอ่างล้างจาน', bounds: { left: 10, top: 40, width: 20, height: 30 },
         onInteract: (element) => {

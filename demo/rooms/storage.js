@@ -70,6 +70,54 @@ Object.assign(GameState.flags, {
 });
 
 window.RoomData.storage = {
+    styles: `
+.room-storage {
+  background-image: url('assets/storage_bg.png');
+  background-color: #050505;
+}
+#flashlight-ui-container {
+  position: absolute;
+  top: 15px;
+  left: 240px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
+  background: rgba(0,0,0,0.75);
+  padding: 5px 15px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  z-index: 50;
+  pointer-events: auto;
+}
+#battery-bar-container {
+  font-size: 14px;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+#battery-text {
+  font-weight: bold;
+  color: #4f4;
+}
+#battery-text.low {
+  color: #ff4444;
+}
+.door-closing-animation {
+  transform-origin: left;
+  transition: transform 30s linear;
+  transform: perspective(600px) rotateY(0deg);
+}
+.door-closing-animation.closing {
+  transform: perspective(600px) rotateY(-85deg);
+}
+.door-closing-animation.wedged {
+  transform: perspective(600px) rotateY(-10deg) !important;
+  transition: transform 0.5s ease-out;
+  border-right: 5px solid #8B4513;
+}
+    `,
     objects: [
       { id: 'door_main', name: 'ประตูบานพับ (ทางเข้า)', bounds: { left: 5, top: 10, width: 20, height: 80 },
         onInteract: (element) => {

@@ -9,6 +9,9 @@ Object.assign(GameState.flags, {
 });
 
 window.RoomData.hallway_f2 = {
+  styles: `
+.room-hallway_f2 { background-image: url('assets/hallway_f2_bg.png'); }
+  `,
   objects: [
     { id: 'curtain', name: 'ผ้าม่านหน้าต่างบานใหญ่', bounds: { left: 20, top: 20, width: 30, height: 50 },
       onInteract: (element) => {

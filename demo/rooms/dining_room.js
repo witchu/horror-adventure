@@ -77,6 +77,10 @@ Object.assign(GameState.flags, {
 });
 
 window.RoomData.dining_room = {
+    styles: `
+.room-dining_room { background-image: url('assets/dining_room_bg.png'); }
+.flicker-dining { animation: flicker 3s infinite; }
+    `,
     objects: [
       { id: 'switch', name: 'สวิตช์ไฟ', bounds: { left: 10, top: 40, width: 5, height: 10 },
         onInteract: (element) => {

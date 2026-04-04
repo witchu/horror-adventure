@@ -7,6 +7,9 @@ Object.assign(GameState.flags, {
 });
 
 window.RoomData.hallway_f1 = {
+  styles: `
+.room-hallway_f1 { background-image: url('assets/hallway_f1_bg.png'); }
+  `,
   objects: [
     { id: 'backpack', name: 'กระเป๋าสะพาย', bounds: { left: 25, top: 70, width: 15, height: 15 },
       onInteract: (element) => {

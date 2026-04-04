@@ -154,6 +154,24 @@ Object.assign(GameState.flags, {
 });
 
 window.RoomData.bathroom = {
+    styles: `
+.room-bathroom {
+  background-image: url('assets/bathroom_bg.png');
+}
+.water-gauge-container { margin: 20px 0; }
+.water-gauge-bg { width: 100%; height: 30px; background-color: #111; border: 1px solid #555; position: relative; overflow: hidden; }
+#water-gauge-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #aa3333, #3333aa); transition: width 0.3s; }
+.water-texts { display: flex; justify-content: space-between; margin-top: 5px; font-size: 13px; color: #ccc; }
+.faucet-controls { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
+.faucet-btn { flex: 1; padding: 10px 0; font-weight: bold; border: 1px solid #444; background-color: #222; cursor: pointer; color: #ccc; transition: 0.2s; }
+.faucet-btn:hover { border-color: #fff; color: #fff; }
+.faucet-btn.hot { border-bottom: 3px solid #aa3333; }
+.faucet-btn.hot.active { background-color: #5a2222; color: #ff8888; border-color: #ff4444; }
+.faucet-btn.cold { border-bottom: 3px solid #3333aa; }
+.faucet-btn.cold.active { background-color: #22225a; color: #8888ff; border-color: #4444ff; }
+.faucet-btn.close { border-bottom: 3px solid #888; }
+.faucet-btn.close.active { background-color: #444; color: #fff; border-color: #aaa; }
+    `,
     objects: [
       { id: 'soap', name: 'ขวดสบู่', bounds: { left: 20, top: 80, width: 10, height: 10 },
         onInteract: (element) => {

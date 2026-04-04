@@ -11,12 +11,12 @@
 | File | Purpose |
 |------|---------|
 | `index.html` | Layout for HUD, Scene, UI overlays, Inventory, Log panel, and script inclusions. |
-| `style.css` | Horror theme in muted green tones, animation classes, responsive layout |
+| `style.css` | Global horror theme (muted green tones, shared animation classes, shared UI layout). Room-specific CSS lives in `rooms/*.js`. |
 | `state.js` | Global state (GameState, flattened flags, items, checkpoint), Player logic, Inventory logic, timers |
 | `ui.js` | HUD rendering, logs, dialogue functions, and DOM Element map (`els`) |
 | `room.js` | Room manager (`loadRoom`, `updateRoomVisuals`, `handleInteraction`) |
 | `timers.js` | Game loop dispatchers (HP drain loop, hazard dispatcher) |
-| `rooms/*.js` | Individual rooms containing `objects`, `decorations`, `setupUI()`, `updateVisuals()`, and `onSecondTimer()` |
+| `rooms/*.js` | Individual rooms containing `styles`, `objects`, `decorations`, `setupUI()`, `updateVisuals()`, and `onSecondTimer()` |
 | `main.js` | `init()`, `restartRoom()`, and window listeners |
 | `assets/` | Room background images (`bedroom_bg.png`, `bathroom_bg.png`, ...) |
 
@@ -82,6 +82,7 @@ Timers increment every 1 second → at thresholds they change CSS class (`danger
 ```
 loadRoom(roomId)
   ├─ set currentRoom, scene className
+  ├─ inject RoomData[roomId].styles into <style id="room-custom-styles"> (previous room styles are replaced)
   ├─ clear & rebuild interactive-layer from window.RoomData[roomId]
   │   ├─ .objects → div.interactive-object (clickable → handleInteraction)
   │   └─ .decorations → div.non-interactive-object (non-clickable, status display)
@@ -114,6 +115,10 @@ Create `rooms/laundry.js`:
 ```js
 window.RoomData = window.RoomData || {};
 window.RoomData.laundry = {
+  styles: `
+.room-laundry { background-image: url('assets/laundry_bg.png'); }
+/* Add any room-specific CSS here (custom animations, UI widget styles, etc.) */
+  `,
   objects: [
     { 
       id: 'obj_name', name: 'Display Name', bounds: { left: 0, top: 0, width: 20, height: 20 },
@@ -138,12 +143,14 @@ window.RoomData.laundry = {
 };
 ```
 
-### Step 2: Define default flags in `state.js`
+### Step 2: Define default flags
 
-Add to `GameState.flags`:
+Define default flags via `Object.assign` at the top of your room file (inside an IIFE if needed):
 ```js
-    laundry_checkedMachine: false,
-    laundry_doorUnlocked: false
+Object.assign(GameState.flags, {
+  laundry_checkedMachine: false,
+  laundry_doorUnlocked: false
+});
 ```
 
 ### Step 3: Link script in `index.html`
@@ -217,7 +224,7 @@ case 'door_laundry':
 
 ## 6. Key Systems Reference
 
-### CSS Animation Classes
+### CSS Animation Classes (Global — in `style.css`)
 
 | Class | Effect |
 |-------|--------|
@@ -230,7 +237,8 @@ case 'door_laundry':
 | `timing-safe` | Green border (safe to click) |
 | `timing-unsafe` | Red border (clicking causes damage) |
 | `hidden` | display: none |
-| `smoke-effect` | Smoke (used in kitchen) |
+
+> **Note:** Room-specific CSS classes (e.g., `.smoke-effect`, `.flicker-dining`, `.door-closing-animation`, faucet UI styles) are defined in their respective `rooms/*.js` files via the `styles` template literal. They are dynamically injected when `loadRoom()` is called.
 
 ### Core Functions (`state.js` & `ui.js`)
 
@@ -262,6 +270,6 @@ renderHUD()               – update HP bar + battery display
 2. **Modular Scripts usage** — core tracking logic is divided across specific JS files (`state.js`, `room.js`, `main.js`), while room data goes in modular `rooms/*.js`. Ensure each room handles its own minigames, `setupUI`, `updateVisuals`, and `onSecondTimer`. Use IIFEs if you need local functions/variables to encapsulate minigame logic properly without leaking globals.
 3. **Checkpoints** — must be saved (`saveCheckpoint()`) before every `loadRoom()` call.
 4. **Hazard timers** — incorporate them locally into `onSecondTimer()` on your specific room interface.
-5. **CSS classes** — use existing classes (`danger-low`, `danger-high`, etc.); avoid creating new ones unless necessary.
-6. **Background assets** — name as `{roomId}_bg.png` and store in `assets/`.
+5. **CSS classes** — use existing global classes (`danger-low`, `danger-high`, etc.) from `style.css`. Room-specific CSS (backgrounds, custom animations, widget styles) must go in the room's `styles` template literal, **not** in `style.css`.
+6. **Background assets** — name as `{roomId}_bg.png` and store in `assets/`. Reference it in the room's `styles` property as `.room-{roomId} { background-image: url('assets/{roomId}_bg.png'); }`.
 7. **Test the death loop** — every room must restart cleanly using `loadCheckpoint()`.

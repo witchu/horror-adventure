@@ -30,6 +30,16 @@ function loadRoom(roomId) {
   }
 
   const room = (window.RoomData && window.RoomData[roomId]) ? window.RoomData[roomId] : null;
+
+  // Inject Room-Specific CSS
+  let styleEl = document.getElementById('room-custom-styles');
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'room-custom-styles';
+    document.head.appendChild(styleEl);
+  }
+  styleEl.innerHTML = (room && room.styles) ? room.styles : '';
+
   if (room && room.objects) {
     room.objects.forEach(obj => {
       const el = document.createElement('div');

@@ -13,6 +13,9 @@ Object.assign(GameState.flags, {
 });
 
 window.RoomData.bedroom = {
+  styles: `
+.room-bedroom { background-image: url('assets/bedroom_bg.png'); }
+  `,
   objects: [
     { id: 'bed', name: 'เตียงนอน', bounds: { left: 10, top: 60, width: 40, height: 30 },
       onInteract: (element) => {
