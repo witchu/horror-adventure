@@ -6,7 +6,6 @@ const GameState = {
   hpDrainRate: 0,
   logs: [], // Array of log text strings
   currentRoom: 'bedroom',
-  smartphoneBattery: 52, // Flashlight battery for storage starts at 52%
 
   // Flattened inventory
   items: [],

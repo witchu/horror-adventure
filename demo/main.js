@@ -45,10 +45,6 @@ function restartRoom() {
   // Hide any overlays
   document.querySelectorAll('.ui-overlay').forEach(el => el.classList.add('hidden'));
 
-  if (GameState.currentRoom === 'storage') {
-    GameState.smartphoneBattery = 100; // restore battery on die
-  }
-  
   GameState.hp = GameState.maxHp; // Restore HP
   GameState.hpDrainRate = 0; // Restore drain status
   

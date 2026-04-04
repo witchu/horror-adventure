@@ -30,7 +30,6 @@ GameState = {
   hpDrainRate,          // units/sec, drained every 100ms
   logs: [],             // deduped log strings
   currentRoom,          // active room ID
-  smartphoneBattery,    // flashlight battery %
   items: [],            // inventory [{id, name}], max 6
   flags: {},            // flattened room flags (e.g. bedroom_stoodUp)
   checkpoint: null      // deep clone of {items, flags}

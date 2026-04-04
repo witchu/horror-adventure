@@ -22,7 +22,6 @@ window.RoomData.hallway_f1 = {
             flags['hallway_f1_backpackSearched2'] = true;
             showDialogue("ค้นต่อ... เจอสมาร์ทโฟน! (แบต 100%) ใช้เปิดไฟฉายได้ถ้าจำเป็น");
             addItem('smartphone', 'สมาร์ทโฟน');
-            GameState.smartphoneBattery = 100;
         } else {
             showDialogue("ไม่มีอะไรในกระเป๋าแล้ว");
         }

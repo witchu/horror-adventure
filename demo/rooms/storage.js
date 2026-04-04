@@ -1,11 +1,12 @@
 (function() {
   let roomEls = {};
+  let smartphoneBattery = 100;
   let powerbankChargeTicks = 0;
   let powerbankInterval = null;
 
   function toggleFlashlight() {
       const flags = GameState.flags;
-      if (GameState.smartphoneBattery <= 0) {
+      if (smartphoneBattery <= 0) {
           showDialogue("แบตเตอรี่โทรศัพท์หมดเกลี้ยง เปิดแฟลชไม่ได้แล้ว!");
           return;
       }
@@ -34,12 +35,12 @@
                   clearInterval(powerbankInterval);
                   return;
               }
-              if (GameState.smartphoneBattery < 100 && powerbankChargeTicks < 15) {
-                  GameState.smartphoneBattery += 1;
+              if (smartphoneBattery < 100 && powerbankChargeTicks < 15) {
+                  smartphoneBattery += 1;
                   powerbankChargeTicks++;
                   renderHUD();
                   
-                  if (GameState.smartphoneBattery >= 100 || powerbankChargeTicks >= 15) {
+                  if (smartphoneBattery >= 100 || powerbankChargeTicks >= 15) {
                       clearInterval(powerbankInterval);
                       showDialogue("พาวเวอร์แบงค์พลังงานหมดแล้ว!");
                   }
@@ -51,6 +52,7 @@
   }
 
   window.RoomData = window.RoomData || {};
+
 
 Object.assign(GameState.flags, {
   storage_flashLightOn: false,
@@ -293,8 +295,8 @@ window.RoomData.storage = {
          const batteryText = document.getElementById('battery-text');
          if (batteryBarContainer) batteryBarContainer.classList.remove('hidden');
          if (batteryText) {
-             batteryText.innerText = `${Math.floor(GameState.smartphoneBattery)}%`;
-             if (GameState.smartphoneBattery < 20) {
+             batteryText.innerText = `${Math.floor(smartphoneBattery)}%`;
+             if (smartphoneBattery < 20) {
                  batteryText.classList.add('low');
              } else {
                  batteryText.classList.remove('low');
@@ -317,9 +319,9 @@ window.RoomData.storage = {
 
       // Battery Drain
       if (flags['storage_flashLightOn']) {
-          GameState.smartphoneBattery -= 0.5; // 200 seconds total battery
-          if (GameState.smartphoneBattery <= 0) {
-              GameState.smartphoneBattery = 0;
+          smartphoneBattery -= 0.5; // 200 seconds total battery
+          if (smartphoneBattery <= 0) {
+              smartphoneBattery = 0;
               flags['storage_flashLightOn'] = false;
               this.updateVisuals();
           }
@@ -351,7 +353,7 @@ window.RoomData.storage = {
       }
       
       // Auto-death when dark for too long without hammer
-      if (!flags['storage_flashLightOn'] && GameState.smartphoneBattery <= 0 && !hasItem('powerbank') && !flags['storage_gotHammer']) {
+      if (!flags['storage_flashLightOn'] && smartphoneBattery <= 0 && !hasItem('powerbank') && !flags['storage_gotHammer']) {
          die("ความมืดเข้าปกคลุม ประตูบานพับของห้องปิดกระแทกอย่างรวดเร็ว ถูกขังตายด้วยการขาดอากาศหายใจ");
       }
     }
