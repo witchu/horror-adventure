@@ -1,4 +1,11 @@
 window.RoomData = window.RoomData || {};
+
+Object.assign(GameState.flags, {
+  hallway_f1_backpackSearched1: false,
+  hallway_f1_backpackSearched2: false,
+  hallway_f1_storageUnlocked: false
+});
+
 window.RoomData.hallway_f1 = {
   objects: [
     { id: 'backpack', name: 'กระเป๋าสะพาย', bounds: { left: 25, top: 70, width: 15, height: 15 },

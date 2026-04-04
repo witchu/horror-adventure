@@ -96,6 +96,26 @@
   }
 
   window.RoomData = window.RoomData || {};
+
+  Object.assign(GameState.flags, {
+    kitchen_sinkOff: false,
+    kitchen_kettleOff: false,
+    kitchen_cabinetClosed: false,
+    kitchen_gasNotesFound: false,
+    kitchen_gasStep: 0,
+    kitchen_gasOff: false,
+    kitchen_tastedFirst: false,
+    kitchen_ingredientsAdded: false,
+    kitchen_poisonedFood: false,
+    kitchen_tastedSecond: false,
+    kitchen_drawerRightOpened: false,
+    kitchen_cabinetOpenLevel: 0,
+    kitchen_waterTimer: 0,
+    kitchen_kettleTimer: 0,
+    kitchen_cabinetTimer: 0,
+    kitchen_gasTimer: 0
+  });
+
   window.RoomData.kitchen = {
     objects: [
       { id: 'sink', name: 'ก๊อกน้ำอ่างล้างจาน', bounds: { left: 10, top: 40, width: 20, height: 30 },

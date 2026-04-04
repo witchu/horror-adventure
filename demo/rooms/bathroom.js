@@ -132,7 +132,28 @@
   }
 
   window.RoomData = window.RoomData || {};
-  window.RoomData.bathroom = {
+
+Object.assign(GameState.flags, {
+  bathroom_soapPicked: false,
+  bathroom_pillTaken: false,
+  bathroom_dryerUnplugged: false,
+  bathroom_dryerStored: false,
+  bathroom_waterFilled: false,
+  bathroom_bathed: false,
+  bathroom_dried: false,
+  bathroom_waterDrained: false,
+  bathroom_gotKey: false,
+  bathroom_doorUnlocked: false,
+  bathroom_timer: 0,
+  bathroom_soapTimer: 0,
+  bathroom_bathtubActive: false,
+  bathroom_bathtubVolume: 0,
+  bathroom_bathtubHotAmt: 0,
+  bathroom_bathtubColdAmt: 0,
+  bathroom_bathtubMode: 'close'
+});
+
+window.RoomData.bathroom = {
     objects: [
       { id: 'soap', name: 'ขวดสบู่', bounds: { left: 20, top: 80, width: 10, height: 10 },
         onInteract: (element) => {

@@ -1,4 +1,17 @@
 window.RoomData = window.RoomData || {};
+
+Object.assign(GameState.flags, {
+  bedroom_stoodUp: false,
+  bedroom_alarmOff: false,
+  bedroom_windowClosed: false,
+  bedroom_wardrobeClosed: false,
+  bedroom_gotTowel: false,
+  bedroom_doorUnlocked: false,
+  bedroom_windowClosingState: false, // Used for timing
+  bedroom_timer: 0,
+  bedroom_windowTick: 0
+});
+
 window.RoomData.bedroom = {
   objects: [
     { id: 'bed', name: 'เตียงนอน', bounds: { left: 10, top: 60, width: 40, height: 30 },

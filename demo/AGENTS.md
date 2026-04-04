@@ -59,11 +59,9 @@ This stores a deep clone of `GameState.items` and `GameState.flags`.
 
 **On death** → via `restartRoom()`, the game calls `loadCheckpoint()`. This seamlessly reverts all interactions (items gained/lost, flags modified) to the moment the player entered the room, avoiding any state leaks. GameState HP/damage restores, and timers reset to `0`.
 
-### 2.3 roomTimers (escalating hazards)
+### 2.3 Room Timers (escalating hazards)
 
-```js
-roomTimers = { bedroom, bathroomSoap, kitchenWater, kitchenKettle, kitchenCabinet, kitchenGas, diningClock, storageDoor, storagePanic, hallwayChandelier }
-```
+Room timers are now integrated directly into `GameState.flags` using the `{roomId}_{timerName}` prefix convention (e.g., `bedroom_timer`, `kitchen_waterTimer`).
 
 Timers increment every 1 second → at thresholds they change CSS class (`danger-low` → `danger-high`) → if ignored further → `die()`.
 
@@ -88,7 +86,7 @@ loadRoom(roomId)
   │   ├─ .objects → div.interactive-object (clickable → handleInteraction)
   │   └─ .decorations → div.non-interactive-object (non-clickable, status display)
   ├─ reset room-specific timers via GameState.flags
-  ├─ updateRoomVisuals(roomId) → delegates to room's local updateVisuals()
+  ├─ updateRoomVisuals() → delegates to current room's local updateVisuals()
   └─ renderHUD()
 ```
 
@@ -159,11 +157,11 @@ Add to `GameState.flags`:
 Store timer properties gracefully inside `GameState.flags` and implement the 1-second interval checks directly inside `onSecondTimer`:
 ```js
   onSecondTimer: function() {
-    if (GameState.currentRoom !== 'laundry') return;
+    // GameState.currentRoom check is handled globally by timers.js
     const flags = GameState.flags;
     if (!flags['laundry_someFlag']) {
-      flags.roomTimers_laundryFlood = (flags.roomTimers_laundryFlood || 0) + 1;
-      if (flags.roomTimers_laundryFlood > 30) die("...");
+      flags.laundry_floodTimer = (flags.laundry_floodTimer || 0) + 1;
+      if (flags.laundry_floodTimer > 30) die("...");
     }
   }
 ```
@@ -248,7 +246,7 @@ die(reason)               – show death screen
 saveCheckpoint()          - snapshot items + flags map
 loadCheckpoint()          - revert to snapshot
 loadRoom(roomId)          – load a room
-updateRoomVisuals(roomId) – update labels/classes per flags
+updateRoomVisuals()       – update labels/classes per flags for current room
 renderHUD()               – update HP bar + battery display
 ```
 

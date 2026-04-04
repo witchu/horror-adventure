@@ -51,7 +51,25 @@
   }
 
   window.RoomData = window.RoomData || {};
-  window.RoomData.storage = {
+
+Object.assign(GameState.flags, {
+  storage_flashLightOn: false,
+  storage_doorWedged: false,
+  storage_doorClosed: false,
+  storage_woodStickAcquired: false,
+  storage_foundNote: false,
+  storage_foundKey: false,
+  storage_foundPowerbank: false,
+  storage_boxOpened: false,
+  storage_gotHammer: false,
+  storage_doorTimerStarted: false,
+  storage_doorSmallOpenedCount: 0,
+  storage_boxSearchView: 0,
+  storage_doorTimer: 0,
+  storage_panicTimer: 0
+});
+
+window.RoomData.storage = {
     objects: [
       { id: 'door_main', name: 'ประตูบานพับ (ทางเข้า)', bounds: { left: 5, top: 10, width: 20, height: 80 },
         onInteract: (element) => {

@@ -1,4 +1,13 @@
 window.RoomData = window.RoomData || {};
+
+Object.assign(GameState.flags, {
+  hallway_f2_curtainClosed: false,
+  hallway_f2_rugSorted: false,
+  hallway_f2_lightOn: false,
+  hallway_f2_chandelierSwinging: true,
+  hallway_f2_chandelierTimer: 0
+});
+
 window.RoomData.hallway_f2 = {
   objects: [
     { id: 'curtain', name: 'ผ้าม่านหน้าต่างบานใหญ่', bounds: { left: 20, top: 20, width: 30, height: 50 },

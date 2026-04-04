@@ -62,7 +62,21 @@
   }
 
   window.RoomData = window.RoomData || {};
-  window.RoomData.dining_room = {
+
+Object.assign(GameState.flags, {
+  dining_room_lightSwitchState: 1, // 1: flickering, 0: off, 2: on-full
+  dining_room_teaDrank: false,
+  dining_room_coffeeDrank: false,
+  dining_room_waterDrank: false,
+  dining_room_newspaperRead: false,
+  dining_room_keyAcquired: false,
+  dining_room_wheelsChecked: false,
+  dining_room_clockMoved: false,
+  dining_room_drinksAppeared: false,
+  dining_room_clockTimer: 0
+});
+
+window.RoomData.dining_room = {
     objects: [
       { id: 'switch', name: 'สวิตช์ไฟ', bounds: { left: 10, top: 40, width: 5, height: 10 },
         onInteract: (element) => {
