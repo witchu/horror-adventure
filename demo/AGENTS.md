@@ -1,48 +1,171 @@
-# โครงสร้างและระบบการทำงานของ Panic - Home Episode (Demo Version)
+# Panic : Home Episode — Demo Dev Guide
 
-เอกสารนี้รวบรวมข้อมูลสำหรับการทำงานของ AI/Agent และโครงสร้างโดยรวมของตัวเกมในเวอร์ชั่นย่อ (Demo) ที่ครอบคลุมห้อง 2 ด่านแรก (ห้องนอน และ ห้องน้ำ)
-
-## 1. ภาพรวมของระบบ (Tech Stack & Architecture)
-ตัว Demo ถูกสร้างขึ้นมาภายใต้โฟลเดอร์ `d:\horror-adventure\demo\` โดยอาศัยเทคโนโลยี Web พื้นฐานและไม่มี Framework เพื่อความเรียบง่ายและสามารถทำงานได้สมบูรณ์ในตัวเอง
-*   **HTML (`index.html`):** จัดคุมโครงสร้างหน้าจอ HUD, Scene พื้นที่เล่นเกม, หน้าต่างตาย/ชนะ, แผงช่องเก็บของ, แผง Action Log
-*   **CSS (`style.css`):** จัดรูปแบบให้ออกมาเป็นเกม Point-and-Click กลิ่นอายจิตวิทยา-สยองขวัญโทนหม่นอมเขียว จัดการอนิเมชั่นพฤติกรรม (สั่น, ส่าย, กระพริบ) และสีสันสถานะแจ้งเตือนจังหวะเวลา
-*   **JavaScript (`game.js`):** เป็นเส้นเลือดใหญ่สำหรับ State Management (เลือด, ช่องเก็บของ, Log), ข้อมูลตำแหน่งสิ่งของในห้อง (RoomData), และ Game Loop สำหรับตรรกะเวลาและการโต้ตอบ (Interactions)
-*   **Assets (`assets/`):** เก็บรูปภาพพื้นหลังจำลองบรรยากาศห้องต่างๆ 
+> Room designs → `../design/rooms/` · Room map → `../design/map.md`
 
 ---
 
-## 2. ระบบ State Management (ตรรกะเกม)
-ทุกค่าสถานะถูกจัดเก็บอยู่ในตรรกะแบบ Centralized ภายใน `GameState` และ `RoomFlags` ใน `game.js`:
+## 1. Architecture
 
-### 2.1 GameState (สถานะตัวละครหลัก)
-*   **HP (หลอดเลือด):** ระดับปกติคือ 3 หน่วย อัปเดตผ่านแบบ Progress bar ที่เปลี่ยนแปลงอย่างสมูธ
-*   **Inventory (ช่องเก็บของ):** เก็บไอเทมได้สูงสุด 6 ชิ้น ไม่สามารถทะลุลิมิตได้
-*   **Logs (สมุดบันทึกเบาะแส):** ออโต้จดบันทึกเบาะแสปริศนา
-*   **Action Log (บันทึกพฤติกรรม):** หน้าต่างพับเก็บได้ด้านขวาบน ซึ่งจะ Stamp คอยบันทึกการกระทำและผลลัพธ์พร้อมเวลา (ชั่วโมง:นาที:วินาที)
-*   **Current Room:** ห้องที่ผู้เล่นอยู่ ณ ปัจจุบัน
+| File | Role |
+|------|------|
+| `index.html` | DOM layout (HUD, scene, overlays, inventory, log panel) + script tags |
+| `style.css` | Global theme & shared CSS classes (animations, danger states, UI layout) |
+| `state.js` | `GameState` object, player functions (`takeDamage`, `die`), inventory, checkpoint |
+| `ui.js` | DOM element map (`els`), `renderHUD`, `showDialogue`, `addLog`, `addActionLog` |
+| `room.js` | `loadRoom`, `updateRoomVisuals`, `handleInteraction` |
+| `timers.js` | HP drain loop (100ms), hazard dispatcher (1s → `room.onSecondTimer()`) |
+| `rooms/*.js` | **Self-contained room modules** — flags, styles, objects, decorations, `setupUI`, `updateVisuals`, `onSecondTimer` |
+| `main.js` | `init()`, `restartRoom()`, `window.onload` |
+| `assets/` | Room backgrounds (`{roomId}_bg.png`) |
 
-### 2.2 RoomFlags (สถานะปริศนาของแต่ละห้อง)
-เป็น Object แบบ Boolean เช็คเงื่อนไขความคืบหน้าต่างๆ (เช่น หยิบขวดสบู่หรือยัง, ถอดปลั๊กไดร์เป่าผมไหม) 
-*หากผู้เล่นทนบาดแผลไม่ไหวแล้วตาย สถานะทั้งหมดของด่านนั้นจะถูก Reset ค่ากลับตั้งต้นเพื่อบังคับเล่นใหม่ตั้งแต่เริ่มห้องนั้น*
-
----
-
-## 3. ระบบการบาดเจ็บและความตาย (Damage & Death Mechanics)
-ตัวเดโมมีการจำลองวิธีสูญเสียเลือดใน 3 มุมมอง:
-1.  **ได้รับบาดเจ็บเมื่อทำพลาด (Instant Damage):** ทำการหัก HP เลือด `0.25 หน่วย` ในทันทีเมื่อมีการกดพลาดในสถานการณ์ที่ไม่ร้ายแรง (เช่น เตะขอบเตียงในขณะที่ยังไม่ได้ปิดนาฬิกาปลุก, หยิบยาผิดประเภท)
-2.  **ได้รับบาดเจ็บต่อเนื่อง (Continuous Damage / DoT):** ควบคุมผ่านตัวแปร `hpDrainRate` นำมาใช้ในสถานการณ์บีบคั้น (เช่น ไฟในห้องน้ำกระพริบตัวละครหลอน) โดยระบบเกมจะมี Timer ค่อยๆ หักเลือดของตัวละครออกอัตโนมัติ **1 หน่วย ต่อระยะเวลา 10 วินาที** (หรือ 0.1 หน่วยต่อวินาที) ซึ่งหลอดเลือดจะค่อยๆ ร่วงลงแบบ Realtime
-3.  **เสียชีวิตทันที (Instant Kill):** เกิดเหตุการณ์ร้ายแรง (เช่น ถูกไฟดูด) ค่า HP จะเหลือ 0 ทันที และระบบเข้าสู่หน้า "YOU DIED" เมื่อกดเริ่มใหม่ ผู้เล่นจะกลับมาที่ 3 HP เต็มอีกครั้ง 
+Vanilla HTML/CSS/JS — no frameworks, global scripts loaded sequentially.
 
 ---
 
-## 4. ระบบเหตุการณ์กดดันตามเวลาจริง (Real-time Hazards & Timers)
-ภายในเกมมีการใช้ Event Loop จับเวลาเป็นระยะ ๆ เพื่อสร้างมินิเกมและสภาพแวดล้อมที่ผู้เล่นต้องเร่งสมาธิ
-*   **มินิเกมจังหวะเวลา (Timing Events):** สิ่งของจะสลับ Class CSS ไปมา (เช่น หน้าต่างที่สลับกระโดดคลาสไฟเขียว `timing-safe` หรือ ไฟแดง `timing-unsafe` เพื่อบอกให้ทราบว่าช่วงวินาทีไหนโต้ตอบปิดหน้าต่างได้อย่างปลอดภัย) 
-*   **สิ่งของอันตรายที่เพิ่มสถานะขึ้นเอง (Escalating Hazards):** 
-    วัตถุประเภทตกแต่ง (`decorations` หรือ สิ่งที่กดโต้ตอบไม่ได้) เช่น *พัดลมเพดาน* และ *สบู่บนพื้นตก* จะมีตัวจับเวลา `roomTimers` คอยนับ เมื่อผ่านไปถึงเกณฑ์ความเสี่ยง จะมีการแจ้งเตือนด้วยข้อความสีส้ม (`danger-low`) หรือสีแดงสั่นไหวรุนแรง (`danger-high`) หากเพิกเฉยเลยเวลาที่กำหนด จะนำไปสู่อันตรายถึงแก่ความตาย
+## 2. GameState
+
+```js
+GameState = {
+  hp, maxHp,            // HP (0 = dead, max 3)
+  hpDrainRate,          // units/sec, drained every 100ms
+  logs: [],             // deduped log strings
+  currentRoom,          // active room ID
+  items: [],            // inventory [{id, name}], max 6
+  flags: {},            // flattened room flags (e.g. bedroom_stoodUp)
+  checkpoint: null      // deep clone of {items, flags}
+}
+```
+
+**Checkpoint:** `saveCheckpoint()` before every `loadRoom()`. On death → `restartRoom()` calls `loadCheckpoint()` to revert all flags/items, restores HP, reloads room.
+
+**Damage types:** instant (`takeDamage`), continuous (`hpDrainRate > 0`), instant kill (`die`).
 
 ---
 
-## 5. การสืบสวนและการโต้ตอบ (Interactions)
-*   **Interactive Objects (วัตถุโต้ตอบได้):** คุยกับ Logic ของ `handleInteraction` เพื่อแปรผลพฤติกรรมต่างๆ ผู้ทดสอบสามารถกดปุ่ม "เปิด/ปิดแสงนำทาง (Hint)" ใน HUD เพื่อให้มีกรอบสว่างรอบตัววัตถุทั้งหมดได้เลย ไม่ต้องควานหากล่อง Hitbox 
-*   **Non-interactive Objects (วัตถุประกอบฉาก / อุปสรรค):** ใช้แจ้งข้อมูลระดับความรุนแรงของอันตรายรอบตัวตามข้อ (4) เท่านั้น ไม่ตอบโต้เมื่อนำเมาส์ไปคลิก 
+## 3. Room Module Format (`rooms/*.js`)
+
+Each room file is self-contained. Pattern:
+
+```js
+window.RoomData = window.RoomData || {};
+
+// 1. Register default flags
+Object.assign(GameState.flags, {
+  roomId_flagName: false,
+  roomId_timer: 0
+});
+
+// 2. Define room data
+window.RoomData.roomId = {
+  // Room-specific CSS (injected on loadRoom, replaces previous)
+  styles: `
+    .room-roomId { background-image: url('assets/roomId_bg.png'); }
+    /* custom animations, UI widget styles, etc. */
+  `,
+
+  objects: [
+    { id: 'obj_id', name: 'Display', bounds: { left, top, width, height },
+      classes: 'swinging',  // optional initial CSS class
+      onInteract: (element) => {
+        const flags = GameState.flags;
+        // logic → showDialogue / addItem / takeDamage / die
+        flags['roomId_flagName'] = true;
+        updateRoomVisuals();
+      }
+    }
+  ],
+
+  decorations: [],  // non-clickable status elements (unless onInteract provided)
+
+  setupUI: function() {
+    // inject custom DOM overlays (called once at init for ALL rooms)
+  },
+
+  updateVisuals: function() {
+    // update DOM classes/text based on GameState.flags
+  },
+
+  onSecondTimer: function() {
+    // per-second hazard logic (only runs when this room is active)
+  }
+};
+```
+
+---
+
+## 4. Adding a New Room
+
+1. **Create `rooms/{roomId}.js`** following the pattern above
+2. **Add `<script>` tag** in `index.html` (before `main.js`)
+3. **Connect exits** — in source room's `onInteract`: `saveCheckpoint(); loadRoom('roomId');`
+4. **Add background** — `assets/{roomId}_bg.png`, referenced in `styles`
+5. **Read the GDD first** — `../design/rooms/XX_name.md`
+
+No need to modify `restartRoom()` — checkpoint system handles state revert automatically.
+
+---
+
+## 5. Room Status
+
+| # | Room | Implemented | Notes |
+|---|------|:-----------:|-------|
+| 01 | `bedroom` | ✅ | Starting room |
+| 02 | `bathroom` | ✅ | Pill UI, Faucet UI, Bathtub choice |
+| 03 | `hallway_f2` | ✅ | Curtain / rug / light switch / chandelier |
+| 04 | `hallway_f1` | ✅ | Backpack + branching paths |
+| 05 | `kitchen` | ✅ | Stove UI, Ingredient UI, multi-hazard |
+| 06 | `dining_room` | ✅ | Drinks UI, clock puzzle, lamp / table climb |
+| 07 | `storage` | ✅ | Flashlight, darkness, door timer, panic |
+| 08 | `laundry` | ❌ | — |
+| 09 | `living_room` | ❌ | — |
+| 10 | `front_garden` | ❌ | — |
+| 11 | `fence_gate` | ❌ | 4-digit code puzzle |
+| 12 | `road` | ❌ | Game ending |
+
+**Current demo endpoint:** Win screen on hammer + laundry door.
+
+---
+
+## 6. Shared CSS Classes (in `style.css`)
+
+| Class | Effect |
+|-------|--------|
+| `swinging` | Swing left-right |
+| `flickering` | Opacity flicker |
+| `light-shake` / `heavy-shake` | Gentle / violent shake |
+| `danger-low` / `danger-high` | Orange pulse / red shake border |
+| `timing-safe` / `timing-unsafe` | Green / red border (timed clicks) |
+| `hidden` | `display: none` |
+
+Room-specific CSS (backgrounds, custom animations, widget styles) goes in the room's `styles` property — **not** in `style.css`.
+
+---
+
+## 7. Core Functions
+
+| Function | Source | Purpose |
+|----------|--------|---------|
+| `showDialogue(text)` | `ui.js` | Display message + log action |
+| `addItem(id, name)` | `state.js` | Add to inventory (max 6) |
+| `removeItem(id)` | `state.js` | Remove from inventory |
+| `hasItem(id)` | `state.js` | Check if item exists |
+| `addLog(text)` | `ui.js` | Add clue note (deduped) |
+| `addActionLog(text)` | `ui.js` | Add timestamped action entry |
+| `takeDamage(reason, amt)` | `state.js` | Deduct HP (default 0.25) |
+| `die(reason)` | `state.js` | Show death screen |
+| `saveCheckpoint()` | `state.js` | Snapshot items + flags |
+| `loadCheckpoint()` | `state.js` | Revert to snapshot |
+| `loadRoom(roomId)` | `room.js` | Load a room |
+| `updateRoomVisuals()` | `room.js` | Delegate to room's `updateVisuals()` |
+| `renderHUD()` | `ui.js` | Update HP bar + battery |
+
+---
+
+## 8. Rules
+
+1. **Read the GDD** before implementing any room
+2. **Room modules are self-contained** — flags, styles, objects, `setupUI`, `updateVisuals`, `onSecondTimer` all live in `rooms/*.js`. Use IIFEs for local scope when needed
+3. **Always `saveCheckpoint()` before `loadRoom()`**
+4. **Room-specific CSS** → room's `styles` property, **not** `style.css`
+5. **Background naming** → `assets/{roomId}_bg.png`, referenced as `.room-{roomId} { background-image: url('assets/{roomId}_bg.png'); }`
+6. **Test death/restart loop** — every room must restart cleanly via `loadCheckpoint()`
