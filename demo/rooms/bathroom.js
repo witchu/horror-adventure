@@ -30,6 +30,7 @@
     closePillUI();
     if (id === 1) {
       GameState.flags['bathroom_pillTaken'] = true;
+      GameState.hpDrainRate = 0; // อาการ panic หยุด, hp หยุดลด
       showDialogue("คุณทานยาสีชมพูเข้ม... ทันใดนั้นไฟห้องน้ำที่กะพริบก็กลับมาสว่างเป็นปกติ จิตใจคุณสงบลง");
       updateRoomVisuals();
     } else if (id === 2 || id === 5) {

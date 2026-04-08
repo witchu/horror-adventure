@@ -9,7 +9,8 @@ Object.assign(GameState.flags, {
   bedroom_doorUnlocked: false,
   bedroom_windowClosingState: false, // Used for timing
   bedroom_timer: 0,
-  bedroom_windowTick: 0
+  bedroom_windowTick: 0,
+  hallway_f2_unlocked: false
 });
 
 window.RoomData.bedroom = {
@@ -126,10 +127,19 @@ window.RoomData.bedroom = {
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['bedroom_stoodUp']) return;
+
+        if (flags['hallway_f2_unlocked']) {
+          showDialogue("คุณเปิดประตูออกไปสู่โถงทางเดินชั้น 2...");
+          saveCheckpoint();
+          loadRoom('hallway_f2');
+          return;
+        }
+
         if (!hasItem('key')) {
           showDialogue("ประตูล็อคแน่นหนา ต้องหากุญแจมาไขเปิดเท่านั้น");
         } else {
           removeItem('key');
+          flags['hallway_f2_unlocked'] = true;
           showDialogue("คุณไขกุญแจและผลักประตูเปิดออกไปสู่โถงทางเดินชั้น 2...");
           saveCheckpoint();
           loadRoom('hallway_f2');

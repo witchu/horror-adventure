@@ -1,6 +1,7 @@
 // --- Main Entry and Game Flow ---
 
 function init() {
+  window.triggerDeath = (msg) => { if (typeof die === 'function') die(msg); else console.error('die function not found'); };
   if (els.dialogueBtn) els.dialogueBtn.addEventListener('click', closeDialogue);
   if (els.restartBtn) els.restartBtn.addEventListener('click', restartRoom);
   

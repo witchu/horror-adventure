@@ -13,7 +13,7 @@ function loadRoom(roomId) {
   if (els.flashlightMask) els.flashlightMask.classList.add('hidden');
 
   // Hide all room-specific overlays and special widgets globally on room transition
-  document.querySelectorAll('.ui-overlay, #battery-bar-container').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.ui-overlay, #battery-bar-container, #flashlight-ui-container').forEach(el => el.classList.add('hidden'));
 
   // Reset consistent damage across room changes
   GameState.hpDrainRate = 0;
@@ -91,6 +91,12 @@ function handleInteraction(room, objId, element) {
   let obj = roomData.objects.find(o => o.id === objId);
   if (!obj && roomData.decorations) {
     obj = roomData.decorations.find(d => d.id === objId);
+  }
+
+  if (room === 'laundry' && GameState.flags && GameState.flags.laundry_on_board && objId !== 'window' && objId !== 'ironing_board') {
+      GameState.flags.laundry_on_board = false;
+      takeDamage(0.2, 'ขยับตัวเอื้อมมือพลาด เสียหลักร่วงลงมาจากโต๊ะรีดผ้า!');
+      return;
   }
 
   if (obj && obj.onInteract) {

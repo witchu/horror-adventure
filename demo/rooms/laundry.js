@@ -84,14 +84,16 @@ window.RoomData.laundry = {
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.laundry_basket_empty) {
-          flags.laundry_basket_empty = true;
-          addItem('dirty_clothes', 'เสื้อผ้าสกปรก');
-          showDialogue('คุณหยิบเสื้อผ้าสกปรกจากตะกร้าเก็บไว้... มีกระดาษโน้ตหลุดออกมา: "ห้องนี้อบอ้าวไปด้วยความร้อน ควรทำให้อากาศถ่ายเทเสมอ"');
-          addLog('ข้อความ: ควรทำให้อากาศถ่ายเทเสมอ สำหรับห้องซักล้าง');
+          if (addItem('dirty_clothes', 'เสื้อผ้าสกปรก')) {
+             flags.laundry_basket_empty = true;
+             showDialogue('คุณหยิบเสื้อผ้าสกปรกจากตะกร้าเก็บไว้... มีกระดาษโน้ตหลุดออกมา: "ห้องนี้อบอ้าวไปด้วยความร้อน ควรทำให้อากาศถ่ายเทเสมอ"');
+             addLog('ข้อความ: ควรทำให้อากาศถ่ายเทเสมอ สำหรับห้องซักล้าง');
+          }
         } else if (!flags.laundry_wheel_taken) {
-          flags.laundry_wheel_taken = true;
-          showDialogue('คุณตรวจสอบตะกร้าผ้าที่ว่างเปล่า... ถอดอะไหล่ล้อจากตะกร้าผ้าได้ [ได้อะไหล่ล้อตะกร้าผ้า]');
-          addItem('basket_wheel', 'อะไหล่ล้อตะกร้าผ้า');
+          if (addItem('basket_wheel', 'อะไหล่ล้อตะกร้าผ้า')) {
+             flags.laundry_wheel_taken = true;
+             showDialogue('คุณตรวจสอบตะกร้าผ้าที่ว่างเปล่า... ถอดอะไหล่ล้อจากตะกร้าผ้าได้ [ได้อะไหล่ล้อตะกร้าผ้า]');
+          }
         } else {
           showDialogue('ตะกร้าผ้าว่างเปล่า ไม่มีอะไรให้ใช้แล้ว');
         }
@@ -100,35 +102,8 @@ window.RoomData.laundry = {
     {
       id: 'washer', name: 'เครื่องซักผ้า', bounds: { left: 40, top: 60, width: 25, height: 30 },
       onInteract: (element) => {
-        const flags = GameState.flags;
-        if (flags.laundry_washer_running) {
-            const promptAns = prompt('เครื่องซักผ้ากำลังทำงาน คุณจะทำอะไร?\n1. หยุดการทำงาน');
-            if (promptAns === '1') {
-                flags.laundry_washer_running = false;
-                showDialogue('คุณกดปิดเครื่องซักผ้า');
-                element.classList.remove('washer-shaking');
-            }
-        } else {
-            const promptAns = prompt('เครื่องซักผ้าปิดอยู่ คุณจะทำอะไร?\n1. เริ่มทำงาน\n2. ใส่เสื้อผ้าลงไป');
-            if (promptAns === '1') {
-                flags.laundry_washer_running = true;
-                if (!flags.laundry_washer_has_clothes) {
-                    showDialogue('คุณเปิดเครื่องซักผ้าโดยที่ไม่มีเสื้อผ้าอยู่ข้างใน! ฟองจากผงซักฟอกเริ่มล้นออกมา!');
-                } else {
-                    showDialogue('คุณเปิดเครื่องซักผ้า เครื่องเริ่มทำงานและสั่นอย่างแรง');
-                }
-                element.classList.add('washer-shaking');
-            } else if (promptAns === '2') {
-                if (hasItem('dirty_clothes')) {
-                    removeItem('dirty_clothes');
-                    flags.laundry_washer_has_clothes = true;
-                    showDialogue('คุณเปิดฝาแล้วเอาเสื้อผ้าสกปรกใส่เข้าไปในเครื่องซักผ้า');
-                } else if (flags.laundry_washer_has_clothes) {
-                    showDialogue('มีเสื้อผ้าอยู่ข้างในเครื่องแล้ว');
-                } else {
-                    showDialogue('คุณไม่มีเสื้อผ้าให้ใส่ลงไป ลองหาตะกร้าผ้าดู');
-                }
-            }
+        if (window.RoomData.laundry.openWasherUI) {
+            window.RoomData.laundry.openWasherUI(element);
         }
       }
     },
@@ -202,7 +177,79 @@ window.RoomData.laundry = {
     }
   ],
   decorations: [],
-  setupUI: function () { },
+  setupUI: function () {
+    if (!document.getElementById('laundry-ui-container')) {
+        const uiStr = `
+          <div id="laundry-ui-container" class="ui-overlay hidden">
+              <div class="ui-panel">
+                  <h3 id="laundry-washer-title">เครื่องซักผ้า</h3>
+                  <div class="pill-grid" id="laundry-washer-options">
+                  </div>
+                  <button class="close-ui-btn" id="laundry-close-ui">ปิด</button>
+              </div>
+          </div>
+        `;
+        const d = document.createElement('div');
+        d.innerHTML = uiStr;
+        document.body.appendChild(d.firstElementChild);
+        document.getElementById('laundry-close-ui').onclick = () => {
+            document.getElementById('laundry-ui-container').classList.add('hidden');
+        };
+    }
+  },
+  openWasherUI: function(element) {
+      const flags = GameState.flags;
+      const opts = document.getElementById('laundry-washer-options');
+      const title = document.getElementById('laundry-washer-title');
+      opts.innerHTML = '';
+      if (flags.laundry_washer_running) {
+          title.innerText = 'เครื่องซักผ้ากำลังทำงาน คุณจะทำอะไร?';
+          const btn = document.createElement('button');
+          btn.className = 'pill-btn';
+          btn.innerText = '[หยุดการทำงาน]';
+          btn.onclick = () => {
+              document.getElementById('laundry-ui-container').classList.add('hidden');
+              flags.laundry_washer_running = false;
+              showDialogue('คุณกดปิดเครื่องซักผ้า');
+              element.classList.remove('washer-shaking');
+          };
+          opts.appendChild(btn);
+      } else {
+          title.innerText = 'เครื่องซักผ้าปิดอยู่ คุณจะทำอะไร?';
+          const btn1 = document.createElement('button');
+          btn1.className = 'pill-btn';
+          btn1.innerText = '[เริ่มทำงาน]';
+          btn1.onclick = () => {
+              document.getElementById('laundry-ui-container').classList.add('hidden');
+              flags.laundry_washer_running = true;
+              if (!flags.laundry_washer_has_clothes) {
+                  showDialogue('คุณเปิดเครื่องซักผ้าโดยที่ไม่มีเสื้อผ้าอยู่ข้างใน! ฟองจากผงซักฟอกเริ่มล้นออกมา!');
+              } else {
+                  showDialogue('คุณเปิดเครื่องซักผ้า เครื่องเริ่มทำงานและสั่นอย่างแรง');
+              }
+              element.classList.add('washer-shaking');
+          };
+          opts.appendChild(btn1);
+
+          const btn2 = document.createElement('button');
+          btn2.className = 'pill-btn';
+          btn2.innerText = '[ใส่เสื้อผ้าลงไป]';
+          btn2.onclick = () => {
+              document.getElementById('laundry-ui-container').classList.add('hidden');
+              if (hasItem('dirty_clothes')) {
+                  removeItem('dirty_clothes');
+                  flags.laundry_washer_has_clothes = true;
+                  showDialogue('คุณเปิดฝาแล้วเอาเสื้อผ้าสกปรกใส่เข้าไปในเครื่องซักผ้า');
+              } else if (flags.laundry_washer_has_clothes) {
+                  showDialogue('มีเสื้อผ้าอยู่ข้างในเครื่องแล้ว');
+              } else {
+                  showDialogue('คุณไม่มีเสื้อผ้าให้ใส่ลงไป ลองหาตะกร้าผ้าดู');
+              }
+          };
+          opts.appendChild(btn2);
+      }
+      document.getElementById('laundry-ui-container').classList.remove('hidden');
+  },
   updateVisuals: function () {
     const flags = GameState.flags;
     const fanEl = document.getElementById('obj-fan');

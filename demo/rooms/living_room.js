@@ -101,14 +101,8 @@ window.RoomData.living_room = {
     { id: 'tv_drawer', name: 'ลิ้นชักชั้นวางทีวี', bounds: { left: 40, top: 60, width: 25, height: 10 },
       onInteract: (element) => {
         if (!GameState.flags.living_room_drawer_open) {
-          const ans = prompt('เปิดลิ้นชัก... พบยาเม็ดสีฟ้าจำนวนหนึ่ง คุณจะทำอะไร?\n1. เก็บเป็นเสบียงฉุกเฉิน\n2. ทานให้หมดตอนนี้เลย');
-          if (ans === '1') {
-            GameState.flags.living_room_drawer_open = true;
-            showDialogue('คุณเลือกที่จะเก็บมันไว้เป็นเสบียงฉุกเฉิน (ไม่ใช่ควรกินทั้งหมด)');
-            addLog("พกยาเม็ดสีฟ้าติดตัวไปนิดหน่อย และเก็บที่เหลือไว้ที่นี่");
-          } else if (ans === '2') {
-            triggerDeath('คุณกินยาเม็ดสีฟ้าทั้งหมดรวดเดียว อาการ Overdose ทำให้หัวใจวายเฉียบพลันและเสียชีวิตทันที!');
-          }
+          const ui = document.getElementById('living-room-ui-container');
+          if (ui) ui.classList.remove('hidden');
         } else {
           showDialogue('ลิ้นชักเปิดอยู่ ไม่มียาเหลือแล้ว');
         }
@@ -203,7 +197,39 @@ window.RoomData.living_room = {
     }
   ],
   decorations: [],
-  setupUI: function() {},
+  setupUI: function() {
+    if (!document.getElementById('living-room-ui-container')) {
+        const uiStr = `
+          <div id="living-room-ui-container" class="ui-overlay hidden">
+              <div class="ui-panel">
+                  <h3>เปิดลิ้นชัก... พบยาเม็ดสีฟ้า คุณจะทำอะไร?</h3>
+                  <div class="pill-grid">
+                      <button class="pill-btn" id="lr-btn-save">[เก็บไว้ยามฉุกเฉิน]</button>
+                      <button class="pill-btn" id="lr-btn-eat">[ทานตอนนี้]</button>
+                  </div>
+                  <button class="close-ui-btn" id="lr-close-ui">ปิด</button>
+              </div>
+          </div>
+        `;
+        const d = document.createElement('div');
+        d.innerHTML = uiStr;
+        document.body.appendChild(d.firstElementChild);
+
+        document.getElementById('lr-btn-save').onclick = () => {
+            document.getElementById('living-room-ui-container').classList.add('hidden');
+            GameState.flags.living_room_drawer_open = true;
+            showDialogue('คุณเลือกที่จะเก็บมันไว้เป็นเสบียงฉุกเฉิน');
+            addLog("พกยาเม็ดสีฟ้าติดตัวไปนิดหน่อย และเก็บที่เหลือไว้ที่นี่");
+        };
+        document.getElementById('lr-btn-eat').onclick = () => {
+            document.getElementById('living-room-ui-container').classList.add('hidden');
+            triggerDeath('คุณกินยาเม็ดสีฟ้าทั้งหมดรวดเดียว อาการ Overdose ทำให้หัวใจวายเฉียบพลันและเสียชีวิตทันที!');
+        };
+        document.getElementById('lr-close-ui').onclick = () => {
+            document.getElementById('living-room-ui-container').classList.add('hidden');
+        };
+    }
+  },
   updateVisuals: function() {
     const flags = GameState.flags;
     const tvObj = document.getElementById('obj-tv');
@@ -216,7 +242,14 @@ window.RoomData.living_room = {
     }
     const doorHallway = document.getElementById('obj-door_hallway');
     if (doorHallway) {
+       let isShaking = false;
        if (!flags.living_room_door_fixed && flags.living_room_tv_on) {
+          let t = flags.living_room_tv_timer;
+          if ((t >= 10 && t < 15) || (t >= 30 && t < 35) || (t >= 50)) {
+              isShaking = true;
+          }
+       }
+       if (isShaking) {
           doorHallway.classList.add('door-shaking');
        } else {
           doorHallway.classList.remove('door-shaking');
@@ -242,22 +275,40 @@ window.RoomData.living_room = {
        
        if (!flags.living_room_door_fixed && !flags.living_room_door_broken) {
          flags.living_room_tv_timer++;
-         if (flags.living_room_tv_timer >= 60) {
+         let t = flags.living_room_tv_timer;
+         if (t === 10) {
+            showDialogue('ก๊อกๆ... เสียงเคาะประตูดังมาจากฝั่งโถงทางเดิน');
+            window.RoomData.living_room.updateVisuals();
+         } else if (t === 15 || t === 35) {
+            window.RoomData.living_room.updateVisuals();
+         } else if (t === 30) {
+            showDialogue('ก๊อกๆๆๆ... ก๊อกๆๆๆ... เสียงเคาะประตูเริ่มดังและถี่ขึ้น!');
+            window.RoomData.living_room.updateVisuals();
+         } else if (t === 50) {
+            showDialogue('ตึง!! ตึง!! ... บางสิ่งกำลังกระแทกประตูอย่างรุนแรง!!');
+            window.RoomData.living_room.updateVisuals();
+         } else if (t >= 60) {
             flags.living_room_door_broken = true;
-            triggerDeath("ประตูพังเข้ามา สิ่งชั่วร้ายทะลักเข้ามาในห้อง!");
+            triggerDeath("ตกใจช็อกกับสิ่งที่ปรากฏอยู่ตรงหน้า เมื่อมันพังประตูเข้ามาเห็นคุณ!");
          }
        }
     } else {
        GameState.hpDrainRate = 0;
-       if (!flags.living_room_door_fixed) {
+       if (!flags.living_room_door_fixed && !flags.living_room_door_broken) {
            flags.living_room_tv_timer = 0; // stop timer if TV is off
+           window.RoomData.living_room.updateVisuals();
        }
     }
 
     if (!flags.living_room_phone_missed) {
-        flags.living_room_phone_timer++;
-        if (flags.living_room_phone_timer === 1 || flags.living_room_phone_timer === 15) {
+        if (flags.living_room_phone_timer === 0) {
             showDialogue("กริ๊งงงง! โทรศัพท์บ้านดังขึ้น...");
+        } else if (flags.living_room_phone_timer === 10) {
+            showDialogue("กริ๊งงงง! โทรศัพท์บ้านยังคงดังอยู่...");
+        }
+        flags.living_room_phone_timer++;
+        if (flags.living_room_phone_timer > 20) {
+           flags.living_room_phone_missed = true;
         }
     }
   }
