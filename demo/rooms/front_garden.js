@@ -83,10 +83,13 @@ window.RoomData.front_garden = {
            return;
         }
         
-        if (hasItem('pot_b')) {
+        if (hasItem('pot_b') || flags.garden_pot_b_placed) {
            flags.garden_on_cage = true;
+           if (hasItem('pot_b')) {
+               flags.garden_pot_b_placed = true;
+               removeItem('pot_b'); 
+           }
            showDialogue('คุณนำกระถาง B วางช่วยเสริมความสูง แล้วปีนขึ้นไปบนกรงสำเร็จ ปลอดภัยจากสุนัขด้านล่าง!');
-           removeItem('pot_b'); // Pot breaks or stays there, removed from inv
            addLog("ปีนขึ้นมาอยู่บนหลังคากรงเหล็กแล้ว");
         } else if (hasItem('pot_a')) {
            showDialogue('คุณพยายามใช้กระถาง A เป็นขั้นบันได แต่มันแตกออก! เศษดินเผาบาดเท้า!');
@@ -147,8 +150,9 @@ window.RoomData.front_garden = {
                       overlay.remove();
                       triggerDeath('กิ่งไม้สั่นแรงมาก พอคุณใช้พลั่วดึง กิ่งไม้ก็หักลงมาทับคุณตาย!');
                    } else {
-                      showDialogue('คุณใช้พลั่วเกี่ยวเชือกห่วงลงมาได้สำเร็จ [ได้รับเชือกห่วง]');
+                      showDialogue('คุณใช้พลั่วเกี่ยวเชือกห่วงลงมาได้สำเร็จ [ได้รับเชือกห่วง] พลั่วหักในระหว่างใช้งาน');
                       addItem('rope_loop', 'เชือกห่วง');
+                      removeItem('shovel');
                       overlay.remove();
                    }
                } else {
@@ -172,6 +176,8 @@ window.RoomData.front_garden = {
            flags.garden_pots_checked_count++;
            showDialogue('ตรวจสอบกระถาง... คางคกกระโดดออกมา! ตกใจสะดุ้ง!');
            takeDamage('ตกใจคางคก', 0.2);
+        } else if (hasItem('pot_b') || flags.garden_pot_b_placed) {
+           showDialogue('มีกระถางแล้ว ไม่จำเป็นต้องเก็บเพิ่มอีก');
         } else {
            // Provide UI choice
            const uiHTML = `
