@@ -53,17 +53,23 @@ window.RoomData.living_room = {
       id: 'tv', name: 'ทีวี', bounds: { left: 40, top: 40, width: 25, height: 20 },
       onInteract: (element) => {
         const flags = GameState.flags;
-        if (!flags.living_room_tv_on) {
-          flags.living_room_tv_on = true;
-          showDialogue('ภาพซ่าๆ พร้อมเสียงเล่าข่าวดังก้องทั่วห้องถึงเหตุฆาตกรรมในชุมชนใกล้เคียง... (ใช้รีโมทปิดทีวี)');
-          window.RoomData.living_room.updateVisuals();
-        } else {
-          if (hasItem('remote')) {
+        if (hasItem('tv_remote')) {
+          if (!flags.living_room_tv_on) {
+            flags.living_room_tv_on = true;
+            showDialogue('ภาพซ่าๆ พร้อมเสียงเล่าข่าวดังก้องทั่วห้องถึงเหตุฆาตกรรมในชุมชนใกล้เคียง... (ใช้รีโมทเปิดทีวี)');
+            window.RoomData.living_room.updateVisuals();
+          } else {
             flags.living_room_tv_on = false;
             showDialogue('ใช้รีโมทปิดทีวี เสียงรายงานข่าวเงียบลง ความสงบกลับคืนมา');
             window.RoomData.living_room.updateVisuals();
+          }
+        } else {
+          if (!flags.living_room_tv_on) {
+            flags.living_room_tv_on = true;
+            showDialogue('ภาพซ่าๆ พร้อมเสียงเล่าข่าวดังก้องทั่วห้องถึงเหตุฆาตกรรมในชุมชนใกล้เคียง... (ปุ่มปิดที่จอพัง ต้องหารีโมทเพื่อปิดมัน)');
+            window.RoomData.living_room.updateVisuals();
           } else {
-            showDialogue('ทีวีเปิดค้างไว้ เสียงข่าวดังลั่นแทรกกับสัญญาณภาพซ่าๆ (ใช้รีโมทปิดทีวี)');
+            showDialogue('ทีวีเปิดค้างไว้ เสียงข่าวดังลั่นแทรกกับสัญญาณภาพซ่าๆ (ปุ่มปิดที่จอพัง ต้องใช้รีโมทปิดทีวี)');
           }
         }
       }

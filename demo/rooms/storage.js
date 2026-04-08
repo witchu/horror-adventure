@@ -208,7 +208,7 @@
                             removeItem('key_toolbox');
                             showDialogue("คุณใช้กุญแจไขแม่กุญแจออกสำเร็จ! หยิบ 'ค้อน' ออกมาได้แล้ว (ตอนนี้คุณพังประตูใดก็ได้ที่แข็งๆ ได้แล้ว)");
                             addItem('hammer', 'ค้อน');
-                            updateRoomVisuals(); // Hide flashlight UI if hammer gets found
+                            updateRoomVisuals();
                         } else {
                             showDialogue("กล่องถูกล็อคด้วยแม่กุญแจแน่นหนา ต้องหากุญแจมาไข");
                         }
@@ -275,7 +275,7 @@
                 }
             }
 
-            if (GameState.currentRoom === 'storage' && !flags['storage_gotHammer']) {
+            if (GameState.currentRoom === 'storage') {
                 if (roomEls.flashlightUiContainer) roomEls.flashlightUiContainer.classList.remove('hidden');
 
                 const batteryBarContainer = document.getElementById('battery-bar-container');

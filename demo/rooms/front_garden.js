@@ -20,11 +20,11 @@ window.RoomData.front_garden = {
 .branch-shaking { animation: shake 2s infinite; }
   `,
   objects: [
-    { id: 'cage_inside', name: 'เข้าไปในกรง', bounds: { left: 45, top: 60, width: 10, height: 20 },
+    { id: 'cage_toggle', name: 'กรงสุนัข', bounds: { left: 45, top: 60, width: 20, height: 20 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.garden_cage_closed) {
-           showDialogue('ประตูกรงปิดอยู่');
+           showDialogue('ประตูกรงปิดสนิท เข้าออกไม่ได้');
            return;
         }
         if (flags.garden_on_cage) {
@@ -32,28 +32,11 @@ window.RoomData.front_garden = {
            return;
         }
         if (flags.garden_in_cage) {
-           showDialogue('คุณอยู่ในกรงแล้ว');
+           flags.garden_in_cage = false;
+           showDialogue('คุณเดินออกมาจากกรง');
         } else {
            flags.garden_in_cage = true;
            showDialogue('คุณเดินเข้าไปในกรงเหล็กที่มีชามอาหารวางอยู่');
-        }
-      }
-    },
-    { id: 'cage_outside', name: 'ออกจากกรง', bounds: { left: 40, top: 80, width: 20, height: 10 },
-      onInteract: (element) => {
-        const flags = GameState.flags;
-        if (flags.garden_in_cage) {
-           if (flags.garden_cage_closed) {
-               showDialogue('ประตูกรงประแทกปิดไปแล้ว! คุณถูกขัง!');
-           } else {
-               flags.garden_in_cage = false;
-               showDialogue('คุณเดินออกมาจากกรง');
-           }
-        } else {
-           if (flags.garden_on_cage) {
-               flags.garden_on_cage = false;
-               showDialogue('คุณปีนลงจากกรงเหล็ก');
-           }
         }
       }
     },
@@ -87,14 +70,24 @@ window.RoomData.front_garden = {
         }
       }
     },
-    { id: 'cage_roof', name: 'ปีนกรงเหล็ก', bounds: { left: 40, top: 40, width: 20, height: 20 },
+    { id: 'cage_roof', name: 'หลังคากรงเหล็ก', bounds: { left: 40, top: 40, width: 20, height: 20 },
       onInteract: (element) => {
         const flags = GameState.flags;
-        if (flags.garden_in_cage || flags.garden_on_cage) return;
+        if (flags.garden_in_cage) {
+           showDialogue("คุณอยู่ในกรง ปีนขึ้นหลังคาไม่ได้");
+           return;
+        }
+        if (flags.garden_on_cage) {
+           flags.garden_on_cage = false;
+           showDialogue('คุณปีนลงจากกรงเหล็กอย่างระมัดระวัง');
+           return;
+        }
         
         if (hasItem('pot_b')) {
            flags.garden_on_cage = true;
            showDialogue('คุณนำกระถาง B วางช่วยเสริมความสูง แล้วปีนขึ้นไปบนกรงสำเร็จ ปลอดภัยจากสุนัขด้านล่าง!');
+           removeItem('pot_b'); // Pot breaks or stays there, removed from inv
+           addLog("ปีนขึ้นมาอยู่บนหลังคากรงเหล็กแล้ว");
         } else if (hasItem('pot_a')) {
            showDialogue('คุณพยายามใช้กระถาง A เป็นขั้นบันได แต่มันแตกออก! เศษดินเผาบาดเท้า!');
            takeDamage('กระถางบาดเท้า', 0.5);
@@ -131,21 +124,45 @@ window.RoomData.front_garden = {
            showDialogue('เชือกอยู่สูงเกินไป คุณเอื้อมไม่ถึงจากตรงนี้');
            return;
         }
-        // Simplified decision: we auto use shovel if they have it
-        if (hasItem('shovel')) {
-           if (flags.garden_wind_timer >= 300) {
-              triggerDeath('กิ่งไม้สั่นแรงมาก พอคุณใช้พลั่วดึง กิ่งไม้ก็หักลงมาทับคุณตาย!');
-           } else {
-              showDialogue('คุณใช้พลั่วเกี่ยวเชือกห่วงลงมา [ได้รับเชือกห่วง]');
-              addItem('rope_loop', 'เชือกห่วง');
-           }
-        } else {
-           // We ask for interaction
-           showDialogue('คุณสามารถ [ผูกคอ] กับเชือกนี้ได้ หรือหาของมา [เกี่ยว] เชือกลงไป');
-           // Let's implement death right away if they don't have shovel 
-           // In demo context, just warn them
-           showDialogue('มันหลอกล่อให้คุณอยากผูกคอตาย... คุณต้องหาพลั่วมาเกี่ยวเชือกลงไป');
-        }
+
+           const uiHTML = `
+             <div id="garden-rope-ui" class="ui-overlay">
+                 <div class="ui-panel">
+                     <h3>เชือกห่วงแขวนอยู่บนกิ่งไม้ มันเย้ายวนให้พังสิ้นทุกสิ่ง...</h3>
+                     <div class="pill-grid">
+                         <button class="pill-btn" id="btn-rope-take">ใช้พลั่วเกี่ยวเชือกมาเก็บไว้</button>
+                         <button class="pill-btn" id="btn-rope-hang">ผูกคอตาย จบความทรมาน</button>
+                     </div>
+                     <button class="pill-btn mt-10" id="btn-rope-cancel">ไม่ทำอะไร</button>
+                 </div>
+             </div>
+           `;
+           const container = document.getElementById('scene');
+           container.insertAdjacentHTML('beforeend', uiHTML);
+
+           const overlay = document.getElementById('garden-rope-ui');
+           document.getElementById('btn-rope-take').addEventListener('click', () => {
+               if (hasItem('shovel')) {
+                   if (flags.garden_wind_timer >= 300) {
+                      overlay.remove();
+                      triggerDeath('กิ่งไม้สั่นแรงมาก พอคุณใช้พลั่วดึง กิ่งไม้ก็หักลงมาทับคุณตาย!');
+                   } else {
+                      showDialogue('คุณใช้พลั่วเกี่ยวเชือกห่วงลงมาได้สำเร็จ [ได้รับเชือกห่วง]');
+                      addItem('rope_loop', 'เชือกห่วง');
+                      overlay.remove();
+                   }
+               } else {
+                   showDialogue('คุณเอื้อมไม่ถึง และไม่มีอุปกรณ์แบบด้ามยาวเพื่อใช้ดึงเชือกลงมา');
+                   overlay.remove();
+               }
+           });
+           document.getElementById('btn-rope-hang').addEventListener('click', () => {
+               overlay.remove();
+               triggerDeath('คุณทนความกดดันไม่ไหว ตัดสินใจผูกคอตายกับเชือกห่วงบนต้นไม้...');
+           });
+           document.getElementById('btn-rope-cancel').addEventListener('click', () => {
+               overlay.remove();
+           });
       }
     },
     { id: 'pots', name: 'กองกระถาง', bounds: { left: 10, top: 65, width: 15, height: 15 },
@@ -155,13 +172,37 @@ window.RoomData.front_garden = {
            flags.garden_pots_checked_count++;
            showDialogue('ตรวจสอบกระถาง... คางคกกระโดดออกมา! ตกใจสะดุ้ง!');
            takeDamage('ตกใจคางคก', 0.2);
-        } else if (flags.garden_pots_checked_count === 1) {
-           flags.garden_pots_checked_count++;
-           showDialogue('พบกระถาง A (มีรอยร้าว) และ กระถาง B (สภาพดี) คุณเก็บกระถาง B');
-           // Demo simplicity: just give pot B to avoid complex menus
-           addItem('pot_b', 'กระถาง B');
         } else {
-           showDialogue('กองกระถางแตกๆ ไม่มีอะไรแล้ว');
+           // Provide UI choice
+           const uiHTML = `
+             <div id="garden-pot-ui" class="ui-overlay">
+                 <div class="ui-panel">
+                     <h3>ค้นพบกระถางสองใบ คุณจะเลือกเก็บใบไหน?</h3>
+                     <div class="pill-grid">
+                         <button class="pill-btn" id="btn-pot-a">กระถาง A (มีรอยร้าว)</button>
+                         <button class="pill-btn" id="btn-pot-b">กระถาง B (สภาพใหม่แข็งแรง)</button>
+                     </div>
+                     <button class="pill-btn mt-10" id="btn-pot-cancel">ไม่เก็บอะไรเลย</button>
+                 </div>
+             </div>
+           `;
+           const container = document.getElementById('scene');
+           container.insertAdjacentHTML('beforeend', uiHTML);
+
+           const overlay = document.getElementById('garden-pot-ui');
+           document.getElementById('btn-pot-a').addEventListener('click', () => {
+               addItem('pot_a', 'กระถาง A');
+               showDialogue('คุณหยิบ กระถาง A (มีรอยร้าว) ขึ้นมา');
+               overlay.remove();
+           });
+           document.getElementById('btn-pot-b').addEventListener('click', () => {
+               addItem('pot_b', 'กระถาง B');
+               showDialogue('คุณหยิบ กระถาง B (สภาพดี) ขึ้นมา');
+               overlay.remove();
+           });
+           document.getElementById('btn-pot-cancel').addEventListener('click', () => {
+               overlay.remove();
+           });
         }
       }
     },
@@ -184,10 +225,10 @@ window.RoomData.front_garden = {
       onInteract: (element) => {
          if (!GameState.flags.garden_hole_right_checked) {
              GameState.flags.garden_hole_right_checked = true;
-             showDialogue('หลุมนี้ลึกผิดปกติมาก... รู้สึกหวาดกลัว');
+             showDialogue('ตกใจ เห็นหลุมลึกผิดปกติ ดูหวาดกลัวดั่งจุดลึกผิดปกติ');
              takeDamage('หวาดกลัว', 0.2);
          } else {
-             showDialogue('หลุมลึกน่ากลัว');
+             showDialogue('หลุมลึกน่ากลัว ดูผิดปกติ');
          }
       }
     },
@@ -223,7 +264,12 @@ window.RoomData.front_garden = {
     }
   ],
   decorations: [],
-  setupUI: function() {},
+  setupUI: function() {
+    const flags = GameState.flags;
+    if (flags.garden_dog_state !== 'furious') {
+        GameState.hpDrainRate = 0; // stop any previous room's panic draining if safe
+    }
+  },
   updateVisuals: function() {},
   onSecondTimer: function() {
     const flags = GameState.flags;
@@ -241,14 +287,23 @@ window.RoomData.front_garden = {
     }
 
     if (flags.garden_dog_state === 'absent') {
-       flags.garden_dog_timer++;
-       if (flags.garden_dog_timer >= 240) { 
-           showDialogue('สุนัขร็อตไวเลอร์ดุร้ายโผล่มาแล้ว!');
-           if (flags.garden_bowl_full) {
+       if (flags.garden_bowl_full && !flags.garden_in_cage && !flags.garden_cage_closed) {
+           flags.garden_feed_delay_timer = (flags.garden_feed_delay_timer || 0) + 1;
+           if (flags.garden_feed_delay_timer >= 5) {
+               showDialogue('สุนัขเข้าไปอยู่ในกรง เพื่อกินและหลับ');
                flags.garden_dog_state = 'eating';
                flags.garden_dog_action_timer = 0;
-           } else {
-               flags.garden_dog_state = 'furious';
+           }
+       } else {
+           flags.garden_dog_timer++;
+           if (flags.garden_dog_timer >= 240) { 
+               showDialogue('สุนัขร็อตไวเลอร์ดุร้ายโผล่มาแล้ว!');
+               if (flags.garden_bowl_full && !flags.garden_cage_closed) {
+                   flags.garden_dog_state = 'eating';
+                   flags.garden_dog_action_timer = 0;
+               } else {
+                   flags.garden_dog_state = 'furious';
+               }
            }
        }
     } else if (flags.garden_dog_state === 'eating') {
