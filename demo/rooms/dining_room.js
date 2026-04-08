@@ -169,10 +169,10 @@ window.RoomData.dining_room = {
                showDialogue("ลองตรวจสอบดู... พบว่าล้อเลื่อนด้านล่างพัง ต้องการชุดอุปกรณ์ซ่อมล้อมาซ่อมก่อนถึงจะขยับได้");
                flags['dining_room_wheelsChecked'] = true;
            } else {
-               if (hasItem('wheel_repair_kit')) {
+               if (hasItem('basket_wheel')) {
                    flags['dining_room_clockMoved'] = true;
-                   removeItem('wheel_repair_kit');
-                   showDialogue("คุณใช้ชุดอุปกรณ์ซ่อมล้อจนเสร็จ และเลื่อนนาฬิกาลูกตุ้มออกจากทางประตูได้สำเร็จ!");
+                   removeItem('basket_wheel');
+                   showDialogue("คุณใช้อะไหล่ล้อซ่อมล้อนาฬิกาลูกตุ้มจนเสร็จ และเลื่อนนาฬิกาลูกตุ้มออกจากทางประตูได้สำเร็จ!");
                    updateRoomVisuals();
                } else {
                    die("พยายามเลื่อนนาฬิกาลูกตุ้มที่ยังไม่ได้ซ่อมล้อ... ล้อที่พังทำให้นาฬิกาเอียงและล้มทับตัวคุณตายคาที่!");
@@ -187,7 +187,8 @@ window.RoomData.dining_room = {
                showDialogue("นาฬิกาลูกตุ้มบังประตูห้องนั่งเล่นอยู่ คุณเข้าไม่ได้");
            } else {
                showDialogue("ประตูเปิดสู่ห้องนั่งเล่น...");
-               // Currently this demo might not have living room, so just mock or lock
+               saveCheckpoint();
+               loadRoom('living_room');
            }
         }
       },
