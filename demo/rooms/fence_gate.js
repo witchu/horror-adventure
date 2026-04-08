@@ -85,10 +85,28 @@ window.RoomData.fence_gate = {
             removeItem('net');
             addItem('key_house', 'กุญแจประตูบ้าน');
           } else {
-            let ans = confirm("คุณเห็นแสงวิบวับอยู่ก้นบ่อ คุณยังไม่มีไม้ยาว จะเอื้อมมือลงไปหยิบไหม?");
-            if (ans) {
+            const uiHTML = `
+              <div id="fence-fountain-ui" class="ui-overlay">
+                  <div class="ui-panel">
+                      <h3>คุณเห็นแสงวิบวับอยู่ก้นบ่อ คุณยังไม่มีไม้ยาว จะเอื้อมมือลงไปหยิบไหม?</h3>
+                      <div class="pill-grid">
+                          <button class="pill-btn" id="btn-fountain-yes">เอื้อมมือลงไปหยิบ</button>
+                          <button class="pill-btn" id="btn-fountain-no">ไม่เอาดีกว่า</button>
+                      </div>
+                  </div>
+              </div>
+            `;
+            const container = document.getElementById('scene');
+            container.insertAdjacentHTML('beforeend', uiHTML);
+
+            const overlay = document.getElementById('fence-fountain-ui');
+            document.getElementById('btn-fountain-yes').addEventListener('click', () => {
+              overlay.remove();
               triggerDeath('ลื่นตะไคร่ หัวฟาดขอบบ่อจมน้ำตายทันที!');
-            }
+            });
+            document.getElementById('btn-fountain-no').addEventListener('click', () => {
+              overlay.remove();
+            });
           }
         } else {
           showDialogue('ไม่มีอะไรน่าสนใจในน้ำพุแล้ว');
@@ -153,6 +171,7 @@ window.RoomData.fence_gate = {
         }
 
         if (hasItem('key_house')) {
+          removeItem('key_house');
           if (hasItem('fish_knife')) {
             flags.fence_house_door_opened = true;
             showDialogue('คุณเปิดประตูบ้าน! สิ่งชั่วร้ายรออยู่ คุณกระหน่ำแทงมันด้วยมีดแล่ปลาจนเลือดนอง! (เกิด Panic อย่างหนัก)');

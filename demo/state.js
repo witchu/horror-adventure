@@ -16,6 +16,9 @@ const GameState = {
   // Single Checkpoint
   checkpoint: null,
 
+  // Guard: prevent duplicate death triggers
+  isDead: false,
+
   // Persistent stats
   stats: {
     deaths: 0,
@@ -34,6 +37,8 @@ function takeDamage(reason, amount = 0.25) {
 }
 
 function die(reason) {
+  if (GameState.isDead) return;  // prevent double-trigger
+  GameState.isDead = true;
   if (GameState.stats) GameState.stats.deaths++;
   if (els.deathReason) els.deathReason.innerText = reason;
   if (els.deathScreen) els.deathScreen.classList.remove('hidden');

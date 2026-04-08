@@ -555,6 +555,76 @@ h3 {
 }
 .close-ui-btn:hover { color: #fff; }
 
+/* ============================================================
+   Final Action Screen — shows last action before win results
+   ============================================================ */
+
+#final-action-screen {
+  background: rgba(0, 0, 0, 0.97);
+  z-index: 200;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: fadeInScreen 0.8s ease;
+}
+
+#final-action-inner {
+  text-align: center;
+  max-width: 560px;
+  padding: 40px 30px;
+  border: 1px solid #2c3632;
+  background: rgba(10, 14, 12, 0.7);
+  box-shadow: 0 0 60px rgba(0,0,0,0.9), 0 0 20px rgba(179,57,57,0.08);
+  animation: fadeInScreen 1.2s ease;
+}
+
+#final-action-text {
+  font-size: 1.25rem;
+  line-height: 2;
+  color: #c0cac5;
+  margin-bottom: 0;
+  letter-spacing: 0.5px;
+  white-space: pre-wrap;
+}
+
+#final-action-game-over {
+  color: var(--accent);
+  font-size: 1.6rem;
+  letter-spacing: 6px;
+  font-weight: bold;
+  text-shadow: 0 0 20px rgba(179,57,57,0.6);
+  margin: 22px 0 30px;
+  animation: pulseGlow 2s ease infinite;
+}
+
+#final-action-ok {
+  background-color: transparent;
+  color: #8fa098;
+  border: 1px solid #2c3632;
+  padding: 10px 40px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  letter-spacing: 2px;
+  transition: all 0.3s;
+}
+
+#final-action-ok:hover {
+  background-color: #1a221f;
+  border-color: #8fa098;
+  color: #fff;
+}
+
+@keyframes fadeInScreen {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { text-shadow: 0 0 10px rgba(179,57,57,0.4); }
+  50%       { text-shadow: 0 0 30px rgba(179,57,57,0.9); }
+}
+
 
 
 

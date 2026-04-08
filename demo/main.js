@@ -4,6 +4,15 @@ function init() {
   window.triggerDeath = (msg) => { if (typeof die === 'function') die(msg); else console.error('die function not found'); };
   if (els.dialogueBtn) els.dialogueBtn.addEventListener('click', closeDialogue);
   if (els.restartBtn) els.restartBtn.addEventListener('click', restartRoom);
+
+  // Final action screen — OK button reveals win screen
+  const finalOkBtn = document.getElementById('final-action-ok');
+  if (finalOkBtn) {
+    finalOkBtn.addEventListener('click', () => {
+      document.getElementById('final-action-screen').classList.add('hidden');
+      document.getElementById('win-screen').classList.remove('hidden');
+    });
+  }
   
   if (els.hintBtn) {
       els.hintBtn.addEventListener('click', () => {
@@ -40,6 +49,7 @@ function restartRoom() {
       els.deathScreen.classList.add('hidden');
   }
   
+  GameState.isDead = false;   // reset death guard
   GameState.hp = GameState.maxHp; // Restore HP (default)
   GameState.hpDrainRate = 0; // Restore drain status
 
