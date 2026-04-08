@@ -79,6 +79,13 @@ window.RoomData.hallway_f2 = {
         saveCheckpoint();
         loadRoom('hallway_f1');
       }
+    },
+    { id: 'door_bedroom', name: 'กลับห้องนอน', bounds: { left: -5, top: 20, width: 20, height: 50 },
+      onInteract: (element) => {
+        showDialogue("คุณเปิดประตูกลับเข้าไปในห้องนอน");
+        saveCheckpoint();
+        loadRoom('bedroom');
+      }
     }
   ],
   decorations: [

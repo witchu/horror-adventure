@@ -232,7 +232,7 @@ window.RoomData.front_garden = {
        if (!flags.garden_cage_closed) {
            flags.garden_cage_closed = true;
            showDialogue('ลมพัดแรงจนประตูกรงกระแทกปิด! คุณติดอยู่ในกรง!');
-           GameState.hpDrainRate += 0.5; // panic
+           GameState.hpDrainRate += 0.02; // panic
        }
     }
 
@@ -266,7 +266,7 @@ window.RoomData.front_garden = {
         if (!flags.garden_on_cage) {
             triggerDeath('สุนัขพุ่งเข้ามากัดคุณจนตาย!');
         } else {
-            GameState.hpDrainRate = 0.5; // Dog barking
+            GameState.hpDrainRate = 0.02; // Dog barking
             // Wait out the dog
             flags.garden_dog_action_timer++;
             if (flags.garden_dog_action_timer > 15) {

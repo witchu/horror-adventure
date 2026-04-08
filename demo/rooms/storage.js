@@ -1,8 +1,6 @@
 (function () {
     let roomEls = {};
-    let smartphoneBattery = 100;
-    let powerbankChargeTicks = 0;
-    let powerbankInterval = null;
+    let smartphoneBattery = 52;
 
     function toggleFlashlight() {
         const flags = GameState.flags;
@@ -25,29 +23,12 @@
         if (hasItem('powerbank')) {
             removeItem('powerbank');
             if (roomEls.flashlightChargeBtn) roomEls.flashlightChargeBtn.disabled = true;
-            showDialogue("คุณเสียบชาร์จพาวเวอร์แบงค์... แบตเตอรี่จะค่อยๆ เพิ่มขึ้น (1% ทุก 5 วินาที)");
-            powerbankChargeTicks = 0;
-
-            if (powerbankInterval) clearInterval(powerbankInterval);
-
-            powerbankInterval = setInterval(() => {
-                if (GameState.hp <= 0) {
-                    clearInterval(powerbankInterval);
-                    return;
-                }
-                if (smartphoneBattery < 100 && powerbankChargeTicks < 15) {
-                    smartphoneBattery += 1;
-                    powerbankChargeTicks++;
-                    renderHUD();
-
-                    if (smartphoneBattery >= 100 || powerbankChargeTicks >= 15) {
-                        clearInterval(powerbankInterval);
-                        showDialogue("พาวเวอร์แบงค์พลังงานหมดแล้ว!");
-                    }
-                } else {
-                    clearInterval(powerbankInterval);
-                }
-            }, 5000);
+            
+            smartphoneBattery += 20;
+            if (smartphoneBattery > 100) smartphoneBattery = 100;
+            
+            showDialogue("คุณเสียบชาร์จพาวเวอร์แบงค์... แบตเตอรี่เพิ่มขึ้นเป็น " + smartphoneBattery + "% (พาวเวอร์แบงค์ถูกใช้งานจนเกลี้ยง)");
+            renderHUD();
         }
     }
 
@@ -349,12 +330,12 @@
             if (!flags['storage_flashLightOn'] && flags.storage_panicTimer > 210) { // 3 min 30 sec = 210s
                 if (GameState.hpDrainRate === 0) {
                     showDialogue("มืดสนิท... อา อาการ Panic กำเริบระดับ 1! (บาดเจ็บต่อเนื่อง)");
-                    GameState.hpDrainRate = 0.2;
+                    GameState.hpDrainRate = 0.02;
                 }
             } else if (flags['storage_flashLightOn'] && flags.storage_panicTimer > 300) { // 5 mins = 300s
-                if (GameState.hpDrainRate <= 0.2) {
+                if (GameState.hpDrainRate <= 0.02) {
                     showDialogue("อยู่ในที่แคบนานเกินไป... แสงแฟลชก็ช่วยไม่ได้ อาการ Panic กำเริบระดับ 2! (บาดเจ็บต่อเนื่อง)");
-                    GameState.hpDrainRate = 0.4;
+                    GameState.hpDrainRate = 0.02;
                 }
             }
 

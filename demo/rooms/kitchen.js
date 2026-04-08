@@ -113,7 +113,8 @@
     kitchen_waterTimer: 0,
     kitchen_kettleTimer: 0,
     kitchen_cabinetTimer: 0,
-    kitchen_gasTimer: 0
+    kitchen_gasTimer: 0,
+    kitchen_laundry_unlocked: false
   });
 
   window.RoomData.kitchen = {
@@ -228,8 +229,13 @@
       },
       { id: 'door_laundry', name: 'ประตูห้องซักล้าง', bounds: { left: 80, top: 70, width: 15, height: 25 },
         onInteract: (element) => {
-          if (hasItem('hammer')) {
+          if (GameState.flags['kitchen_laundry_unlocked']) {
+              showDialogue("ประตูห้องซักล้างถูกทุบเปิดไว้แล้ว คุณเปิดเข้าไปในห้อง...");
+              saveCheckpoint();
+              loadRoom('laundry');
+          } else if (hasItem('hammer')) {
               removeItem('hammer');
+              GameState.flags['kitchen_laundry_unlocked'] = true;
               showDialogue("คุณใช้ค้อนทุบลูกบิดที่ขึ้นสนิมจนหลุด! ประตูห้องซักล้างถูกเปิดออกแล้ว...");
               saveCheckpoint();
               loadRoom('laundry');
@@ -360,11 +366,11 @@
           if (flags.kitchen_gasTimer > 15) {
              if (GameState.hpDrainRate === 0) {
                  showDialogue("สูดดมควันไหม้จากอาหารบนเตา! (บาดเจ็บต่อเนื่อง)");
-                 GameState.hpDrainRate = 0.5; // Drain faster
+                 GameState.hpDrainRate = 0.02; // Drain faster
              }
           }
       } else {
-          if (GameState.hpDrainRate === 0.5) GameState.hpDrainRate = 0;
+          if (GameState.hpDrainRate === 0.02) GameState.hpDrainRate = 0;
       }
     }
   };

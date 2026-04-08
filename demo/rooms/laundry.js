@@ -48,7 +48,7 @@ window.RoomData.laundry = {
       }
     },
     {
-      id: 'iron_plug', name: 'ปลั๊กเตารีด', bounds: { left: 35, top: 40, width: 5, height: 5 },
+      id: 'iron_plug', name: 'ปลั๊กเตารีด', bounds: { left: 45, top: 40, width: 15, height: 15 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.laundry_iron_plugged) {
@@ -85,12 +85,12 @@ window.RoomData.laundry = {
         const flags = GameState.flags;
         if (!flags.laundry_basket_empty) {
           flags.laundry_basket_empty = true;
-          flags.laundry_washer_has_clothes = true;
-          showDialogue('คุณเทเสื้อผ้าทั้งหมดลงเครื่องซักผ้า... มีกระดาษโน้ตหลุดออกมา: "ห้องนี้อบอ้าวไปด้วยความร้อน ควรทำให้อากาศถ่ายเทเสมอ"');
+          addItem('dirty_clothes', 'เสื้อผ้าสกปรก');
+          showDialogue('คุณหยิบเสื้อผ้าสกปรกจากตะกร้าเก็บไว้... มีกระดาษโน้ตหลุดออกมา: "ห้องนี้อบอ้าวไปด้วยความร้อน ควรทำให้อากาศถ่ายเทเสมอ"');
           addLog('ข้อความ: ควรทำให้อากาศถ่ายเทเสมอ สำหรับห้องซักล้าง');
         } else if (!flags.laundry_wheel_taken) {
           flags.laundry_wheel_taken = true;
-          showDialogue('คุณถอดอะไหล่ล้อจากตะกร้าผ้าที่ว่างเปล่า [ได้อะไหล่ล้อตะกร้าผ้า]');
+          showDialogue('คุณตรวจสอบตะกร้าผ้าที่ว่างเปล่า... ถอดอะไหล่ล้อจากตะกร้าผ้าได้ [ได้อะไหล่ล้อตะกร้าผ้า]');
           addItem('basket_wheel', 'อะไหล่ล้อตะกร้าผ้า');
         } else {
           showDialogue('ตะกร้าผ้าว่างเปล่า ไม่มีอะไรให้ใช้แล้ว');
@@ -102,17 +102,33 @@ window.RoomData.laundry = {
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.laundry_washer_running) {
-          flags.laundry_washer_running = false;
-          showDialogue('คุณกดปิดเครื่องซักผ้า');
-          element.classList.remove('washer-shaking');
+            const promptAns = prompt('เครื่องซักผ้ากำลังทำงาน คุณจะทำอะไร?\n1. หยุดการทำงาน');
+            if (promptAns === '1') {
+                flags.laundry_washer_running = false;
+                showDialogue('คุณกดปิดเครื่องซักผ้า');
+                element.classList.remove('washer-shaking');
+            }
         } else {
-          flags.laundry_washer_running = true;
-          if (!flags.laundry_washer_has_clothes) {
-            showDialogue('คุณเปิดเครื่องซักผ้าโดยที่ไม่มีเสื้อผ้าอยู่ข้างใน! ฟองจากผงซักฟอกเริ่มล้นออกมา!');
-          } else {
-            showDialogue('คุณเปิดเครื่องซักผ้า เครื่องเริ่มทำงานและสั่นอย่างแรง');
-          }
-          element.classList.add('washer-shaking');
+            const promptAns = prompt('เครื่องซักผ้าปิดอยู่ คุณจะทำอะไร?\n1. เริ่มทำงาน\n2. ใส่เสื้อผ้าลงไป');
+            if (promptAns === '1') {
+                flags.laundry_washer_running = true;
+                if (!flags.laundry_washer_has_clothes) {
+                    showDialogue('คุณเปิดเครื่องซักผ้าโดยที่ไม่มีเสื้อผ้าอยู่ข้างใน! ฟองจากผงซักฟอกเริ่มล้นออกมา!');
+                } else {
+                    showDialogue('คุณเปิดเครื่องซักผ้า เครื่องเริ่มทำงานและสั่นอย่างแรง');
+                }
+                element.classList.add('washer-shaking');
+            } else if (promptAns === '2') {
+                if (hasItem('dirty_clothes')) {
+                    removeItem('dirty_clothes');
+                    flags.laundry_washer_has_clothes = true;
+                    showDialogue('คุณเปิดฝาแล้วเอาเสื้อผ้าสกปรกใส่เข้าไปในเครื่องซักผ้า');
+                } else if (flags.laundry_washer_has_clothes) {
+                    showDialogue('มีเสื้อผ้าอยู่ข้างในเครื่องแล้ว');
+                } else {
+                    showDialogue('คุณไม่มีเสื้อผ้าให้ใส่ลงไป ลองหาตะกร้าผ้าดู');
+                }
+            }
         }
       }
     },
@@ -125,8 +141,8 @@ window.RoomData.laundry = {
     {
       id: 'pet_flap', name: 'ช่องสัตว์เลี้ยงบนประตู', bounds: { left: 80, top: 80, width: 5, height: 5 },
       onInteract: (element) => {
-        showDialogue('เป็นประตูบานสวิงเล็กๆ คุณพยายามมุดออกไป...');
-        triggerDeath('ร่างกายคุณติดอยู่กลางช่องแคบ ไม่มีใครช่วยเหลือ ขาดอากาศหายใจจนเสียชีวิต!');
+        showDialogue('เป็นประตูบานสวิงเล็กๆ คุณมุดหัวและลำตัวพยายามมุดออกไป...');
+        triggerDeath('ร่างกายคุณติดอยู่กลางช่องแคบขยับไม่ได้ ไม่มีใครช่วยเหลือ ขาดอากาศหายใจจนเสียชีวิต!');
       }
     },
     {
@@ -200,23 +216,23 @@ window.RoomData.laundry = {
 
     // Engine heat
     if (!flags.laundry_fan_on) {
-      GameState.hpDrainRate = 0.03;
+      GameState.hpDrainRate = 0.02;
     } else {
       GameState.hpDrainRate = 0; // Reduced drain
     }
 
     // Washer logic
     if (flags.laundry_washer_running) {
-      GameState.hpDrainRate += 0.01; // panic from shaking
+      GameState.hpDrainRate += 0.02; // panic from shaking
 
       if (!flags.laundry_washer_has_clothes) {
         flags.laundry_washer_timer++;
-        if (flags.laundry_washer_timer >= 10 && !flags.laundry_floor_wet) {
+        if (flags.laundry_washer_timer >= 20 && !flags.laundry_floor_wet) {
           flags.laundry_floor_wet = true;
           if (els.interactiveLayer) els.interactiveLayer.classList.add('floor-wet');
         }
-        if (flags.laundry_washer_timer >= 30) {
-          triggerDeath('ฟองล้นเต็มพื้น ทำให้คุณลื่นล้มหัวใจวายตาย!');
+        if (flags.laundry_washer_timer >= 60) {
+          triggerDeath('ฟองล้นเต็มพื้นปริมาณมหาศาล ทำให้คุณลื่นล้มหัวใจวายตาย!');
         }
       }
     }

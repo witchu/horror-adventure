@@ -42,7 +42,7 @@ window.RoomData.road = {
                  GameState.flags.road_attacked_man = true;
                  GameState.flags.road_man_interacted = true;
                  showDialogue('คุณต่อว่าเขา เขาด่ากลับ เกิดการถกเถียง คุณใช้มีดแล่ปลาแทงเขาจนล้มลง! (Panic กำเริบอย่างรุนแรง)');
-                 GameState.hpDrainRate += 0.5;
+                 GameState.hpDrainRate += 0.02;
              } else {
                  triggerDeath('คุณไปด่าเขา เขาโกรธจัดและกระหน่ำทำร้ายคุณจนตายคาฟุตบาท!');
              }

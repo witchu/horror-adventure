@@ -387,7 +387,7 @@ window.RoomData.bathroom = {
         flags.bathroom_timer++;
         if (flags.bathroom_timer > 15 && GameState.hpDrainRate === 0) {
           showDialogue("ไฟกะพริบถี่ทำให้คุณเริ่มหลอน! (บาดเจ็บต่อเนื่อง)");
-          GameState.hpDrainRate = 0.1;
+          GameState.hpDrainRate = 0.02;
         }
       } else {
         // Handled by room transition logic instead of continually overwriting here

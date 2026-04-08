@@ -160,7 +160,7 @@ window.RoomData.fence_gate = {
              if (hasItem('fish_knife')) {
                  flags.fence_house_door_opened = true;
                  showDialogue('คุณเปิดประตูบ้าน! สิ่งชั่วร้ายรออยู่ คุณกระหน่ำแทงมันด้วยมีดแล่ปลาจนเลือดนอง! (เกิด Panic อย่างหนัก)');
-                 GameState.hpDrainRate += 0.5; 
+                 GameState.hpDrainRate += 0.02; 
              } else {
                  triggerDeath('คุณไขเปิดประตู... สิ่งชั่วร้ายที่รออยู่กระหน่ำทำร้ายคุณจนตายคาช่องประตู!');
              }
