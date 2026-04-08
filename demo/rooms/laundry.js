@@ -156,7 +156,8 @@ window.RoomData.laundry = {
         } else {
           if (hasItem('fire_extinguisher')) {
             flags.laundry_window_broken = true;
-            showDialogue('คุณใช้ถังดับเพลิงกระแทกหน้าต่างบานเกร็ดจนแตก! ทางออกสู่สวนถูกเปิดออกแล้ว');
+            removeItem('fire_extinguisher');
+            showDialogue('คุณใช้ถังดับเพลิงทุบกระจกหน้าต่างบานเกล็ดจนแตก! กลิ่นอายความอิสระลอยเข้ามา... (ถังดับเพลิงพังเสียไปแล้ว)');
           } else {
             showDialogue('หน้าต่างบานเกร็ดฝืดสนิท หมุนไม่ได้ ต้องหาของหนักๆ มาทุบมัน');
           }
@@ -252,6 +253,22 @@ window.RoomData.laundry = {
   },
   updateVisuals: function () {
     const flags = GameState.flags;
+    const ironEl = document.getElementById('obj-iron');
+    if (ironEl) {
+        if (flags.laundry_iron_plugged && !flags.laundry_iron_up) {
+            if (flags.laundry_iron_timer > 30) {
+                ironEl.classList.add('danger-high');
+                ironEl.classList.remove('danger-low');
+            } else if (flags.laundry_iron_timer > 10) {
+                ironEl.classList.add('danger-low');
+                ironEl.classList.remove('danger-high');
+            } else {
+                ironEl.classList.remove('danger-low', 'danger-high');
+            }
+        } else {
+            ironEl.classList.remove('danger-low', 'danger-high');
+        }
+    }
     const fanEl = document.getElementById('obj-fan');
     if (fanEl && flags.laundry_fan_on) { fanEl.classList.add('laundry-fan-on'); }
 

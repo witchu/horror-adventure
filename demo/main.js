@@ -40,14 +40,14 @@ function restartRoom() {
       els.deathScreen.classList.add('hidden');
   }
   
-  // Rely on the single global checkpoint to restore inventory and flat flags
+  GameState.hp = GameState.maxHp; // Restore HP (default)
+  GameState.hpDrainRate = 0; // Restore drain status
+
+  // Rely on the single global checkpoint to restore inventory, flat flags, and current HP
   loadCheckpoint();
 
   // Hide any overlays
   document.querySelectorAll('.ui-overlay').forEach(el => el.classList.add('hidden'));
-
-  GameState.hp = GameState.maxHp; // Restore HP
-  GameState.hpDrainRate = 0; // Restore drain status
   
   renderInventory();
   renderHUD();

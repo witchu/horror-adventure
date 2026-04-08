@@ -42,7 +42,7 @@ function die(reason) {
 // --- Inventory & Checkpoint Functions ---
 
 function addItem(id, name) {
-  if (GameState.items.length >= 6) {
+  if (GameState.items.length >= 9) {
     showDialogue("กระเป๋าเต็ม!");
     return false;
   }
@@ -83,7 +83,8 @@ function renderInventory() {
 function saveCheckpoint() {
   GameState.checkpoint = {
     items: JSON.parse(JSON.stringify(GameState.items)),
-    flags: JSON.parse(JSON.stringify(GameState.flags))
+    flags: JSON.parse(JSON.stringify(GameState.flags)),
+    hp: GameState.hp
   };
 }
 
@@ -91,6 +92,9 @@ function loadCheckpoint() {
   if (GameState.checkpoint) {
     GameState.items = JSON.parse(JSON.stringify(GameState.checkpoint.items));
     GameState.flags = JSON.parse(JSON.stringify(GameState.checkpoint.flags));
+    if (GameState.checkpoint.hp !== undefined) {
+        GameState.hp = GameState.checkpoint.hp;
+    }
     renderInventory();
   }
 }

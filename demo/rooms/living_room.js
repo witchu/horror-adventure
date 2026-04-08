@@ -36,7 +36,8 @@ window.RoomData.living_room = {
 }
   `,
   objects: [
-    { id: 'phone', name: 'โทรศัพท์บ้าน', bounds: { left: 20, top: 50, width: 10, height: 10 },
+    {
+      id: 'phone', name: 'โทรศัพท์บ้าน', bounds: { left: 20, top: 50, width: 10, height: 10 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.living_room_phone_missed && flags.living_room_phone_timer < 30) {
@@ -48,31 +49,27 @@ window.RoomData.living_room = {
         }
       }
     },
-    { id: 'tv', name: 'ทีวี', bounds: { left: 40, top: 40, width: 25, height: 20 },
+    {
+      id: 'tv', name: 'ทีวี', bounds: { left: 40, top: 40, width: 25, height: 20 },
       onInteract: (element) => {
         const flags = GameState.flags;
-        if (hasItem('tv_remote')) {
-           if (flags.living_room_tv_on) {
-             flags.living_room_tv_on = false;
-             showDialogue('คุณใช้รีโมทปิดทีวี เสียงซ่าและเสียงรายงานข่าวหายไป ห้องเงียบลง');
-             GameState.hpDrainRate = 0;
-             window.RoomData.living_room.updateVisuals();
-           } else {
-             flags.living_room_tv_on = true;
-             showDialogue('คุณใช้รีโมทเปิดทีวี');
-             GameState.hpDrainRate = 0.02; // Drain HP
-             window.RoomData.living_room.updateVisuals();
-           }
+        if (!flags.living_room_tv_on) {
+          flags.living_room_tv_on = true;
+          showDialogue('ภาพซ่าๆ พร้อมเสียงเล่าข่าวดังก้องทั่วห้องถึงเหตุฆาตกรรมในชุมชนใกล้เคียง... (ใช้รีโมทปิดทีวี)');
+          window.RoomData.living_room.updateVisuals();
         } else {
-           if (flags.living_room_tv_on) {
-             showDialogue('ทีวีเปิดค้างไว้ เสียงนักข่าวรายงานเหตุฆาตกรรมในท้องถิ่น... น่ากลัว (ต้องหารีโมทเพื่อปิดมัน)');
-           } else {
-             showDialogue('ทีวีปิดอยู่');
-           }
+          if (hasItem('remote')) {
+            flags.living_room_tv_on = false;
+            showDialogue('ใช้รีโมทปิดทีวี เสียงรายงานข่าวเงียบลง ความสงบกลับคืนมา');
+            window.RoomData.living_room.updateVisuals();
+          } else {
+            showDialogue('ทีวีเปิดค้างไว้ เสียงข่าวดังลั่นแทรกกับสัญญาณภาพซ่าๆ (ใช้รีโมทปิดทีวี)');
+          }
         }
       }
     },
-    { id: 'sofa_blanket', name: 'ผ้าห่มบนโซฟา', bounds: { left: 40, top: 65, width: 30, height: 20 },
+    {
+      id: 'sofa_blanket', name: 'ผ้าห่มบนโซฟา', bounds: { left: 40, top: 65, width: 30, height: 20 },
       onInteract: (element) => {
         if (!GameState.flags.living_room_blanket_checked) {
           GameState.flags.living_room_blanket_checked = true;
@@ -83,7 +80,8 @@ window.RoomData.living_room = {
         }
       }
     },
-    { id: 'dishes', name: 'จานชามสกปรก', bounds: { left: 50, top: 85, width: 20, height: 10 },
+    {
+      id: 'dishes', name: 'จานชามสกปรก', bounds: { left: 50, top: 85, width: 20, height: 10 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.living_room_dishes_checked) {
@@ -98,7 +96,8 @@ window.RoomData.living_room = {
         }
       }
     },
-    { id: 'tv_drawer', name: 'ลิ้นชักชั้นวางทีวี', bounds: { left: 40, top: 60, width: 25, height: 10 },
+    {
+      id: 'tv_drawer', name: 'ลิ้นชักชั้นวางทีวี', bounds: { left: 40, top: 60, width: 25, height: 10 },
       onInteract: (element) => {
         if (!GameState.flags.living_room_drawer_open) {
           const ui = document.getElementById('living-room-ui-container');
@@ -108,7 +107,8 @@ window.RoomData.living_room = {
         }
       }
     },
-    { id: 'dog_bed', name: 'เบาะนอนสุนัข', bounds: { left: 80, top: 75, width: 15, height: 15 },
+    {
+      id: 'dog_bed', name: 'เบาะนอนสุนัข', bounds: { left: 80, top: 75, width: 15, height: 15 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.living_room_dogbed_check_count === 0) {
@@ -124,22 +124,24 @@ window.RoomData.living_room = {
         }
       }
     },
-    { id: 'dog_bowl', name: 'ชามอาหารสุนัข', bounds: { left: 75, top: 85, width: 8, height: 8 },
+    {
+      id: 'dog_bowl', name: 'ชามอาหารสุนัข', bounds: { left: 75, top: 85, width: 8, height: 8 },
       onInteract: (element) => {
         showDialogue('คุณตักอาหารสุนัขที่เหลือเข้ากระเป๋า [ได้อาหารสุนัข]');
         if (!hasItem('dog_food')) {
-            addItem('dog_food', 'อาหารสุนัข');
+          addItem('dog_food', 'อาหารสุนัข');
         }
       }
     },
-    { id: 'door_hallway', name: 'ประตูโถงทางเดิน', bounds: { left: 5, top: 15, width: 15, height: 50 },
+    {
+      id: 'door_hallway', name: 'ประตูโถงทางเดิน', bounds: { left: 5, top: 15, width: 15, height: 50 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.living_room_door_broken) {
           showDialogue('คุณเปิดประตูที่พังออก... บางอย่างชั่วร้ายยืนรออยู่อีกฝั่ง!!');
           triggerDeath('ช็อกตายจากสิ่งน่าหวาดกลัวที่พังประตูเข้ามา');
         } else if (flags.living_room_door_fixed) {
-           showDialogue('ประตูถูกซ่อมและล็อคแล้ว ประตูยังคงฝืดอยู่ มีกำลังในการดึงเปิดไม่พอ คุณออกทางนี้ไม่ได้');
+          showDialogue('ประตูถูกซ่อมและล็อคแล้ว ประตูยังคงฝืดอยู่ มีกำลังในการดึงเปิดไม่พอ คุณออกทางนี้ไม่ได้');
         } else {
           if (hasItem('door_knob')) {
             flags.living_room_door_fixed = true;
@@ -152,7 +154,8 @@ window.RoomData.living_room = {
         }
       }
     },
-    { id: 'door_dining', name: 'ประตูทางเชื่อมห้องทานข้าว', bounds: { left: 80, top: 15, width: 15, height: 50 },
+    {
+      id: 'door_dining', name: 'ประตูทางเชื่อมห้องทานข้าว', bounds: { left: 80, top: 15, width: 15, height: 50 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.living_room_dining_door_closed) {
@@ -165,41 +168,43 @@ window.RoomData.living_room = {
         }
       }
     },
-    { id: 'door_dining_close', name: 'บานประตูห้องทานข้าว', bounds: { left: 70, top: 20, width: 10, height: 10 },
+    {
+      id: 'door_dining_close', name: 'บานประตูห้องทานข้าว', bounds: { left: 70, top: 20, width: 10, height: 10 },
       onInteract: (element) => {
-         const flags = GameState.flags;
-         if (!flags.living_room_dining_door_closed) {
-            flags.living_room_dining_door_closed = true;
-            if (!flags.living_room_extinguisher_taken) {
-                showDialogue('คุณปิดประตูห้องทานข้าว... เผยให้เห็น [ถังดับเพลิง] ซ่อนอยู่หลังประตู!');
-            } else {
-                showDialogue('คุณปิดประตูห้องทานข้าว');
-            }
-         } else {
-            flags.living_room_dining_door_closed = false;
-            showDialogue('คุณเปิดประตูห้องทานข้าวอ้าไว้ตามเดิม');
-         }
-         window.RoomData.living_room.updateVisuals();
+        const flags = GameState.flags;
+        if (!flags.living_room_dining_door_closed) {
+          flags.living_room_dining_door_closed = true;
+          if (!flags.living_room_extinguisher_taken) {
+            showDialogue('คุณปิดประตูห้องทานข้าว... เผยให้เห็น [ถังดับเพลิง] ซ่อนอยู่หลังประตู!');
+          } else {
+            showDialogue('คุณปิดประตูห้องทานข้าว');
+          }
+        } else {
+          flags.living_room_dining_door_closed = false;
+          showDialogue('คุณเปิดประตูห้องทานข้าวอ้าไว้ตามเดิม');
+        }
+        window.RoomData.living_room.updateVisuals();
       }
     },
-    { id: 'fire_extinguisher_obj', name: 'ถังดับเพลิง', bounds: { left: 75, top: 25, width: 10, height: 20 },
+    {
+      id: 'fire_extinguisher_obj', name: 'ถังดับเพลิง', bounds: { left: 75, top: 25, width: 10, height: 20 },
       onInteract: (element) => {
-         const flags = GameState.flags;
-         if (flags.living_room_dining_door_closed && !flags.living_room_extinguisher_taken) {
-             flags.living_room_extinguisher_taken = true;
-             addItem('fire_extinguisher', 'ถังดับเพลิง');
-             showDialogue('คุณหยิบถังดับเพลิงมาสะพายไว้ [ได้รับถังดับเพลิง]');
-         } else {
-             showDialogue('คุณเก็บถังดับเพลิงไปแล้ว');
-         }
-         window.RoomData.living_room.updateVisuals();
+        const flags = GameState.flags;
+        if (flags.living_room_dining_door_closed && !flags.living_room_extinguisher_taken) {
+          flags.living_room_extinguisher_taken = true;
+          addItem('fire_extinguisher', 'ถังดับเพลิง');
+          showDialogue('คุณหยิบถังดับเพลิงมาสะพายไว้ [ได้รับถังดับเพลิง]');
+        } else {
+          showDialogue('คุณเก็บถังดับเพลิงไปแล้ว');
+        }
+        window.RoomData.living_room.updateVisuals();
       }
     }
   ],
   decorations: [],
-  setupUI: function() {
+  setupUI: function () {
     if (!document.getElementById('living-room-ui-container')) {
-        const uiStr = `
+      const uiStr = `
           <div id="living-room-ui-container" class="ui-overlay hidden">
               <div class="ui-panel">
                   <h3>เปิดลิ้นชัก... พบยาเม็ดสีฟ้า คุณจะทำอะไร?</h3>
@@ -211,105 +216,115 @@ window.RoomData.living_room = {
               </div>
           </div>
         `;
-        const d = document.createElement('div');
-        d.innerHTML = uiStr;
-        document.body.appendChild(d.firstElementChild);
+      const d = document.createElement('div');
+      d.innerHTML = uiStr;
+      document.body.appendChild(d.firstElementChild);
 
-        document.getElementById('lr-btn-save').onclick = () => {
-            document.getElementById('living-room-ui-container').classList.add('hidden');
-            GameState.flags.living_room_drawer_open = true;
-            showDialogue('คุณเลือกที่จะเก็บมันไว้เป็นเสบียงฉุกเฉิน');
-            addLog("พกยาเม็ดสีฟ้าติดตัวไปนิดหน่อย และเก็บที่เหลือไว้ที่นี่");
-        };
-        document.getElementById('lr-btn-eat').onclick = () => {
-            document.getElementById('living-room-ui-container').classList.add('hidden');
-            triggerDeath('คุณกินยาเม็ดสีฟ้าทั้งหมดรวดเดียว อาการ Overdose ทำให้หัวใจวายเฉียบพลันและเสียชีวิตทันที!');
-        };
-        document.getElementById('lr-close-ui').onclick = () => {
-            document.getElementById('living-room-ui-container').classList.add('hidden');
-        };
+      document.getElementById('lr-btn-save').onclick = () => {
+        document.getElementById('living-room-ui-container').classList.add('hidden');
+        GameState.flags.living_room_drawer_open = true;
+        showDialogue('คุณเลือกที่จะเก็บมันไว้เป็นเสบียงฉุกเฉิน');
+        addLog("พกยาเม็ดสีฟ้าติดตัวไปนิดหน่อย และเก็บที่เหลือไว้ที่นี่");
+      };
+      document.getElementById('lr-btn-eat').onclick = () => {
+        document.getElementById('living-room-ui-container').classList.add('hidden');
+        triggerDeath('คุณกินยาเม็ดสีฟ้าทั้งหมดรวดเดียว อาการ Overdose ทำให้หัวใจวายเฉียบพลันและเสียชีวิตทันที!');
+      };
+      document.getElementById('lr-close-ui').onclick = () => {
+        document.getElementById('living-room-ui-container').classList.add('hidden');
+      };
     }
   },
-  updateVisuals: function() {
+  updateVisuals: function () {
     const flags = GameState.flags;
     const tvObj = document.getElementById('obj-tv');
     if (tvObj) {
       if (flags.living_room_tv_on) {
-         tvObj.classList.add('living-room-tv-glow');
+        tvObj.classList.add('living-room-tv-glow', 'light-shake');
       } else {
-         tvObj.classList.remove('living-room-tv-glow');
+        tvObj.classList.remove('living-room-tv-glow', 'light-shake');
+      }
+    }
+
+    // Check phone vibrating
+    const phoneObj = document.getElementById('obj-phone');
+    if (phoneObj) {
+      if (!flags.living_room_phone_missed && flags.living_room_phone_timer > 0) {
+        phoneObj.classList.add('light-shake');
+      } else {
+        phoneObj.classList.remove('light-shake');
       }
     }
     const doorHallway = document.getElementById('obj-door_hallway');
     if (doorHallway) {
-       let isShaking = false;
-       if (!flags.living_room_door_fixed && flags.living_room_tv_on) {
-          let t = flags.living_room_tv_timer;
-          if ((t >= 10 && t < 15) || (t >= 30 && t < 35) || (t >= 50)) {
-              isShaking = true;
-          }
-       }
-       if (isShaking) {
-          doorHallway.classList.add('door-shaking');
-       } else {
-          doorHallway.classList.remove('door-shaking');
-       }
+      let isShaking = false;
+      if (!flags.living_room_door_fixed && flags.living_room_tv_on) {
+        let t = flags.living_room_tv_timer;
+        if ((t >= 10 && t < 15) || (t >= 30 && t < 35) || (t >= 50)) {
+          isShaking = true;
+        }
+      }
+      if (isShaking) {
+        doorHallway.classList.add('door-shaking');
+      } else {
+        doorHallway.classList.remove('door-shaking');
+      }
     }
     const extObj = document.getElementById('obj-fire_extinguisher_obj');
     if (extObj) {
-        if (flags.living_room_dining_door_closed && !flags.living_room_extinguisher_taken) {
-            extObj.style.display = 'block';
-        } else {
-            extObj.style.display = 'none';
-        }
+      if (flags.living_room_dining_door_closed && !flags.living_room_extinguisher_taken) {
+        extObj.style.display = 'block';
+      } else {
+        extObj.style.display = 'none';
+      }
     }
   },
-  onSecondTimer: function() {
+  onSecondTimer: function () {
     const flags = GameState.flags;
     if (flags.living_room_tv_on) {
-       if (flags.living_room_door_fixed) {
-           GameState.hpDrainRate = 0; // stop HP drain if door fixed
-       } else {
-           GameState.hpDrainRate = 0.02; // Drain slowly
-       }
-       
-       if (!flags.living_room_door_fixed && !flags.living_room_door_broken) {
-         flags.living_room_tv_timer++;
-         let t = flags.living_room_tv_timer;
-         if (t === 10) {
-            showDialogue('ก๊อกๆ... เสียงเคาะประตูดังมาจากฝั่งโถงทางเดิน');
-            window.RoomData.living_room.updateVisuals();
-         } else if (t === 15 || t === 35) {
-            window.RoomData.living_room.updateVisuals();
-         } else if (t === 30) {
-            showDialogue('ก๊อกๆๆๆ... ก๊อกๆๆๆ... เสียงเคาะประตูเริ่มดังและถี่ขึ้น!');
-            window.RoomData.living_room.updateVisuals();
-         } else if (t === 50) {
-            showDialogue('ตึง!! ตึง!! ... บางสิ่งกำลังกระแทกประตูอย่างรุนแรง!!');
-            window.RoomData.living_room.updateVisuals();
-         } else if (t >= 60) {
-            flags.living_room_door_broken = true;
-            triggerDeath("ตกใจช็อกกับสิ่งที่ปรากฏอยู่ตรงหน้า เมื่อมันพังประตูเข้ามาเห็นคุณ!");
-         }
-       }
+      if (flags.living_room_door_fixed) {
+        GameState.hpDrainRate = 0; // stop HP drain if door fixed
+      } else {
+        GameState.hpDrainRate = 0.02; // Drain slowly
+      }
+
+      if (!flags.living_room_door_fixed && !flags.living_room_door_broken) {
+        flags.living_room_tv_timer++;
+        let t = flags.living_room_tv_timer;
+        if (t === 10) {
+          addLog('ก๊อกๆ... เสียงเคาะประตูดังมาจากฝั่งโถงทางเดิน');
+          window.RoomData.living_room.updateVisuals();
+        } else if (t === 30) {
+          addLog('ก๊อกๆๆๆ... เสียงเคาะประตูเริ่มดังและถี่ขึ้น!');
+          window.RoomData.living_room.updateVisuals();
+        } else if (t === 50) {
+          showDialogue('ตึง!! ตึง!! ... บางสิ่งกำลังกระแทกประตูอย่างรุนแรง!!');
+          window.RoomData.living_room.updateVisuals();
+        } else if (t >= 60) {
+          flags.living_room_door_broken = true;
+          triggerDeath("ตกใจช็อกกับสิ่งที่ปรากฏอยู่ตรงหน้า เมื่อมันพังประตูเข้ามาเห็นคุณ!");
+        }
+      }
     } else {
-       GameState.hpDrainRate = 0;
-       if (!flags.living_room_door_fixed && !flags.living_room_door_broken) {
-           flags.living_room_tv_timer = 0; // stop timer if TV is off
-           window.RoomData.living_room.updateVisuals();
-       }
+      GameState.hpDrainRate = 0;
+      if (!flags.living_room_door_fixed && !flags.living_room_door_broken) {
+        flags.living_room_tv_timer = 0; // stop timer if TV is off
+        window.RoomData.living_room.updateVisuals();
+      }
     }
 
     if (!flags.living_room_phone_missed) {
-        if (flags.living_room_phone_timer === 0) {
-            showDialogue("กริ๊งงงง! โทรศัพท์บ้านดังขึ้น...");
-        } else if (flags.living_room_phone_timer === 10) {
-            showDialogue("กริ๊งงงง! โทรศัพท์บ้านยังคงดังอยู่...");
-        }
-        flags.living_room_phone_timer++;
-        if (flags.living_room_phone_timer > 20) {
-           flags.living_room_phone_missed = true;
-        }
+      flags.living_room_phone_timer++;
+      let pt = flags.living_room_phone_timer;
+      if (pt === 1 || pt === 10) {
+        addLog("กริ๊งงงง! เสียงโทรศัพท์บ้านดังขึ้น!");
+        window.RoomData.living_room.updateVisuals();
+      }
+      if (pt === 20) {
+        flags.living_room_phone_missed = true;
+        addLog("เสียงโทรศัพท์เงียบไปแล้ว... สายหลุดไป");
+        window.RoomData.living_room.updateVisuals();
+      }
     }
   }
 };

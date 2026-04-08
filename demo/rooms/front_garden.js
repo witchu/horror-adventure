@@ -57,11 +57,15 @@ window.RoomData.front_garden = {
         }
       }
     },
-    { id: 'cage_door', name: 'ประตูกรง', bounds: { left: 40, top: 60, width: 5, height: 20 },
+    { id: 'cage_door', name: 'ประตูกรง', bounds: { left: 35, top: 60, width: 5, height: 20 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.garden_cage_locked) {
-           showDialogue('ประตูกรงถูกผูกเชือคล็อคแน่นหนาแล้ว');
+           showDialogue('ประตูกรงถูกผูกเชือคล็อคล็อคแน่นหนาแล้ว');
+           return;
+        }
+        if (flags.garden_dog_state === 'absent') {
+           showDialogue('ตอนนี้ยังไม่มีสุนัขในกรง คุณต้องรอให้มันเข้าไปก่อนถึงจะคุ้มค่าที่จะปิดมัน');
            return;
         }
         if (flags.garden_cage_closed) {
@@ -100,7 +104,7 @@ window.RoomData.front_garden = {
         }
       }
     },
-    { id: 'bowl', name: 'ชามอาหาร', bounds: { left: 48, top: 75, width: 5, height: 5 },
+    { id: 'bowl', name: 'ชามอาหาร', bounds: { left: 50, top: 80, width: 5, height: 5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.garden_in_cage) {
@@ -144,7 +148,7 @@ window.RoomData.front_garden = {
         }
       }
     },
-    { id: 'pots', name: 'กองกระถาง', bounds: { left: 65, top: 65, width: 15, height: 15 },
+    { id: 'pots', name: 'กองกระถาง', bounds: { left: 10, top: 65, width: 15, height: 15 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.garden_pots_checked_count === 0) {
@@ -161,7 +165,7 @@ window.RoomData.front_garden = {
         }
       }
     },
-    { id: 'hole_left', name: 'หลุมซ้าย', bounds: { left: 10, top: 70, width: 10, height: 10 },
+    { id: 'hole_left', name: 'หลุมซ้าย', bounds: { left: 60, top: 70, width: 10, height: 10 },
       onInteract: (element) => {
          if (!hasItem('shovel')) {
             showDialogue('พบ [พลั่วขุดดินด้ามยาว] พิงอยู่ข้างหลุม');
@@ -171,12 +175,12 @@ window.RoomData.front_garden = {
          }
       }
     },
-    { id: 'hole_center', name: 'หลุมกลาง', bounds: { left: 20, top: 75, width: 10, height: 10 },
+    { id: 'hole_center', name: 'หลุมกลาง', bounds: { left: 70, top: 75, width: 10, height: 10 },
       onInteract: (element) => {
          triggerDeath('ตกใจสุดขีดจากการพบสิ่งที่น่าสะพรึงกลัวและสยดสยองซ่อนอยู่ในหลุม — ช็อกตาย!');
       }
     },
-    { id: 'hole_right', name: 'หลุมขวา', bounds: { left: 30, top: 70, width: 10, height: 10 },
+    { id: 'hole_right', name: 'หลุมขวา', bounds: { left: 80, top: 70, width: 10, height: 10 },
       onInteract: (element) => {
          if (!GameState.flags.garden_hole_right_checked) {
              GameState.flags.garden_hole_right_checked = true;
@@ -203,7 +207,7 @@ window.RoomData.front_garden = {
          }
       }
     },
-    { id: 'clothesline', name: 'ราวตากผ้า', bounds: { left: 15, top: 30, width: 15, height: 15 },
+    { id: 'clothesline', name: 'ราวตากผ้า', bounds: { left: 70, top: 30, width: 15, height: 15 },
       onInteract: (element) => {
          showDialogue('กระดาษโน้ตในเสื้อ: "ถ้าไม่มีใครอยู่ ต้องให้อาหารเจ้าร็อคกี้ไว้ ให้เขาอยู่ในกรงและปิดให้แน่นหนา"');
          addLog("ให้อาหารและล็อคกรงสัตว์เลี้ยงให้แน่นหนา");
@@ -238,7 +242,7 @@ window.RoomData.front_garden = {
 
     if (flags.garden_dog_state === 'absent') {
        flags.garden_dog_timer++;
-       if (flags.garden_dog_timer >= 60) { // For demo speed up, 60 instead of 120
+       if (flags.garden_dog_timer >= 240) { 
            showDialogue('สุนัขร็อตไวเลอร์ดุร้ายโผล่มาแล้ว!');
            if (flags.garden_bowl_full) {
                flags.garden_dog_state = 'eating';
@@ -263,8 +267,10 @@ window.RoomData.front_garden = {
     }
     
     if (flags.garden_dog_state === 'furious') {
-        if (!flags.garden_on_cage) {
+        if (!flags.garden_on_cage && !flags.garden_in_cage) {
             triggerDeath('สุนัขพุ่งเข้ามากัดคุณจนตาย!');
+        } else if (flags.garden_in_cage && !flags.garden_cage_closed) {
+            triggerDeath('สุนัขพุ่งทะลุประตูกรงที่เปิดอ้าเข้ามากัดคุณจนตายคาที่!');
         } else {
             GameState.hpDrainRate = 0.02; // Dog barking
             // Wait out the dog

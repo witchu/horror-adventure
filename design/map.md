@@ -4,43 +4,60 @@
 
 ```mermaid
 graph TD
-    BED["🛏 ห้องนอน\n(Bedroom)"]
-    BATH["🚿 ห้องน้ำ\n(Bathroom)"]
-    HALL_F2["🚪 โถงชั้น 2\n(Hallway 2nd Fl)"]
-    HALL_F1["🚪 โถงชั้น 1\n(Hallway 1st Fl)"]
-    KIT["🍳 ห้องครัว\n(Kitchen)"]
-    DIN["🍽 ห้องทานข้าว\n(Dining Room)"]
-    LIV["🛋 ห้องนั่งเล่น\n(Living Room)"]
-    STO["📦 ห้องเก็บของ\n(Storage)"]
-    LAU["🧺 ห้องซักล้าง\n(Laundry)"]
-    GAR["🌿 สวนหน้าบ้าน\n(Front Garden)"]
-    GATE["🔒 รั้ว / ประตู\n(Fence & Gate)"]
-    ROAD["🛣 ถนน\n(Road — จบเกม)"]
+    subgraph F2["🏠 ชั้น 2 (2nd Floor)"]
+        BED["🛏 ห้องนอน\nBedroom"]
+        BATH["🚿 ห้องน้ำ\nBathroom"]
+        HALL_F2["🚪 โถงชั้น 2\nHallway 2F"]
+    end
 
-    BED <-->|"ประตูห้องน้ำ"| BATH
-    BED <-->|"ออกสู่โถงชั้น 2"| HALL_F2
-    HALL_F2 <-->|"ขึ้นลงบันได"| HALL_F1
-    HALL_F1 <-->|"ประตูห้องครัว"| KIT
-    HALL_F1 <-->|"ประตูห้องนั่งเล่น"| LIV
-    HALL_F1 <-->|"ประตูห้องเก็บของ"| STO
-    KIT <-->|"ช่องทางเดิน"| DIN
-    KIT <-->|"ประตูหลังครัว"| LAU
-    DIN <-->|"ประตูห้องทานข้าว"| LIV
-    LIV <-->|"ประตูห้องนั่งเล่น"| HALL_F1
-    LAU <-->|"หน้าต่างบานเกร็ด\n(⚠️ บาดเจ็บ)"| GAR
-    GAR <-->|"ทางเดินในสวน"| GATE
-    
-    BED -->|"ประตูห้องนอน\n🔓 ต้องมีกุญแจ"| HALL_F2
-    HALL_F2 -->|"บันได\n🔓 จัดพรมและเปิดไฟ"| HALL_F1
-    HALL_F1 -->|"เข้าครัว"| KIT
-    KIT -->|"ผ่านครัว → ห้องทานข้าว"| DIN
-    KIT -->|"ผ่านครัว → ห้องซักล้าง\n🔓 ต้องใช้ค้อนทุบลูกบิดที่ขึ้นสนิม"| LAU 
-    DIN -->|"ประตูออกห้องนั่งเล่น\n🔓 ต้องเลื่อนนาฬิกาลูกตุ้มที่ขวางประตู"| LIV
-    LIV -->|"ประตูออกโถง\n🔓 ต้องซ่อมด้วยลูกบิดประตู"| HALL_F1
-    HALL_F1 -->|"ประตูห้องเก็บของ\n🔓 ต้องมีกุญแจ"| STO    
-    LAU -->|"หน้าต่างออกสวน\n🔓 ต้องใช้ถังดับเพลิงทุบหน้าต่างบานเกร็ด\n(⚠️ เข้าออกบาดเจ็บ)"| GAR
-    GAR -->|"ทางเดินในสวน\n(⚠️ หากขังสุนัขไม่สมบูรณ์ สุนัขจะทะลุตามมา)"| GATE
-    GATE -->|"ปลดล็อครหัส 4 หลักที่แผง\n→ ออกได้"| ROAD
+    subgraph F1["🏠 ชั้น 1 (1st Floor)"]
+        HALL_F1["🚪 โถงชั้น 1\nHallway 1F"]
+        KIT["🍳 ห้องครัว\nKitchen"]
+        DIN["🍽 ห้องทานข้าว\nDining Room"]
+        LIV["🛋 ห้องนั่งเล่น\nLiving Room"]
+        STO["📦 ห้องเก็บของ\nStorage"]
+        LAU["🧺 ห้องซักล้าง\nLaundry"]
+    end
+
+    subgraph OUT["🌳 ภายนอกบ้าน (Outdoor)"]
+        GAR["🌿 สวนหน้าบ้าน\nFront Garden"]
+        GATE["🔒 รั้ว / ประตู\nFence & Gate"]
+        ROAD["🛣 ถนน\nRoad — จบเกม 🏁"]
+    end
+
+    BED -->|"✅ Win flow สำเร็จ → แง้มประตูห้องน้ำ"| BATH
+    BATH -->|"🔑 หยิบกุญแจก้นอ่าง → ย้อนไขประตูออก"| BED
+    BED -->|"🔓 ใช้กุญแจ (จากห้องน้ำ)"| HALL_F2
+    HALL_F2 -->|"🔓 จัดพรม + เปิดไฟบันได"| HALL_F1
+
+    HALL_F1 -->|"เปิดประตู (ปกติ)"| KIT
+    HALL_F1 -->|"🔓 ซ่อมลูกบิดประตู (จากห้องนั่งเล่น)"| LIV
+    HALL_F1 -->|"🔓 ใช้กุญแจ (จากขอบโคมไฟห้องทานข้าว)"| STO
+
+    KIT -->|"ช่องทางเดิน (ปกติ)"| DIN
+    KIT -->|"🔓 ใช้ค้อนทุบลูกบิดสนิม"| LAU
+
+    DIN -->|"🔓 ใช้อะไหล่ล้อซ่อมนาฬิกา → เลื่อนออก"| LIV
+    STO -->|"ได้ค้อน → ย้อนกลับ"| KIT
+
+    LIV -->|"🔓 ซ่อมลูกบิด → ออกสู่โถง"| HALL_F1
+    LAU -->|"🔓 ใช้ถังดับเพลิงทุบหน้าต่าง\n⚠️ ปีนออก — บาดเจ็บ"| GAR
+
+    GAR -->|"⚠️ หากขังสุนัขไม่สำเร็จ สุนัขตามมา"| GATE
+    GATE -->|"🔓 พิมพ์รหัส 4 หลัก (0-2-1-0) ที่แผงรั้ว"| ROAD
+
+    style ROAD fill:#1a1a2e,color:#e94560,stroke:#e94560,stroke-width:2px
+    style BED fill:#2d2d44,color:#cdd6f4,stroke:#89b4fa
+    style BATH fill:#2d2d44,color:#cdd6f4,stroke:#89b4fa
+    style HALL_F2 fill:#2d2d44,color:#cdd6f4,stroke:#89b4fa
+    style HALL_F1 fill:#313244,color:#cdd6f4,stroke:#89dceb
+    style KIT fill:#313244,color:#cdd6f4,stroke:#89dceb
+    style DIN fill:#313244,color:#cdd6f4,stroke:#89dceb
+    style LIV fill:#313244,color:#cdd6f4,stroke:#89dceb
+    style STO fill:#313244,color:#cdd6f4,stroke:#89dceb
+    style LAU fill:#313244,color:#cdd6f4,stroke:#89dceb
+    style GAR fill:#1e3a2f,color:#a6e3a1,stroke:#a6e3a1
+    style GATE fill:#3a1e1e,color:#f38ba8,stroke:#f38ba8
 ```
 
 ---
