@@ -229,6 +229,7 @@
       { id: 'door_laundry', name: 'ประตูห้องซักล้าง', bounds: { left: 80, top: 70, width: 15, height: 25 },
         onInteract: (element) => {
           if (hasItem('hammer')) {
+              removeItem('hammer');
               showDialogue("คุณใช้ค้อนทุบลูกบิดที่ขึ้นสนิมจนหลุด! ประตูห้องซักล้างถูกเปิดออกแล้ว...");
               saveCheckpoint();
               loadRoom('laundry');
