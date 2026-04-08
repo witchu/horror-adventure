@@ -130,7 +130,7 @@ window.RoomData.laundry = {
         } else {
           if (flags.laundry_iron_plugged) {
             showDialogue('คุณพยายามปีนโต๊ะรีดผ้า... สัมผัสโดนเตารีดที่กำลังร้อนจัด!! (พุพอง)');
-            takeDamage(1.0, 'เตารีดบาดเจ็บ!');
+            takeDamage('เตารีดบาดเจ็บ!', 1.0);
             flags.laundry_on_board = true;
           } else {
             flags.laundry_on_board = true;
@@ -150,7 +150,7 @@ window.RoomData.laundry = {
 
         if (flags.laundry_window_broken) {
           showDialogue('คุณปีนออกทางหน้าต่างซี่กระจกที่แตกแล้ว ถูกกระจกบาดเล็กน้อย... แต่คุณออกไปสู่สวนสำเร็จ!');
-          takeDamage(0.2, 'เศษกระจกบาด', false);
+          takeDamage('เศษกระจกบาด', 0.2, false);
           saveCheckpoint();
           loadRoom('front_garden');
         } else {

@@ -93,7 +93,7 @@ window.RoomData.front_garden = {
            showDialogue('คุณนำกระถาง B วางช่วยเสริมความสูง แล้วปีนขึ้นไปบนกรงสำเร็จ ปลอดภัยจากสุนัขด้านล่าง!');
         } else if (hasItem('pot_a')) {
            showDialogue('คุณพยายามใช้กระถาง A เป็นขั้นบันได แต่มันแตกออก! เศษดินเผาบาดเท้า!');
-           takeDamage(0.5, 'กระถางบาดเท้า');
+           takeDamage('กระถางบาดเท้า', 0.5);
            removeItem('pot_a');
         } else {
            showDialogue('กรงสูงเกินไป ปีนไม่ถึง ต้องการสิ่งของช่วยเสริมความสูง');
@@ -150,7 +150,7 @@ window.RoomData.front_garden = {
         if (flags.garden_pots_checked_count === 0) {
            flags.garden_pots_checked_count++;
            showDialogue('ตรวจสอบกระถาง... คางคกกระโดดออกมา! ตกใจสะดุ้ง!');
-           takeDamage(0.2, 'ตกใจคางคก');
+           takeDamage('ตกใจคางคก', 0.2);
         } else if (flags.garden_pots_checked_count === 1) {
            flags.garden_pots_checked_count++;
            showDialogue('พบกระถาง A (มีรอยร้าว) และ กระถาง B (สภาพดี) คุณเก็บกระถาง B');
@@ -181,7 +181,7 @@ window.RoomData.front_garden = {
          if (!GameState.flags.garden_hole_right_checked) {
              GameState.flags.garden_hole_right_checked = true;
              showDialogue('หลุมนี้ลึกผิดปกติมาก... รู้สึกหวาดกลัว');
-             takeDamage(0.2, 'หวาดกลัว');
+             takeDamage('หวาดกลัว', 0.2);
          } else {
              showDialogue('หลุมลึกน่ากลัว');
          }
@@ -212,7 +212,7 @@ window.RoomData.front_garden = {
     { id: 'laundry_window', name: 'กลับห้องซักล้าง', bounds: { left: 0, top: 30, width: 10, height: 40 },
       onInteract: (element) => {
          showDialogue('คุณปีนกลับเข้าไปในห้องซักล้าง (โดนกระจกบาดอีกครั้ง)');
-         takeDamage(0.2, 'เศษกระจกบาด', false);
+         takeDamage('เศษกระจกบาด', 0.2, false);
          saveCheckpoint();
          loadRoom('laundry');
       }

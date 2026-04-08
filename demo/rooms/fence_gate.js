@@ -35,22 +35,8 @@ window.RoomData.fence_gate = {
             return;
         }
 
-        // Extremely simplified code prompt for demo
-        let code = prompt("ป้อนรหัส 4 หลักเพื่อปลดล็อคประตูรั้ว:");
-        if (code === null) return;
-        
-        if (code === "0210") {
-             flags.fence_gate_open = true;
-             showDialogue('รหัสถูกต้อง! ประตูรั้วเปิดออก คุณสามารถออกสู่ถนนได้แล้ว');
-        } else {
-             flags.fence_code_attempts++;
-             if (flags.fence_code_attempts >= 3) {
-                 showDialogue('รหัสผิดครบกำหนด! ระบบถูกล็อค 30 วินาที');
-                 flags.fence_code_lock_timer = 30;
-                 flags.fence_code_attempts = 0;
-             } else {
-                 showDialogue('รหัสไม่ถูกต้อง (ระวัง หากผิด 3 ครั้งจะถูกล็อค)');
-             }
+        if (window.openFenceNumpad) {
+            window.openFenceNumpad();
         }
       }
     },
@@ -112,7 +98,7 @@ window.RoomData.fence_gate = {
         if (!flags.fence_left_bin_opened) {
             flags.fence_left_bin_opened = true;
             showDialogue('เปิดถังขยะ... กลิ่นเหม็นเน่ารุนแรงทะลักออกมา พบถุงดำขนาดใหญ่น่าสงสัยในนั้น ตกใจแทบอาเจียน!');
-            takeDamage(0.75, 'ตกใจกลิ่นเหม็นเน่า');
+            takeDamage('ตกใจกลิ่นเหม็นเน่า', 0.75);
         } else {
             showDialogue('ถังขยะกะส่งกลิ่นเหม็น ไม่อยากยุ่งกับมันอีกแล้ว');
         }
@@ -187,7 +173,90 @@ window.RoomData.fence_gate = {
     }
   ],
   decorations: [],
-  setupUI: function() {},
+  setupUI: function() {
+    if (!document.getElementById('fence-ui-container')) {
+        let currentCode = "";
+        const uiStr = `
+          <div id="fence-ui-container" class="ui-overlay hidden">
+              <div class="ui-panel gamepad-panel">
+                  <h3>กรอกรหัสผ่าน 4 หลัก</h3>
+                  <div class="numpad-display" id="fence-ui-display" style="font-size:24px; letter-spacing:8px; margin: 10px 0;">----</div>
+                  <div class="numpad-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
+                      <button class="numpad-btn pill-btn" data-val="1">1</button>
+                      <button class="numpad-btn pill-btn" data-val="2">2</button>
+                      <button class="numpad-btn pill-btn" data-val="3">3</button>
+                      <button class="numpad-btn pill-btn" data-val="4">4</button>
+                      <button class="numpad-btn pill-btn" data-val="5">5</button>
+                      <button class="numpad-btn pill-btn" data-val="6">6</button>
+                      <button class="numpad-btn pill-btn" data-val="7">7</button>
+                      <button class="numpad-btn pill-btn" data-val="8">8</button>
+                      <button class="numpad-btn pill-btn" data-val="9">9</button>
+                      <button class="numpad-btn pill-btn" id="numpad-clear" style="background:none; border:2px solid #555; color:#fff;">C</button>
+                      <button class="numpad-btn pill-btn" data-val="0">0</button>
+                      <button class="numpad-btn pill-btn numpad-submit" id="numpad-submit" style="background:#550000; color:#fff;">OK</button>
+                  </div>
+                  <button class="close-ui-btn" id="fence-close-ui" style="margin-top:20px;">ปิด</button>
+              </div>
+          </div>
+        `;
+        const d = document.createElement('div');
+        d.innerHTML = uiStr;
+        document.body.appendChild(d.firstElementChild);
+
+        const display = document.getElementById('fence-ui-display');
+        const updateDisplay = () => {
+            display.innerText = currentCode.padEnd(4, '-');
+        };
+
+        document.querySelectorAll('.numpad-btn[data-val]').forEach(btn => {
+            btn.onclick = () => {
+                if (currentCode.length < 4) {
+                    currentCode += btn.getAttribute('data-val');
+                    updateDisplay();
+                }
+            };
+        });
+
+        document.getElementById('numpad-clear').onclick = () => {
+            currentCode = '';
+            updateDisplay();
+        };
+
+        document.getElementById('fence-close-ui').onclick = () => {
+            document.getElementById('fence-ui-container').classList.add('hidden');
+        };
+
+        document.getElementById('numpad-submit').onclick = () => {
+            if (currentCode.length < 4) {
+                showDialogue("กรุณากรอกรหัสให้ครบ 4 หลัก");
+                return;
+            }
+            
+            const flags = GameState.flags;
+            document.getElementById('fence-ui-container').classList.add('hidden');
+            
+            if (currentCode === "0210") {
+                flags.fence_gate_open = true;
+                showDialogue('รหัสถูกต้อง! ประตูรั้วเปิดออก คุณสามารถออกสู่ถนนได้แล้ว');
+            } else {
+                flags.fence_code_attempts++;
+                if (flags.fence_code_attempts >= 3) {
+                    showDialogue('รหัสผิดครบกำหนด! ระบบถูกล็อค 30 วินาที');
+                    flags.fence_code_lock_timer = 30;
+                    flags.fence_code_attempts = 0;
+                } else {
+                    showDialogue('รหัสไม่ถูกต้อง (ระวัง หากผิด 3 ครั้งจะถูกล็อค)');
+                }
+            }
+        };
+
+        window.openFenceNumpad = function() {
+            currentCode = '';
+            updateDisplay();
+            document.getElementById('fence-ui-container').classList.remove('hidden');
+        };
+    }
+  },
   updateVisuals: function() {
     if (GameState.flags.fence_net_taken) {
         let el = document.getElementById('obj-net');

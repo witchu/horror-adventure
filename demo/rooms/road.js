@@ -33,11 +33,12 @@ window.RoomData.road = {
              return;
          }
          
-         const choice = prompt("คุณต้องการทำอะไรกับชายสูบบุหรี่?\n1: ทักทายอย่างสนิท\n2: ต่อว่าอย่างหยาบคาย");
-         if (choice === '1') {
+         const actSayHi = () => {
              GameState.flags.road_man_interacted = true;
              showDialogue('คุณทักทาย เขาพยักหน้าตอบรับอย่างเย็นชา ไม่พูดอะไร');
-         } else if (choice === '2') {
+         };
+         
+         const actCurse = () => {
              if (hasItem('fish_knife')) {
                  GameState.flags.road_attacked_man = true;
                  GameState.flags.road_man_interacted = true;
@@ -46,6 +47,13 @@ window.RoomData.road = {
              } else {
                  triggerDeath('คุณไปด่าเขา เขาโกรธจัดและกระหน่ำทำร้ายคุณจนตายคาฟุตบาท!');
              }
+         };
+
+         if (window.showRoadUI) {
+             window.showRoadUI("คุณต้องการทำอะไรกับชายสูบบุหรี่?", [
+                 { text: "[ทักทายอย่างสนิท]", action: actSayHi },
+                 { text: "[ต่อว่าอย่างหยาบคาย]", action: actCurse }
+             ]);
          }
       }
     },
@@ -56,7 +64,7 @@ window.RoomData.road = {
              triggerDeath('คุณข้ามตอนไฟเขียว รถพุ่งมาด้วยความเร็ว ชนคุณตายคาที่!');
          } else if (color === 'yellow') {
              showDialogue('ไฟเหลือง! รถพุ่งมาแต่เบรกทันอย่างหวุดหวิด คุณตกใจมากข้ามมาถึงอีกฝั่ง');
-             takeDamage(0.5, 'ตกใจรถเบรก');
+             takeDamage('ตกใจรถเบรก', 0.5);
              // Proceed to woman
              handleWomanInteraction();
          } else { // red
@@ -77,7 +85,39 @@ window.RoomData.road = {
     }
   ],
   decorations: [],
-  setupUI: function() {},
+  setupUI: function() {
+    if (!document.getElementById('road-ui-container')) {
+        const uiStr = `
+          <div id="road-ui-container" class="ui-overlay hidden">
+              <div class="ui-panel">
+                  <h3 id="road-ui-title">...</h3>
+                  <div class="pill-grid" id="road-ui-options"></div>
+              </div>
+          </div>
+        `;
+        const d = document.createElement('div');
+        d.innerHTML = uiStr;
+        document.body.appendChild(d.firstElementChild);
+
+        window.showRoadUI = function(title, options) {
+            const container = document.getElementById('road-ui-container');
+            document.getElementById('road-ui-title').innerText = title;
+            const optsDiv = document.getElementById('road-ui-options');
+            optsDiv.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'pill-btn';
+                btn.innerText = opt.text;
+                btn.onclick = () => {
+                    container.classList.add('hidden');
+                    if (opt.action) opt.action();
+                };
+                optsDiv.appendChild(btn);
+            });
+            container.classList.remove('hidden');
+        };
+    }
+  },
   updateVisuals: function() {
       // Re-apply traffic light style based on timer
       let el = document.getElementById('obj-traffic_light');
@@ -116,24 +156,29 @@ function handleWomanInteraction() {
     });
 
     setTimeout(() => {
-        const choice = prompt("พบผู้หญิงในเงามืด... คุณจะทำอย่างไร?\n1: ทักทาย\n2: ทำร้าย");
-        if (choice === '1') {
-            winGame('ผู้หญิงยิ้มตอบรับเบาๆ... คุณเดินจากไปสู่อิสรภาพ จบเกมส์');
-        } else if (choice === '2') {
-            if (hasItem('fish_knife')) {
-                GameState.flags.road_attacked_woman = true;
-                winGame('คุณใช้มีดทำร้ายผู้หญิงจนแน่นิ่ง... แล้วเดินจากไปในความมืด จบเกมส์');
-            } else {
-                showDialogue('คุณพยายามเข้าไปทำร้าย เธอร้องกรี๊ด! คุณตกใจถอยหลัง...');
-                takeDamage(0.5, 'ตกใจเสียงกรี๊ด', false);
-                if (GameState.hp > 0) {
-                    winGame('คุณตกใจ วิ่งหนีออกจากฉากไป... จบเกมส์');
-                }
-            }
-        } else {
-            winGame('คุณตัดสินใจไม่ทำอะไร แล้วเดินจากไป... จบเกมส์');
+        if (window.showRoadUI) {
+            window.showRoadUI("พบผู้หญิงในเงามืด... คุณจะทำอย่างไร?", [
+                { text: "[ทักทาย]", action: () => {
+                    winGame('ผู้หญิงยิ้มตอบรับเบาๆ... คุณเดินจากไปสู่อิสรภาพ จบเกมส์');
+                }},
+                { text: "[ทำร้าย]", action: () => {
+                    if (hasItem('fish_knife')) {
+                        GameState.flags.road_attacked_woman = true;
+                        winGame('คุณใช้มีดทำร้ายผู้หญิงจนแน่นิ่ง... แล้วเดินจากไปในความมืด จบเกมส์');
+                    } else {
+                        showDialogue('คุณพยายามเข้าไปทำร้าย เธอร้องกรี๊ด! คุณตกใจถอยหลัง...');
+                        takeDamage('ตกใจเสียงกรี๊ด', 0.5, false);
+                        if (GameState.hp > 0) {
+                            winGame('คุณตกใจ วิ่งหนีออกจากฉากไป... จบเกมส์');
+                        }
+                    }
+                }},
+                { text: "[เดินจากไปเงียบๆ]", action: () => {
+                    winGame('คุณตัดสินใจไม่ทำอะไร แล้วเดินจากไป... จบเกมส์');
+                }}
+            ]);
         }
-    }, 500); // short delay so UI dialogue closes
+    }, 500); // short delay
 }
 
 function winGame(msg) {

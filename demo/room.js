@@ -95,7 +95,7 @@ function handleInteraction(room, objId, element) {
 
   if (room === 'laundry' && GameState.flags && GameState.flags.laundry_on_board && objId !== 'window' && objId !== 'ironing_board') {
       GameState.flags.laundry_on_board = false;
-      takeDamage(0.2, 'ขยับตัวเอื้อมมือพลาด เสียหลักร่วงลงมาจากโต๊ะรีดผ้า!');
+      takeDamage('ขยับตัวเอื้อมมือพลาด เสียหลักร่วงลงมาจากโต๊ะรีดผ้า!', 0.2);
       return;
   }
 

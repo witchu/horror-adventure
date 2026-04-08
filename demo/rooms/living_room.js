@@ -88,7 +88,7 @@ window.RoomData.living_room = {
         const flags = GameState.flags;
         if (!flags.living_room_dishes_checked) {
           flags.living_room_dishes_checked = true;
-          takeDamage(0.2, "แมลงสาบวิ่งออกมาจากจานชามสกปรก!");
+          takeDamage("แมลงสาบวิ่งออกมาจากจานชามสกปรก!", 0.2);
         } else if (!flags.living_room_dishes_organized) {
           flags.living_room_dishes_organized = true;
           showDialogue('คุณจัดจานชามให้เป็นระเบียบ... พบ [กุญแจตู้จดหมาย] ซ่อนอยู่!');
