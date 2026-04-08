@@ -3,6 +3,8 @@ window.RoomData = window.RoomData || {};
 Object.assign(GameState.flags, {
   road_traffic_timer: 0,
   road_man_interacted: false,
+  road_attacked_man: false,
+  road_attacked_woman: false,
   road_crossed: false // if true, hide the man and show woman interactions
 });
 
@@ -37,6 +39,7 @@ window.RoomData.road = {
              showDialogue('คุณทักทาย เขาพยักหน้าตอบรับอย่างเย็นชา ไม่พูดอะไร');
          } else if (choice === '2') {
              if (hasItem('fish_knife')) {
+                 GameState.flags.road_attacked_man = true;
                  GameState.flags.road_man_interacted = true;
                  showDialogue('คุณต่อว่าเขา เขาด่ากลับ เกิดการถกเถียง คุณใช้มีดแล่ปลาแทงเขาจนล้มลง! (Panic กำเริบอย่างรุนแรง)');
                  GameState.hpDrainRate += 0.5;
@@ -118,6 +121,7 @@ function handleWomanInteraction() {
             winGame('ผู้หญิงยิ้มตอบรับเบาๆ... คุณเดินจากไปสู่อิสรภาพ จบเกมส์');
         } else if (choice === '2') {
             if (hasItem('fish_knife')) {
+                GameState.flags.road_attacked_woman = true;
                 winGame('คุณใช้มีดทำร้ายผู้หญิงจนแน่นิ่ง... แล้วเดินจากไปในความมืด จบเกมส์');
             } else {
                 showDialogue('คุณพยายามเข้าไปทำร้าย เธอร้องกรี๊ด! คุณตกใจถอยหลัง...');
@@ -133,10 +137,59 @@ function handleWomanInteraction() {
 }
 
 function winGame(msg) {
+    const flags = GameState.flags;
+    let endingTitle = "SURVIVED";
+    
+    const killedInHouse = flags.fence_house_door_opened;
+    const attackedInRoad = flags.road_attacked_man || flags.road_attacked_woman;
+
+    if (killedInHouse && !attackedInRoad) {
+        endingTitle = "จบแบบที่ 1 : หลุดพ้นจากความรู้สึก<br><span style='font-size:0.5em;'>(เป็นฆาตกรฆ่าคนในบ้าน)</span>";
+    } else if (killedInHouse && attackedInRoad) {
+        endingTitle = "จบแบบที่ 2 : ศัตรูอยู่รอบตัว<br><span style='font-size:0.5em;'>(เป็นฆาตกรคลุ้มครั้ง)</span>";
+    } else if (!killedInHouse && !attackedInRoad) {
+        endingTitle = "จบแบบที่ 3 : ออกจากบ้านอย่างปลอดภัย เริ่มต้นชีวิต.. เร็วๆ นี้<br><span style='font-size:0.5em;'>(ปกติ?)</span>";
+    } else if (!killedInHouse && attackedInRoad) {
+        // Fallback condition if they didn't kill in house but still attacked people in the road
+        endingTitle = "จบแบบที่ 2 : ศัตรูอยู่รอบตัว<br><span style='font-size:0.5em;'>(เป็นฆาตกรคลุ้มครั้ง)</span>";
+    }
+
+    // Calculate Stats
+    let timeStr = "ไม่ทราบเวลา";
+    if (GameState.stats && GameState.stats.startTime) {
+        const timeSpentMs = Date.now() - GameState.stats.startTime;
+        const totalSecs = Math.floor(timeSpentMs / 1000);
+        const mins = Math.floor(totalSecs / 60);
+        const secs = totalSecs % 60;
+        timeStr = `${mins} นาที ${secs} วินาที`;
+    }
+    
+    const deaths = GameState.stats ? GameState.stats.deaths : 0;
+    const panicTriggers = GameState.stats ? GameState.stats.panicTriggers : 0;
+    const cluesFound = GameState.logs ? GameState.logs.length : 0;
+    const itemsFound = GameState.stats ? GameState.stats.uniqueItems.length : 0;
+
+    const statsHtml = `
+        <div style="background: rgba(0,0,0,0.6); padding: 15px 30px; border-radius: 10px; margin: 0 auto 30px auto; display: inline-block; text-align: left; font-size: 1.2rem; border: 1px solid #444; color: #ddd;">
+            <p style="margin: 5px 0;">💀 ตายทั้งหมด: <span style="color:red; font-weight:bold;">${deaths}</span> ครั้ง</p>
+            <p style="margin: 5px 0;">😱 อาการ Panic กำเริบ: <span style="color:orange; font-weight:bold;">${panicTriggers}</span> ครั้ง</p>
+            <p style="margin: 5px 0;">📝 เบาะแสที่พบ: <span style="color:lightblue; font-weight:bold;">${cluesFound} / 15</span></p>
+            <p style="margin: 5px 0;">🎒 ไอเท็มที่รวบรวมได้ (ไม่ซ้ำ): <span style="color:lightgreen; font-weight:bold;">${itemsFound} / 20</span></p>
+            <p style="margin: 5px 0;">⏱️ เวลาที่ใช้เล่นทั้งหมด: <span style="font-weight:bold;">${timeStr}</span></p>
+        </div>
+    `;
+
     // Override the win screen globally
     const winScreen = document.getElementById('win-screen');
     if (winScreen) {
-        winScreen.innerHTML = `<h1>SURVIVED</h1><p>${msg}</p><button onclick="location.reload()">MAIN MENU</button>`;
+        winScreen.innerHTML = `
+            <div style="text-align: center;">
+                <h1 style="font-size: 3rem; margin-bottom: 20px;">${endingTitle}</h1>
+                <p style="font-size: 1.5rem; margin-bottom: 20px;">${msg}</p>
+                ${statsHtml}<br>
+                <button onclick="location.reload()">MAIN MENU</button>
+            </div>
+        `;
         winScreen.classList.remove('hidden');
     }
 }

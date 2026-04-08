@@ -14,7 +14,15 @@ const GameState = {
   flags: {},
 
   // Single Checkpoint
-  checkpoint: null
+  checkpoint: null,
+
+  // Persistent stats
+  stats: {
+    deaths: 0,
+    panicTriggers: 0,
+    startTime: Date.now(),
+    uniqueItems: []
+  }
 };
 
 // --- Player Functions ---
@@ -26,6 +34,7 @@ function takeDamage(reason, amount = 0.25) {
 }
 
 function die(reason) {
+  if (GameState.stats) GameState.stats.deaths++;
   if (els.deathReason) els.deathReason.innerText = reason;
   if (els.deathScreen) els.deathScreen.classList.remove('hidden');
 }
@@ -38,6 +47,11 @@ function addItem(id, name) {
     return false;
   }
   GameState.items.push({ id, name });
+  
+  if (GameState.stats && !GameState.stats.uniqueItems.includes(id)) {
+      GameState.stats.uniqueItems.push(id);
+  }
+
   renderInventory();
   showDialogue(`ได้รับไอเทม: ${name}`);
   return true;
