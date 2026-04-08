@@ -28,20 +28,18 @@ window.RoomData.road = {
     },
     { id: 'man', name: 'ชายสูบบุหรี่', bounds: { left: 10, top: 50, width: 15, height: 40 },
       onInteract: (element) => {
-         if (GameState.flags.road_man_interacted) {
-             showDialogue('คุณได้โต้ตอบกับเขาไปแล้ว');
+         if (GameState.flags.road_attacked_man) {
+             showDialogue('ชายคนนี้นอนจมกองเลือด...');
              return;
          }
          
          const actSayHi = () => {
-             GameState.flags.road_man_interacted = true;
              showDialogue('คุณทักทาย เขาพยักหน้าตอบรับอย่างเย็นชา ไม่พูดอะไร');
          };
          
          const actCurse = () => {
              if (hasItem('fish_knife')) {
                  GameState.flags.road_attacked_man = true;
-                 GameState.flags.road_man_interacted = true;
                  showDialogue('คุณต่อว่าเขา เขาด่ากลับ เกิดการถกเถียง คุณใช้มีดแล่ปลาแทงเขาจนล้มลง! (Panic กำเริบอย่างรุนแรง)');
                  GameState.hpDrainRate += 0.02;
              } else {
@@ -215,16 +213,19 @@ function winGame(msg) {
     const killedInHouse = flags.fence_house_door_opened;
     const attackedInRoad = flags.road_attacked_man || flags.road_attacked_woman;
 
-    let endingTitle = '';
+    let endingTitleName = '';
+    let endingSubtitle = '';
     let finalActionText = '';
 
     if (killedInHouse && !attackedInRoad) {
         // Ending 1 — Liberated
-        endingTitle = 'จบแบบที่ 1 : หลุดพ้นจากความรู้สึก<br><span style="font-size:0.5em;">(เป็นฆาตกรฆ่าคนในบ้าน)</span>';
+        endingTitleName = 'จบแบบที่ 1 : หลุดพ้นจากความรู้สึก';
+        endingSubtitle = 'เป็นฆาตกรฆ่าคนในบ้าน';
         finalActionText = 'คุณเปิดประตูบ้านและจัดการกับสิ่งชั่วร้ายที่ซ่อนอยู่ข้างใน...\nแล้วเดินออกมาสู่ความมืดโดยไม่หันกลับ';
     } else if (killedInHouse && attackedInRoad) {
         // Ending 2 — Frenzied
-        endingTitle = 'จบแบบที่ 2 : ศัตรูอยู่รอบตัว<br><span style="font-size:0.5em;">(เป็นฆาตกรคลุ้มคลั่ง)</span>';
+        endingTitleName = 'จบแบบที่ 2 : ศัตรูอยู่รอบตัว';
+        endingSubtitle = 'เป็นฆาตกรคลุ้มคลั่ง';
         if (flags.road_attacked_woman) {
             finalActionText = 'คุณใช้มีดทำร้ายผู้หญิงที่คุณไม่รู้จักจนแน่นิ่ง...\nแล้วเดินจากไปในความมืด';
         } else {
@@ -232,7 +233,8 @@ function winGame(msg) {
         }
     } else if (!killedInHouse && attackedInRoad) {
         // Ending 2 fallback — no house kill but attacked on road
-        endingTitle = 'จบแบบที่ 2 : ศัตรูอยู่รอบตัว<br><span style="font-size:0.5em;">(เป็นฆาตกรคลุ้มคลั่ง)</span>';
+        endingTitleName = 'จบแบบที่ 2 : ศัตรูอยู่รอบตัว';
+        endingSubtitle = 'เป็นฆาตกรคลุ้มคลั่ง';
         if (flags.road_attacked_woman) {
             finalActionText = 'คุณใช้มีดทำร้ายผู้หญิงที่คุณไม่รู้จักจนแน่นิ่ง...\nแล้วเดินจากไปในความมืด';
         } else {
@@ -240,7 +242,8 @@ function winGame(msg) {
         }
     } else {
         // Ending 3 — Safe
-        endingTitle = 'จบแบบที่ 3 : ออกจากบ้านอย่างปลอดภัย เริ่มต้นชีวิต.. เร็วๆ นี้<br><span style="font-size:0.5em;">(ปกติ?)</span>';
+        endingTitleName = 'จบแบบที่ 3 : ออกจากบ้านอย่างปลอดภัย';
+        endingSubtitle = 'เริ่มต้นชีวิต.. เร็วๆ นี้ (ปกติ?)';
         finalActionText = 'คุณเดินออกจากบ้านและข้ามถนนอย่างปลอดภัย...\nไม่แน่ใจว่าคืนนี้เกิดอะไรขึ้น แต่ตอนนี้คุณเป็นอิสระแล้ว';
     }
 
@@ -259,12 +262,27 @@ function winGame(msg) {
     const itemsFound = GameState.stats ? GameState.stats.uniqueItems.length : 0;
 
     const statsHtml = `
-        <div style="background:rgba(0,0,0,0.6);padding:15px 30px;border-radius:10px;margin:0 auto 30px auto;display:inline-block;text-align:left;font-size:1.1rem;border:1px solid #444;color:#ddd;">
-            <p style="margin:5px 0;">💀 ตายทั้งหมด: <span style="color:red;font-weight:bold;">${deaths}</span> ครั้ง</p>
-            <p style="margin:5px 0;">😱 อาการ Panic กำเริบ: <span style="color:orange;font-weight:bold;">${panicTriggers}</span> ครั้ง</p>
-            <p style="margin:5px 0;">📝 เบาะแสที่พบ: <span style="color:lightblue;font-weight:bold;">${cluesFound} / 15</span></p>
-            <p style="margin:5px 0;">🎒 ไอเท็มที่รวบรวมได้ (ไม่ซ้ำ): <span style="color:lightgreen;font-weight:bold;">${itemsFound} / 20</span></p>
-            <p style="margin:5px 0;">⏱️ เวลาที่ใช้เล่น: <span style="font-weight:bold;">${timeStr}</span></p>
+        <div class="win-stats-grid">
+            <div class="win-stat-row">
+                <span class="win-stat-label">💀 ตายทั้งหมด</span>
+                <span class="win-stat-value" style="color:#ff6b6b;">${deaths} ครั้ง</span>
+            </div>
+            <div class="win-stat-row">
+                <span class="win-stat-label">😱 อาการ Panic กำเริบ</span>
+                <span class="win-stat-value" style="color:#ffb84d;">${panicTriggers} ครั้ง</span>
+            </div>
+            <div class="win-stat-row">
+                <span class="win-stat-label">📝 เบาะแสที่พบ</span>
+                <span class="win-stat-value" style="color:#4dd2ff;">${cluesFound} / 15</span>
+            </div>
+            <div class="win-stat-row">
+                <span class="win-stat-label">🎒 ไอเท็มที่รวบรวมได้</span>
+                <span class="win-stat-value" style="color:#4dff4d;">${itemsFound} / 20</span>
+            </div>
+            <div class="win-stat-row">
+                <span class="win-stat-label">⏱️ เวลาที่ใช้เล่น</span>
+                <span class="win-stat-value" style="color:#fff;">${timeStr}</span>
+            </div>
         </div>
     `;
 
@@ -278,10 +296,11 @@ function winGame(msg) {
     const winScreen = document.getElementById('win-screen');
     if (winScreen) {
         winScreen.innerHTML = `
-            <div style="text-align:center;max-width:640px;padding:20px;">
-                <h1 style="font-size:2.4rem;margin-bottom:20px;">${endingTitle}</h1>
+            <div class="win-box">
+                <h1 class="win-title">${endingTitleName}</h1>
+                <div class="win-subtitle">${endingSubtitle}</div>
                 ${statsHtml}
-                <button onclick="location.reload()">MAIN MENU</button>
+                <button class="win-btn" onclick="location.reload()">MAIN MENU</button>
             </div>
         `;
         // win-screen stays hidden until OK is clicked (handled in main.js)

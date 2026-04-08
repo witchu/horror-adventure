@@ -1,8 +1,8 @@
 // --- Global Game State ---
 
 const GameState = {
-  hp: 3,
-  maxHp: 3,
+  hp: 100,
+  maxHp: 100,
   hpDrainRate: 0,
   logs: [], // Array of log text strings
   currentRoom: 'bedroom',

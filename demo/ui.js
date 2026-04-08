@@ -28,7 +28,7 @@ function renderHUD() {
   if (hpFill && hpText) {
     const pct = Math.max(0, (GameState.hp / GameState.maxHp) * 100);
     hpFill.style.width = `${pct}%`;
-    hpText.innerText = `${Math.max(0, GameState.hp).toFixed(2)} / ${GameState.maxHp}`;
+    hpText.innerText = `${Number(pct.toFixed(2))}/100%`;
   }
   
   if (GameState.hp <= 0 && els.deathScreen && els.deathScreen.classList.contains('hidden')) {
