@@ -23,6 +23,15 @@ window.RoomData.laundry = {
 .washer-shaking { animation: shake 0.2s infinite; }
 .floor-wet { background-color: rgba(173, 216, 230, 0.5); border-bottom: 5px solid blue; }
   `,
+  beforeInteract: function(objId, element) {
+    const flags = GameState.flags;
+    if (flags && flags.laundry_on_board && objId !== 'window' && objId !== 'ironing_board') {
+      flags.laundry_on_board = false;
+      takeDamage('ขยับตัวเอื้อมมือพลาด เสียหลักร่วงลงมาจากโต๊ะรีดผ้า!', 0.2);
+      return true; // Handle interaction, prevent normal onInteract
+    }
+    return false;
+  },
   objects: [
     {
       id: 'dryer', name: 'เครื่องอบผ้า', bounds: { left: 10, top: 50, width: 20, height: 30 },

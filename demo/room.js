@@ -93,13 +93,23 @@ function handleInteraction(room, objId, element) {
     obj = roomData.decorations.find(d => d.id === objId);
   }
 
-  if (room === 'laundry' && GameState.flags && GameState.flags.laundry_on_board && objId !== 'window' && objId !== 'ironing_board') {
-      GameState.flags.laundry_on_board = false;
-      takeDamage('ขยับตัวเอื้อมมือพลาด เสียหลักร่วงลงมาจากโต๊ะรีดผ้า!', 0.2);
-      return;
+  const beforeFlags = JSON.stringify(GameState.flags);
+  const beforeItems = JSON.stringify(GameState.items);
+  let interacted = false;
+
+  if (roomData.beforeInteract && roomData.beforeInteract(objId, element)) {
+      interacted = true;
+  } else if (obj && obj.onInteract) {
+      obj.onInteract(element);
+      interacted = true;
   }
 
-  if (obj && obj.onInteract) {
-    obj.onInteract(element);
+  if (interacted && !GameState.isDead) {
+      const currentFlags = JSON.stringify(GameState.flags);
+      const currentItems = JSON.stringify(GameState.items);
+      
+      if (beforeFlags !== currentFlags || beforeItems !== currentItems) {
+          saveCheckpoint();
+      }
   }
 }
