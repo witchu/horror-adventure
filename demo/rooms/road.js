@@ -273,11 +273,11 @@ function winGame(msg) {
             </div>
             <div class="win-stat-row">
                 <span class="win-stat-label">📝 เบาะแสที่พบ</span>
-                <span class="win-stat-value" style="color:#4dd2ff;">${cluesFound} / 15</span>
+                <span class="win-stat-value" style="color:#4dd2ff;">${cluesFound} / 20</span>
             </div>
             <div class="win-stat-row">
                 <span class="win-stat-label">🎒 ไอเท็มที่รวบรวมได้</span>
-                <span class="win-stat-value" style="color:#4dff4d;">${itemsFound} / 20</span>
+                <span class="win-stat-value" style="color:#4dff4d;">${itemsFound} / 22</span>
             </div>
             <div class="win-stat-row">
                 <span class="win-stat-label">⏱️ เวลาที่ใช้เล่น</span>
