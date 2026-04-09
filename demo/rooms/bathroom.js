@@ -10,6 +10,17 @@
 
   let roomEls = {};
 
+  function resetBathtubCheckpoint() {
+    if (GameState.checkpoint && GameState.checkpoint.flags) {
+        GameState.checkpoint.flags.bathroom_bathtubActive = false;
+        GameState.checkpoint.flags.bathroom_bathtubVolume = 0;
+        GameState.checkpoint.flags.bathroom_bathtubHotAmt = 0;
+        GameState.checkpoint.flags.bathroom_bathtubColdAmt = 0;
+        GameState.checkpoint.flags.bathroom_bathtubMode = 'close';
+        GameState.checkpoint.flags.bathroom_waterFilled = false;
+    }
+  }
+
   function openPillUI() {
     roomEls.pillOptions.innerHTML = '';
     pills.forEach(pill => {
@@ -110,10 +121,12 @@
     const coldPct = Math.round((flags.bathroom_bathtubColdAmt / tot) * 100);
     
     if (hotPct > 80) {
+        resetBathtubCheckpoint();
         die("สัมผัสผิวน้ำอุณหภูมิที่ร้อนจัด ผิวหนังพุพองถูกลวกอย่างรุนแรงทนทานความเจ็บปวดไม่ไหว...");
         return;
     }
     if (coldPct > 80) {
+        resetBathtubCheckpoint();
         die("ร่างกายช็อคหัวใจวายจากการสูญเสียความร้อนอย่างเฉียบพลันในน้ำยะเยือก!");
         return;
     }
@@ -376,8 +389,10 @@ window.RoomData.bathroom = {
             flags.bathroom_bathtubActive = false;
             closeFaucetUI();
             if (!flags['bathroom_dryerUnplugged']) {
+                resetBathtubCheckpoint();
                 die("ปล่อยน้ำล้นอ่าง ท่วมพื้นไหลไปโดนไดร์เป่าผมที่เสียบปลั๊กอยู่ ไฟช็อตตายคาที่!");
             } else {
+                resetBathtubCheckpoint();
                 die("ปล่อยน้ำล้นอ่าง ท่วมพื้นจำนวนมากจนคุณลื่นล้มหัวฟาดพื้นตาย!");
             }
         }
