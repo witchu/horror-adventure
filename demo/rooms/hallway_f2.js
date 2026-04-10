@@ -101,6 +101,14 @@ window.RoomData.hallway_f2 = {
     const rug = document.getElementById('obj-rug');
     const switchEl = document.getElementById('obj-light_switch');
     
+    if (els && els.scene) {
+        if (!flags['hallway_f2_lightOn']) {
+            els.scene.style.filter = 'brightness(0.3)';
+        } else {
+            els.scene.style.filter = 'brightness(1)';
+        }
+    }
+
     if (flags['hallway_f2_curtainClosed'] && curtain && ch) {
         curtain.innerText = 'ผ้าม่าน (ปิดสนิท)';
         ch.classList.remove('swinging');
