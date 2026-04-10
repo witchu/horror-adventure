@@ -18,7 +18,7 @@ window.RoomData.bedroom = {
 .room-bedroom { background-image: url('assets/bedroom_bg.png'); }
   `,
   objects: [
-    { id: 'bed', name: 'เตียงนอน', bounds: { left: 10, top: 60, width: 40, height: 30 },
+    { id: 'bed', name: 'เตียงนอน', bounds: { left: 5.4, top: 53.5, width: 41.2, height: 36.8 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['bedroom_stoodUp']) {
@@ -29,7 +29,7 @@ window.RoomData.bedroom = {
         }
       }
     },
-    { id: 'alarm', name: 'นาฬิกาปลุก', bounds: { left: 55, top: 55, width: 10, height: 10 },
+    { id: 'alarm', name: 'นาฬิกาปลุก', bounds: { left: 5.0, top: 58.0, width: 7.5, height: 15.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['bedroom_stoodUp']) {
@@ -43,7 +43,7 @@ window.RoomData.bedroom = {
         }
       }
     },
-    { id: 'window', name: 'หน้าต่าง', bounds: { left: 40, top: 20, width: 20, height: 30 }, classes: 'swinging',
+    { id: 'window', name: 'หน้าต่าง', bounds: { left: 51.5, top: 29.5, width: 18.5, height: 24.5 }, classes: 'swinging',
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['bedroom_stoodUp']) {
@@ -67,7 +67,7 @@ window.RoomData.bedroom = {
         }
       }
     },
-    { id: 'wardrobe', name: 'ตู้เสื้อผ้า', bounds: { left: 70, top: 15, width: 20, height: 60 }, classes: 'heavy-shake',
+    { id: 'wardrobe', name: 'ตู้เสื้อผ้า', bounds: { left: 23.5, top: 28.5, width: 24.5, height: 45.0 }, classes: 'heavy-shake',
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['bedroom_stoodUp']) {
@@ -93,7 +93,7 @@ window.RoomData.bedroom = {
         }
       }
     },
-    { id: 'fan', name: 'พัดลมเพดาน (ลอดผ่าน)', bounds: { left: 30, top: 0, width: 40, height: 15 },
+    { id: 'fan', name: 'พัดลมเพดาน (ลอดผ่าน)', bounds: { left: 37.0, top: 5.0, width: 28.0, height: 18.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['bedroom_stoodUp']) {
@@ -107,7 +107,7 @@ window.RoomData.bedroom = {
         }
       }
     },
-    { id: 'door_bathroom', name: 'ประตูห้องน้ำ', bounds: { left: 5, top: 10, width: 15, height: 35 },
+    { id: 'door_bathroom', name: 'ประตูห้องน้ำ', bounds: { left: 71.5, top: 30.5, width: 12.5, height: 45.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['bedroom_stoodUp']) {
@@ -123,7 +123,7 @@ window.RoomData.bedroom = {
         }
       }
     },
-    { id: 'door_hallway', name: 'ประตูออกโถง', bounds: { left: 85, top: 20, width: 15, height: 40 },
+    { id: 'door_hallway', name: 'ประตูออกโถง', bounds: { left: 89.5, top: 23.5, width: 9.5, height: 71.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['bedroom_stoodUp']) return;

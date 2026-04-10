@@ -13,7 +13,7 @@ window.RoomData.hallway_f2 = {
 .room-hallway_f2 { background-image: url('assets/hallway_f2_bg.png'); }
   `,
   objects: [
-    { id: 'curtain', name: 'ผ้าม่านหน้าต่างบานใหญ่', bounds: { left: 20, top: 20, width: 30, height: 50 },
+    { id: 'curtain', name: 'ผ้าม่านหน้าต่างบานใหญ่', bounds: { left: 33.5, top: 29.5, width: 34.5, height: 31.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['hallway_f2_curtainClosed']) {
@@ -26,7 +26,7 @@ window.RoomData.hallway_f2 = {
         }
       }
     },
-    { id: 'rug', name: 'พรมเช็ดเท้า', bounds: { left: 30, top: 80, width: 40, height: 15 },
+    { id: 'rug', name: 'พรมเช็ดเท้า', bounds: { left: 20.5, top: 84.5, width: 19.5, height: 13.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['hallway_f2_chandelierSwinging'] && !flags['hallway_f2_rugSorted']) {
@@ -40,7 +40,7 @@ window.RoomData.hallway_f2 = {
         }
       }
     },
-    { id: 'light_switch', name: 'สวิตช์ไฟขั้นบันได', bounds: { left: 80, top: 30, width: 10, height: 20 },
+    { id: 'light_switch', name: 'สวิตช์ไฟขั้นบันได', bounds: { left: 16.8, top: 52.8, width: 1.8, height: 6.2 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags['hallway_f2_chandelierSwinging']) {
@@ -60,7 +60,7 @@ window.RoomData.hallway_f2 = {
         }
       }
     },
-    { id: 'stairs_down', name: 'บันไดลงไปชั้นล่าง', bounds: { left: 40, top: 40, width: 20, height: 40 },
+    { id: 'stairs_down', name: 'บันไดลงไปชั้นล่าง', bounds: { left: 41.5, top: 61.5, width: 45.0, height: 38.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags['hallway_f2_chandelierSwinging']) {
@@ -80,7 +80,7 @@ window.RoomData.hallway_f2 = {
         loadRoom('hallway_f1');
       }
     },
-    { id: 'door_bedroom', name: 'กลับห้องนอน', bounds: { left: -5, top: 20, width: 20, height: 50 },
+    { id: 'door_bedroom', name: 'กลับห้องนอน', bounds: { left: 5.2, top: 25.5, width: 10.5, height: 72.5 },
       onInteract: (element) => {
         showDialogue("คุณเปิดประตูกลับเข้าไปในห้องนอน");
         saveCheckpoint();
@@ -89,7 +89,7 @@ window.RoomData.hallway_f2 = {
     }
   ],
   decorations: [
-    { id: 'chandelier', name: 'โคมไฟระย้า', bounds: { left: 30, top: -10, width: 40, height: 30 }, classes: 'chandelier-swing swinging',
+    { id: 'chandelier', name: 'โคมไฟระย้า', bounds: { left: 55.0, top: 12.5, width: 20.5, height: 28.5 }, classes: 'chandelier-swing swinging',
       onInteract: (element) => {}
     }
   ],

@@ -187,7 +187,7 @@ window.RoomData.bathroom = {
 .faucet-btn.close.active { background-color: #444; color: #fff; border-color: #aaa; }
     `,
     objects: [
-      { id: 'soap', name: 'ขวดสบู่', bounds: { left: 20, top: 80, width: 10, height: 10 },
+      { id: 'soap', name: 'ขวดสบู่', bounds: { left: 84.5, top: 77.5, width: 3.0, height: 10.5 },
         onInteract: (element) => {
           const flags = GameState.flags;
           if (!flags['bathroom_soapPicked']) {
@@ -197,7 +197,7 @@ window.RoomData.bathroom = {
           }
         }
       },
-      { id: 'cabinet', name: 'ตู้ยา', bounds: { left: 45, top: 15, width: 15, height: 20 },
+      { id: 'cabinet', name: 'ตู้ยา', bounds: { left: 61.8, top: 28.5, width: 9.2, height: 16.5 },
         onInteract: (element) => {
           const flags = GameState.flags;
           if (!flags['bathroom_pillTaken']) {
@@ -207,7 +207,7 @@ window.RoomData.bathroom = {
           }
         }
       },
-      { id: 'dryer', name: 'ไดร์เป่าผม (เสียบปลั๊ก)', bounds: { left: 60, top: 80, width: 15, height: 10 },
+      { id: 'dryer', name: 'ไดร์เป่าผม (เสียบปลั๊ก)', bounds: { left: 30.5, top: 81.2, width: 9.0, height: 12.5 },
         onInteract: (element) => {
           const flags = GameState.flags;
           if (flags['bathroom_bathed'] && !flags['bathroom_dried'] && !flags['bathroom_dryerUnplugged']) {
@@ -225,7 +225,7 @@ window.RoomData.bathroom = {
           }
         }
       },
-      { id: 'bathtub', name: 'อ่างอาบน้ำ', bounds: { left: 65, top: 40, width: 30, height: 40 },
+      { id: 'bathtub', name: 'อ่างอาบน้ำ', bounds: { left: 2.1, top: 58.8, width: 29.5, height: 35.2 },
         onInteract: (element) => {
           const flags = GameState.flags;
           if (!flags['bathroom_doorUnlocked']) {
@@ -255,7 +255,7 @@ window.RoomData.bathroom = {
           }
         }
       },
-      { id: 'door_back', name: 'กลับเข้าห้องนอน', bounds: { left: 5, top: 15, width: 15, height: 60 },
+      { id: 'door_back', name: 'กลับเข้าห้องนอน', bounds: { left: 89.2, top: 18.5, width: 9.0, height: 74.5 },
         onInteract: (element) => {
           const flags = GameState.flags;
           if (!flags['bathroom_soapPicked'] && flags.bathroom_soapTimer > 25) {
@@ -271,7 +271,7 @@ window.RoomData.bathroom = {
       }
     ],
     decorations: [
-      { id: 'soap-spill', name: 'ฟองสบู่บนพื้น (กองเล็ก)', bounds: { left: 20, top: 90, width: 20, height: 10 },
+      { id: 'soap-spill', name: 'ฟองสบู่บนพื้น (กองเล็ก)', bounds: { left: 77.0, top: 88.5, width: 11.0, height: 8.0 },
         onInteract: (element) => {}
       }
     ],
