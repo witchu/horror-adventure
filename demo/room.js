@@ -2,7 +2,11 @@
 
 function loadRoom(roomId) {
   GameState.currentRoom = roomId;
-  if (els.scene) els.scene.className = `room-${roomId}`;
+  if (els.scene) {
+    const hasHints = els.scene.classList.contains('show-hints');
+    els.scene.className = `room-${roomId}`;
+    if (hasHints) els.scene.classList.add('show-hints');
+  }
   if (els.interactiveLayer) {
     els.interactiveLayer.innerHTML = ''; // clear objects
     els.interactiveLayer.style.display = 'block';
