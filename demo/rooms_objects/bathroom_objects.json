@@ -1,0 +1,136 @@
+{
+  "room_metadata": {
+    "name": "ห้องน้ำ (Bathroom)",
+    "location": "ชั้นสอง (Second Floor)",
+    "atmosphere": "กระเบื้องสีขาวชื้นแฉะ หลอดไฟเพดานกะพริบติดๆ ดับๆ ตลอดเวลา มีแอ่งลื่นที่พื้น และอุปกรณ์ไฟฟ้าตกอยู่ในจุดที่อันตราย",
+    "state": "Abnormal/Unstable"
+  },
+  "room_contents": {
+    "furniture": [
+      {
+        "name": "ตู้ยา (Medicine Cabinet)",
+        "description": "ตู้ยาและเก็บอุปกรณ์อยู่เหนือโถชักโครก เมื่อเปิดออกจะมียาหลายรูปแบบเรียงรายอยู่ให้เลือกทาน"
+      },
+      {
+        "name": "อ่างอาบน้ำ (Bathtub)",
+        "description": "อ่างอาบน้ำว่างเปล่าที่มีก๊อกระบบน้ำร้อนและน้ำเย็นให้ผู้เล่นปรับระดับอุณหภูมิน้ำลงไปในอ่าง"
+      }
+    ],
+    "objects": [
+      {
+        "name": "ขวดสบู่ (Soap Bottle)",
+        "description": "ขวดสบู่ที่ล้มหกอยู่ใกล้ประตู สบู่เหลวกำลังไหลออกมาเรื่อยๆ ทำให้พื้นลื่นเป็นอันตรายถึงชีวิต"
+      },
+      {
+        "name": "ไดร์เป่าผม (Hair Dryer)",
+        "description": "ไดร์เป่าผมที่เสียบปลั๊กไฟคาไว้และตกอยู่บนพื้นใกล้อ่างอาบน้ำ เสี่ยงต่อการโดนไฟดูดตาย"
+      },
+      {
+        "name": "กระปุกยา (Pills)",
+        "description": "ตัวเลือกกระปุกยาทั้ง 6 รูปแบบภายในตู้ยาที่ผู้เล่นต้องเลือกทานให้ถูกต้องรักษาสติและหยุดไฟกะพริบ"
+      },
+      {
+        "name": "กุญแจห้องนอน (Bedroom Key)",
+        "description": "กุญแจสำหรับไขประตูออกสู่โถงทางเดิน ซึ่งติดค้างอยู่ลึกในท่อระบายน้ำของอ่างอาบน้ำ"
+      }
+    ],
+    "exits": [
+      {
+        "name": "ประตูกลับเข้าห้องนอน (Door back to bedroom)",
+        "status": "เปิดอยู่สามารถเดินย้อนกลับได้เสมอ"
+      }
+    ]
+  },
+  "room_objects_bounding_boxes": [
+    {
+      "name": "ตู้ยา (Medicine Cabinet)",
+      "bounding_box": {
+        "left": 61.8,
+        "top": 28.5,
+        "width": 9.2,
+        "height": 16.5
+      }
+    },
+    {
+      "name": "อ่างอาบน้ำ (Bathtub)",
+      "bounding_box": {
+        "left": 2.1,
+        "top": 58.8,
+        "width": 29.5,
+        "height": 35.2
+      }
+    },
+    {
+      "name": "ขวดสบู่ (Soap Bottle)",
+      "bounding_box": {
+        "left": 84.5,
+        "top": 77.5,
+        "width": 3.0,
+        "height": 10.5
+      }
+    },
+    {
+      "name": "ไดร์เป่าผม (Hair Dryer)",
+      "bounding_box": {
+        "left": 30.5,
+        "top": 81.2,
+        "width": 9.0,
+        "height": 12.5
+      }
+    },
+    {
+      "name": "กระปุกยา (Pills)",
+      "bounding_box": {
+        "left": 62.5,
+        "top": 30.5,
+        "width": 7.8,
+        "height": 12.5
+      }
+    },
+    {
+      "name": "กุญแจห้องนอน (Bedroom Key)",
+      "bounding_box": {
+        "left": 24.5,
+        "top": 60.5,
+        "width": 2.5,
+        "height": 2.5
+      }
+    },
+    {
+      "name": "ประตูกลับเข้าห้องนอน (Door back to bedroom)",
+      "bounding_box": {
+        "left": 89.2,
+        "top": 18.5,
+        "width": 9.0,
+        "height": 74.5
+      }
+    },
+    {
+      "name": "โถชักโครก (Toilet)",
+      "bounding_box": {
+        "left": 61.2,
+        "top": 51.5,
+        "width": 10.0,
+        "height": 28.0
+      }
+    },
+    {
+      "name": "อ่างล้างหน้า (Sink)",
+      "bounding_box": {
+        "left": 36.5,
+        "top": 53.2,
+        "width": 10.5,
+        "height": 13.5
+      }
+    },
+    {
+      "name": "กระจก (Mirror)",
+      "bounding_box": {
+        "left": 37.2,
+        "top": 28.8,
+        "width": 9.2,
+        "height": 20.2
+      }
+    }
+  ]
+}
