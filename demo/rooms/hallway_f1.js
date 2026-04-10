@@ -11,7 +11,7 @@ window.RoomData.hallway_f1 = {
 .room-hallway_f1 { background-image: url('assets/hallway_f1_bg.png'); }
   `,
   objects: [
-    { id: 'backpack', name: 'กระเป๋าสะพาย', bounds: { left: 25, top: 70, width: 15, height: 15 },
+    { id: 'backpack', name: 'กระเป๋าสะพาย', bounds: { left: 4.5, top: 41.5, width: 7.5, height: 24.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags['hallway_f1_backpackSearched1']) {
@@ -27,12 +27,12 @@ window.RoomData.hallway_f1 = {
         }
       }
     },
-    { id: 'door_living', name: 'ประตูห้องนั่งเล่น', bounds: { left: 80, top: 10, width: 15, height: 50 },
+    { id: 'door_living', name: 'ประตูห้องนั่งเล่น', bounds: { left: 86.5, top: 28.5, width: 10.2, height: 68.5 },
       onInteract: (element) => {
         showDialogue("ประตูล็อค หรือ ทางนี้ยังไปไม่ได้");
       }
     },
-    { id: 'door_storage', name: 'ประตูห้องเก็บของ', bounds: { left: 60, top: 10, width: 15, height: 50 },
+    { id: 'door_storage', name: 'ประตูห้องเก็บของ', bounds: { left: 18.5, top: 42.5, width: 6.5, height: 25.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags['hallway_f1_storageUnlocked']) {
@@ -50,14 +50,14 @@ window.RoomData.hallway_f1 = {
         }
       }
     },
-    { id: 'door_kitchen', name: 'ทางเข้าไปยังห้องครัว', bounds: { left: 0, top: 20, width: 15, height: 70 },
+    { id: 'door_kitchen', name: 'ทางเข้าไปยังห้องครัว', bounds: { left: 63.5, top: 35.5, width: 15.2, height: 48.5 },
       onInteract: (element) => {
         showDialogue("ประตูเปิดออกสู่ห้องครัว...");
         saveCheckpoint();
         loadRoom('kitchen');
       }
     },
-    { id: 'stairs_up', name: 'บันไดขึ้นชั้น 2', bounds: { left: 40, top: 60, width: 40, height: 40 },
+    { id: 'stairs_up', name: 'บันไดขึ้นชั้น 2', bounds: { left: 33.2, top: 39.5, width: 19.5, height: 43.5 },
       onInteract: (element) => {
         showDialogue("คุณเดินขึ้นบันไดกลับไปยังชั้น 2");
         loadRoom('hallway_f2');
