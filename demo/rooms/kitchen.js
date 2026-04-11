@@ -133,7 +133,7 @@
 }
     `,
     objects: [
-      { id: 'sink', name: 'ก๊อกน้ำอ่างล้างจาน', bounds: { left: 10, top: 40, width: 20, height: 30 },
+      { id: 'sink', name: 'ก๊อกน้ำอ่างล้างจาน', bounds: { left: 30.5, top: 55.5, width: 11.2, height: 14.5 },
         onInteract: (element) => {
           const flags = GameState.flags;
           if (!flags['kitchen_sinkOff']) {
@@ -145,7 +145,7 @@
           }
         }
       },
-      { id: 'kettle', name: 'กาต้มน้ำ', bounds: { left: 35, top: 35, width: 15, height: 20 }, classes: 'light-shake',
+      { id: 'kettle', name: 'กาต้มน้ำ', bounds: { left: 44.2, top: 55.8, width: 6.5, height: 11.8 }, classes: 'light-shake',
         onInteract: (element) => {
           const flags = GameState.flags;
           if (!flags['kitchen_kettleOff']) {
@@ -157,7 +157,7 @@
           }
         }
       },
-      { id: 'cabinet', name: 'ตู้เก็บจานแขวนผนัง', bounds: { left: 10, top: 10, width: 30, height: 20 },
+      { id: 'cabinet', name: 'ตู้เก็บจานแขวนผนัง', bounds: { left: 20.2, top: 22.5, width: 22.8, height: 25.5 },
         onInteract: (element) => {
           const flags = GameState.flags;
           if (!flags['kitchen_cabinetClosed']) {
@@ -169,7 +169,7 @@
           }
         }
       },
-      { id: 'drawer_left', name: 'ลิ้นชักซ้าย', bounds: { left: 10, top: 75, width: 15, height: 20 },
+      { id: 'drawer_left', name: 'ลิ้นชักซ้าย', bounds: { left: 16.5, top: 72.2, width: 12.5, height: 8.5 },
         onInteract: (element) => {
           const flags = GameState.flags;
           if (!flags['kitchen_gasNotesFound']) {
@@ -181,12 +181,12 @@
           }
         }
       },
-      { id: 'drawer_right', name: 'ลิ้นชักขวา', bounds: { left: 30, top: 75, width: 15, height: 20 },
+      { id: 'drawer_right', name: 'ลิ้นชักขวา', bounds: { left: 40.8, top: 71.8, width: 10.2, height: 6.5 },
         onInteract: (element) => {
           takeDamage("เปิดลิ้นชักออกอย่างรวดเร็ว โดนของมีคมด้านในบาดมือ!", 0.25);
         }
       },
-      { id: 'stove', name: 'เตาแก๊ส', bounds: { left: 55, top: 45, width: 20, height: 20 },
+      { id: 'stove', name: 'เตาแก๊ส', bounds: { left: 64.2, top: 69.5, width: 4.5, height: 21.2 },
         onInteract: (element) => {
           const flags = GameState.flags;
           if (!flags['kitchen_gasOff']) {
@@ -196,7 +196,7 @@
           }
         }
       },
-      { id: 'food', name: 'อาหารบนเตา', bounds: { left: 60, top: 35, width: 10, height: 10 },
+      { id: 'food', name: 'อาหารบนเตา', bounds: { left: 51.8, top: 60.2, width: 12.2, height: 31.5 },
         onInteract: (element) => {
           const flags = GameState.flags;
           if (!flags['kitchen_gasOff']) {
@@ -221,13 +221,13 @@
           }
         }
       },
-      { id: 'fridge_note', name: 'กระดานโน๊ตบนตู้เย็น', bounds: { left: 85, top: 40, width: 10, height: 30 },
+      { id: 'fridge_note', name: 'กระดานโน๊ตบนตู้เย็น', bounds: { left: 77.2, top: 41.8, width: 11.5, height: 49.2 },
         onInteract: (element) => {
           showDialogue("กระดานโน๊ตเขียนว่า: 'ทานอาหารด้วยนะ ฉันอุ่นเตรียมไว้ให้แล้ว...แต่รสชาติอาจไม่ถูกใจคุณเท่าไหร่ และอย่าลืมตรวจสอบทุกอย่างให้เรียบร้อยก่อนออกไปด้วยล่ะ'");
           addLog("พ่อบ้าน/แม่บ้านโน๊ตไว้: ทานอาหารด้วยนะ ฉันอุ่นเตรียมไว้ให้แล้ว...");
         }
       },
-      { id: 'door_laundry', name: 'ประตูห้องซักล้าง', bounds: { left: 80, top: 70, width: 15, height: 25 },
+      { id: 'door_laundry', name: 'ประตูห้องซักล้าง', bounds: { left: 2.5, top: 21.0, width: 11.8, height: 73.0 },
         onInteract: (element) => {
           if (GameState.flags['kitchen_laundry_unlocked']) {
               showDialogue("ประตูห้องซักล้างถูกทุบเปิดไว้แล้ว คุณเปิดเข้าไปในห้อง...");
@@ -244,14 +244,14 @@
           }
         }
       },
-      { id: 'door_dining', name: 'ทางไปห้องทานข้าว', bounds: { left: 0, top: 20, width: 10, height: 60 },
+      { id: 'door_dining', name: 'ทางไปห้องทานข้าว', bounds: { left: 65.5, top: 28.8, width: 15.5, height: 56.5 },
         onInteract: (element) => {
           showDialogue("คุณเดินเปิดประตูเข้าไปยังห้องทานข้าว...");
           saveCheckpoint();
           loadRoom('dining_room');
         }
       },
-      { id: 'door_hallway', name: 'กลับโถงทางเดิน', bounds: { left: 40, top: 85, width: 20, height: 10 },
+      { id: 'door_hallway', name: 'กลับโถงทางเดิน', bounds: { left: 88.5, top: 21.8, width: 8.2, height: 72.5 },
         onInteract: (element) => {
           showDialogue("กลับออกไปโถงทางเดินชั้น 1");
           saveCheckpoint();

@@ -82,7 +82,7 @@ window.RoomData.dining_room = {
 .flicker-dining { animation: flicker 3s infinite; }
     `,
     objects: [
-      { id: 'switch', name: 'สวิตช์ไฟ', bounds: { left: 10, top: 40, width: 5, height: 10 },
+      { id: 'switch', name: 'สวิตช์ไฟ', bounds: { left: 62.0, top: 47.0, width: 3.5, height: 9.5 },
         onInteract: (element) => {
            const flags = GameState.flags;
            if (flags['dining_room_lightSwitchState'] === 1) { // Flickering -> Off
@@ -100,7 +100,7 @@ window.RoomData.dining_room = {
            }
         }
       },
-      { id: 'table', name: 'โต๊ะทานข้าว', bounds: { left: 20, top: 60, width: 60, height: 30 },
+      { id: 'table', name: 'โต๊ะทานข้าว', bounds: { left: 36.8, top: 72.8, width: 27.8, height: 22.2 },
         onInteract: (element) => {
            const flags = GameState.flags;
            if (flags['dining_room_tableClimbed']) {
@@ -116,12 +116,12 @@ window.RoomData.dining_room = {
            showDialogue("คุณปีนขึ้นไปบนโต๊ะทานข้าวอย่างมั่นคง สามารถเอื้อมถึงโคมไฟเพดานได้แล้ว (กดที่โต๊ะอีกครั้งเพื่อลง)");
         }
       },
-      { id: 'drinks', name: 'ชุดเครื่องดื่ม', bounds: { left: 25, top: 45, width: 25, height: 15 }, classes: 'hidden',
+      { id: 'drinks', name: 'ชุดเครื่องดื่ม', bounds: { left: 50.2, top: 56.5, width: 14.2, height: 11.8 }, classes: 'hidden',
         onInteract: (element) => {
            openDiningUI();
         }
       },
-      { id: 'newspaper', name: 'หนังสือพิมพ์', bounds: { left: 55, top: 45, width: 15, height: 15 },
+      { id: 'newspaper', name: 'หนังสือพิมพ์', bounds: { left: 37.5, top: 61.5, width: 9.5, height: 9.5 },
         onInteract: (element) => {
            const flags = GameState.flags;
            if (flags['dining_room_lightSwitchState'] !== 2) {
@@ -133,7 +133,7 @@ window.RoomData.dining_room = {
            addLog("Fence Code 2: 2");
         }
       },
-      { id: 'lamp', name: 'โคมไฟเพดาน', bounds: { left: 35, top: 0, width: 30, height: 30 },
+      { id: 'lamp', name: 'โคมไฟเพดาน', bounds: { left: 44.5, top: 5.5, width: 11.5, height: 25.5 },
         onInteract: (element) => {
            const flags = GameState.flags;
            if (!flags['dining_room_tableClimbed']) {
@@ -154,7 +154,7 @@ window.RoomData.dining_room = {
            }
         }
       },
-      { id: 'clock', name: 'นาฬิกาลูกตุ้ม', bounds: { left: 80, top: 20, width: 15, height: 60 },
+      { id: 'clock', name: 'นาฬิกาลูกตุ้ม', bounds: { left: 83.2, top: 28.5, width: 6.8, height: 57.5 },
         onInteract: (element) => {
            const flags = GameState.flags;
            if (flags['dining_room_lightSwitchState'] !== 2) {
@@ -180,7 +180,7 @@ window.RoomData.dining_room = {
            }
         }
       },
-      { id: 'door_living', name: 'ประตูห้องนั่งเล่น', bounds: { left: 90, top: 20, width: 10, height: 60 },
+      { id: 'door_living', name: 'ประตูห้องนั่งเล่น', bounds: { left: 89.8, top: 19.5, width: 7.5, height: 72.5 },
         onInteract: (element) => {
            const flags = GameState.flags;
            if (!flags['dining_room_clockMoved']) {
@@ -192,7 +192,7 @@ window.RoomData.dining_room = {
            }
         }
       },
-      { id: 'door_kitchen', name: 'กลับห้องครัว', bounds: { left: 0, top: 70, width: 15, height: 30 },
+      { id: 'door_kitchen', name: 'กลับห้องครัว', bounds: { left: 66.2, top: 28.2, width: 14.8, height: 49.5 },
         onInteract: (element) => {
            showDialogue("กลับสู่ห้องครัว");
            saveCheckpoint();
