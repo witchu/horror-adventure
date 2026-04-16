@@ -34,13 +34,13 @@ window.RoomData.laundry = {
   },
   objects: [
     {
-      id: 'dryer', name: 'เครื่องอบผ้า', bounds: { left: 10, top: 50, width: 20, height: 30 },
+      id: 'dryer', name: 'เครื่องอบผ้า', bounds: { left: 30.2, top: 53.5, width: 13.5, height: 33.2 },
       onInteract: (element) => {
         showDialogue('เครื่องอบผ้าทำงานหนัก เสียงดังอื้ออึงและแผ่ความร้อน ปิดไม่ได้!');
       }
     },
     {
-      id: 'iron', name: 'เตารีด', bounds: { left: 40, top: 45, width: 10, height: 10 },
+      id: 'iron', name: 'เตารีด', bounds: { left: 21.2, top: 54.2, width: 7.2, height: 11.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.laundry_iron_plugged) {
@@ -57,7 +57,7 @@ window.RoomData.laundry = {
       }
     },
     {
-      id: 'iron_plug', name: 'ปลั๊กเตารีด', bounds: { left: 45, top: 40, width: 15, height: 15 },
+      id: 'iron_plug', name: 'ปลั๊กเตารีด', bounds: { left: 5.0, top: 52.2, width: 3.8, height: 10.8 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.laundry_iron_plugged) {
@@ -76,7 +76,7 @@ window.RoomData.laundry = {
       }
     },
     {
-      id: 'fan', name: 'พัดลมระบายอากาศ', bounds: { left: 80, top: 10, width: 10, height: 10 },
+      id: 'fan', name: 'พัดลมระบายอากาศ', bounds: { left: 30.5, top: 22.8, width: 8.2, height: 14.8 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.laundry_fan_on) {
@@ -89,7 +89,7 @@ window.RoomData.laundry = {
       }
     },
     {
-      id: 'basket', name: 'ตะกร้าผ้า', bounds: { left: 70, top: 70, width: 15, height: 20 },
+      id: 'basket', name: 'ตะกร้าผ้า', bounds: { left: 75.8, top: 63.8, width: 10.8, height: 27.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.laundry_basket_empty) {
@@ -109,7 +109,7 @@ window.RoomData.laundry = {
       }
     },
     {
-      id: 'washer', name: 'เครื่องซักผ้า', bounds: { left: 40, top: 60, width: 25, height: 30 },
+      id: 'washer', name: 'เครื่องซักผ้า', bounds: { left: 44.5, top: 54.5, width: 14.2, height: 32.2 },
       onInteract: (element) => {
         if (window.RoomData.laundry.openWasherUI) {
             window.RoomData.laundry.openWasherUI(element);
@@ -117,20 +117,20 @@ window.RoomData.laundry = {
       }
     },
     {
-      id: 'door_garden', name: 'ประตูล็อค', bounds: { left: 75, top: 30, width: 15, height: 60 },
+      id: 'door_garden', name: 'ประตูล็อค', bounds: { left: 60.5, top: 27.2, width: 15.2, height: 38.5 },
       onInteract: (element) => {
         showDialogue('ประตูออกสู่สวนล็อคตายจากด้านใน เปิดไม่ได้');
       }
     },
     {
-      id: 'pet_flap', name: 'ช่องสัตว์เลี้ยงบนประตู', bounds: { left: 80, top: 80, width: 5, height: 5 },
+      id: 'pet_flap', name: 'ช่องสัตว์เลี้ยงบนประตู', bounds: { left: 64.2, top: 66.2, width: 8.5, height: 14.5 },
       onInteract: (element) => {
         showDialogue('เป็นประตูบานสวิงเล็กๆ คุณมุดหัวและลำตัวพยายามมุดออกไป...');
         triggerDeath('ร่างกายคุณติดอยู่กลางช่องแคบขยับไม่ได้ ไม่มีใครช่วยเหลือ ขาดอากาศหายใจจนเสียชีวิต!');
       }
     },
     {
-      id: 'ironing_board', name: 'โต๊ะรีดผ้า', bounds: { left: 20, top: 50, width: 20, height: 10 },
+      id: 'ironing_board', name: 'โต๊ะรีดผ้า', bounds: { left: 14.8, top: 62.8, width: 15.5, height: 33.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.laundry_on_board) {
@@ -149,7 +149,7 @@ window.RoomData.laundry = {
       }
     },
     {
-      id: 'window', name: 'หน้าต่างบานเกร็ด', bounds: { left: 20, top: 20, width: 20, height: 20 },
+      id: 'window', name: 'หน้าต่างบานเกร็ด', bounds: { left: 10.5, top: 21.5, width: 11.2, height: 41.2 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.laundry_on_board) {
@@ -174,7 +174,7 @@ window.RoomData.laundry = {
       }
     },
     {
-      id: 'door_kitchen', name: 'กลับห้องครัว', bounds: { left: 0, top: 20, width: 10, height: 70 },
+      id: 'door_kitchen', name: 'กลับห้องครัว', bounds: { left: 86.8, top: 17.5, width: 9.5, height: 77.5 },
       onInteract: (element) => {
         if (GameState.flags.laundry_on_board) {
           showDialogue('ลงจากโต๊ะรีดผ้าก่อน');

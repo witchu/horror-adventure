@@ -20,7 +20,7 @@ window.RoomData.front_garden = {
 .branch-shaking { animation: shake 2s infinite; }
   `,
   objects: [
-    { id: 'cage_toggle', name: 'กรงสุนัข', bounds: { left: 45, top: 60, width: 20, height: 20 },
+    { id: 'cage_toggle', name: 'กรงสุนัข', bounds: { left: 14.1, top: 49.0, width: 13.8, height: 26.8 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.garden_cage_closed) {
@@ -40,7 +40,7 @@ window.RoomData.front_garden = {
         }
       }
     },
-    { id: 'cage_door', name: 'ประตูกรง', bounds: { left: 35, top: 60, width: 5, height: 20 },
+    { id: 'cage_door', name: 'ประตูกรง', bounds: { left: 28.2, top: 52.5, width: 9.2, height: 21.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.garden_on_cage) { showDialogue('ต้องลงจากกรงก่อน'); return; }
@@ -71,7 +71,7 @@ window.RoomData.front_garden = {
         }
       }
     },
-    { id: 'cage_roof', name: 'หลังคากรงเหล็ก', bounds: { left: 40, top: 40, width: 20, height: 20 },
+    { id: 'cage_roof', name: 'หลังคากรงเหล็ก', bounds: { left: 10.3, top: 41.8, width: 19.8, height: 6.8 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.garden_in_cage) {
@@ -101,7 +101,7 @@ window.RoomData.front_garden = {
         }
       }
     },
-    { id: 'bowl', name: 'ชามอาหาร', bounds: { left: 50, top: 80, width: 5, height: 5 },
+    { id: 'bowl', name: 'ชามอาหาร', bounds: { left: 7.5, top: 65.2, width: 6.2, height: 8.0 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.garden_on_cage) { showDialogue('ต้องลงจากกรงก่อน'); return; }
@@ -122,7 +122,7 @@ window.RoomData.front_garden = {
         }
       }
     },
-    { id: 'rope', name: 'เชือกห่วงบนกิ่งไม้', bounds: { left: 45, top: 20, width: 10, height: 10 },
+    { id: 'rope', name: 'เชือกห่วงบนกิ่งไม้', bounds: { left: 23.2, top: 14.5, width: 5.2, height: 26.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.garden_on_cage) {
@@ -171,7 +171,7 @@ window.RoomData.front_garden = {
            });
       }
     },
-    { id: 'pots', name: 'กองกระถาง', bounds: { left: 10, top: 65, width: 15, height: 15 },
+    { id: 'pots', name: 'กองกระถาง', bounds: { left: 65.5, top: 58.5, width: 18.0, height: 20.0 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.garden_on_cage) { showDialogue('ต้องลงจากกรงก่อน'); return; }
@@ -215,7 +215,7 @@ window.RoomData.front_garden = {
         }
       }
     },
-    { id: 'hole_left', name: 'หลุมซ้าย', bounds: { left: 60, top: 70, width: 10, height: 10 },
+    { id: 'hole_left', name: 'หลุมซ้าย', bounds: { left: 34.5, top: 84.2, width: 13.5, height: 10.5 },
       onInteract: (element) => {
          if (GameState.flags.garden_on_cage) { showDialogue('ต้องลงจากกรงก่อน'); return; }
          if (!hasItem('shovel')) {
@@ -226,13 +226,13 @@ window.RoomData.front_garden = {
          }
       }
     },
-    { id: 'hole_center', name: 'หลุมกลาง', bounds: { left: 70, top: 75, width: 10, height: 10 },
+    { id: 'hole_center', name: 'หลุมกลาง', bounds: { left: 54.8, top: 84.2, width: 13.5, height: 10.5 },
       onInteract: (element) => {
          if (GameState.flags.garden_on_cage) { showDialogue('ต้องลงจากกรงก่อน'); return; }
          triggerDeath('ตกใจสุดขีดจากการพบสิ่งที่น่าสะพรึงกลัวและสยดสยองซ่อนอยู่ในหลุม — ช็อกตาย!');
       }
     },
-    { id: 'hole_right', name: 'หลุมขวา', bounds: { left: 80, top: 70, width: 10, height: 10 },
+    { id: 'hole_right', name: 'หลุมขวา', bounds: { left: 78.8, top: 84.2, width: 13.5, height: 10.5 },
       onInteract: (element) => {
          if (GameState.flags.garden_on_cage) { showDialogue('ต้องลงจากกรงก่อน'); return; }
          if (!GameState.flags.garden_hole_right_checked) {
@@ -244,7 +244,7 @@ window.RoomData.front_garden = {
          }
       }
     },
-    { id: 'door_fence', name: 'ทางไปรั้วหน้าบ้าน', bounds: { left: 85, top: 40, width: 15, height: 40 },
+    { id: 'door_fence', name: 'ทางไปรั้วหน้าบ้าน', bounds: { left: 40.1, top: 10.2, width: 16.5, height: 51.0 },
       onInteract: (element) => {
          const flags = GameState.flags;
          if (flags.garden_on_cage) { showDialogue('ต้องลงจากกรงก่อน'); return; }
@@ -261,14 +261,14 @@ window.RoomData.front_garden = {
          }
       }
     },
-    { id: 'clothesline', name: 'ราวตากผ้า', bounds: { left: 70, top: 30, width: 15, height: 15 },
+    { id: 'clothesline', name: 'ราวตากผ้า', bounds: { left: 83.8, top: 38.2, width: 9.2, height: 22.5 },
       onInteract: (element) => {
          if (GameState.flags.garden_on_cage) { showDialogue('ต้องลงจากกรงก่อน'); return; }
          showDialogue('กระดาษโน้ตในเสื้อ: "ถ้าไม่มีใครอยู่ ต้องให้อาหารเจ้าร็อคกี้ไว้ ให้เขาอยู่ในกรงและปิดให้แน่นหนา"');
          addLog("ให้อาหารและล็อคกรงสัตว์เลี้ยงให้แน่นหนา");
       }
     },
-    { id: 'laundry_window', name: 'กลับห้องซักล้าง', bounds: { left: 0, top: 30, width: 10, height: 40 },
+    { id: 'laundry_window', name: 'กลับห้องซักล้าง', bounds: { left: 68.8, top: 5.8, width: 26.0, height: 29.5 },
       onInteract: (element) => {
          if (GameState.flags.garden_on_cage) { showDialogue('ต้องลงจากกรงก่อน'); return; }
          showDialogue('คุณปีนกลับเข้าไปในห้องซักล้าง (โดนกระจกบาดอีกครั้ง)');

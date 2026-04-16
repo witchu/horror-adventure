@@ -100,7 +100,7 @@
     `,
         objects: [
             {
-                id: 'door_main', name: 'ประตูบานพับ (ทางเข้า)', bounds: { left: 5, top: 10, width: 20, height: 80 },
+                id: 'door_main', name: 'ประตูบานพับ (ทางเข้า)', bounds: { left: 10.2, top: 30.8, width: 18.0, height: 65.2 },
                 onInteract: (element) => {
                     const flags = GameState.flags;
                     if (flags['storage_doorClosed']) {
@@ -128,13 +128,13 @@
                 }
             },
             {
-                id: 'switch', name: 'สวิตช์ไฟ (ช็อต)', bounds: { left: 30, top: 40, width: 10, height: 10 }, classes: 'flickering',
+                id: 'switch', name: 'สวิตช์ไฟ (ช็อต)', bounds: { left: 4.5, top: 47.8, width: 4.5, height: 11.5 }, classes: 'flickering',
                 onInteract: (element) => {
                     die("คุณพยายามกดสวิตช์ใฟที่พัง กระแสไฟฟ้าลัดวงจรช็อตคุณอย่างรุนแรงจนสิ้นใจ!");
                 }
             },
             {
-                id: 'door_small', name: 'ประตูขนาดเล็กฝั่งพื้น', bounds: { left: 70, top: 80, width: 20, height: 15 },
+                id: 'door_small', name: 'ประตูขนาดเล็กฝั่งพื้น', bounds: { left: 73.2, top: 89.8, width: 21.2, height: 8.2 },
                 onInteract: (element) => {
                     const flags = GameState.flags;
                     if (!flags['storage_flashLightOn']) {
@@ -155,7 +155,7 @@
                 }
             },
             {
-                id: 'box_open', name: 'ลังกระดาษไม่มีฝาปิด', bounds: { left: 40, top: 70, width: 20, height: 20 },
+                id: 'box_open', name: 'ลังกระดาษไม่มีฝาปิด', bounds: { left: 48.2, top: 74.8, width: 12.8, height: 18.2 },
                 onInteract: (element) => {
                     const flags = GameState.flags;
                     if (!flags['storage_flashLightOn']) {
@@ -182,7 +182,7 @@
                 }
             },
             {
-                id: 'box_closed', name: 'ลังกระดาษมีฝาปิด', bounds: { left: 80, top: 60, width: 15, height: 20 },
+                id: 'box_closed', name: 'ลังกระดาษมีฝาปิด', bounds: { left: 49.5, top: 42.2, width: 11.2, height: 14.5 },
                 onInteract: (element) => {
                     const flags = GameState.flags;
                     if (!flags['storage_boxOpened']) {
@@ -195,7 +195,7 @@
                 }
             },
             {
-                id: 'toolbox', name: 'กล่องอุปกรณ์ช่าง', bounds: { left: 45, top: 55, width: 15, height: 15 },
+                id: 'toolbox', name: 'กล่องอุปกรณ์ช่าง', bounds: { left: 58.2, top: 59.2, width: 12.8, height: 13.8 },
                 onInteract: (element) => {
                     const flags = GameState.flags;
                     if (!flags['storage_flashLightOn']) {

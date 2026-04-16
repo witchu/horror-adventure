@@ -18,7 +18,7 @@ window.RoomData.fence_gate = {
   `,
   objects: [
     {
-      id: 'gate_panel', name: 'แผงกรอกรหัส', bounds: { left: 40, top: 40, width: 20, height: 20 },
+      id: 'gate_panel', name: 'แผงกรอกรหัส', bounds: { left: 55.2, top: 66.8, width: 4.8, height: 11.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.garden_cage_locked) {
@@ -42,7 +42,7 @@ window.RoomData.fence_gate = {
       }
     },
     {
-      id: 'gate_door', name: 'ประตูรั้วออกสู่ถนน', bounds: { left: 30, top: 20, width: 40, height: 15 },
+      id: 'gate_door', name: 'ประตูรั้วออกสู่ถนน', bounds: { left: 36.2, top: 63.2, width: 19.2, height: 31.5 },
       onInteract: (element) => {
         if (GameState.flags.fence_gate_open) {
           showDialogue('คุณเดินผ่านประตูรั้วออกสู่ถนน');
@@ -54,7 +54,7 @@ window.RoomData.fence_gate = {
       }
     },
     {
-      id: 'mailbox', name: 'ตู้จดหมาย', bounds: { left: 45, top: 85, width: 10, height: 15 },
+      id: 'mailbox', name: 'ตู้จดหมาย', bounds: { left: 36.1, top: 39.5, width: 6.8, height: 11.2 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.garden_cage_locked) { triggerDeath('สุนัขพุ่งออกมากัดตาย!'); return; }
@@ -75,7 +75,7 @@ window.RoomData.fence_gate = {
       }
     },
     {
-      id: 'fountain', name: 'น้ำพุ', bounds: { left: 10, top: 60, width: 15, height: 15 },
+      id: 'fountain', name: 'น้ำพุ', bounds: { left: 76.2, top: 38.5, width: 15.2, height: 35.2 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.fence_fountain_key_taken) {
@@ -114,7 +114,7 @@ window.RoomData.fence_gate = {
       }
     },
     {
-      id: 'bin_left', name: 'ถังขยะซ้าย', bounds: { left: 80, top: 70, width: 10, height: 15 },
+      id: 'bin_left', name: 'ถังขยะซ้าย', bounds: { left: 5.8, top: 31.0, width: 5.2, height: 17.8 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.garden_cage_locked) { triggerDeath('สุนัขพุ่งออกมากัดตาย!'); return; }
@@ -129,7 +129,7 @@ window.RoomData.fence_gate = {
       }
     },
     {
-      id: 'bin_right', name: 'ถังขยะขวา', bounds: { left: 90, top: 70, width: 10, height: 15 },
+      id: 'bin_right', name: 'ถังขยะขวา', bounds: { left: 11.2, top: 30.8, width: 5.5, height: 18.2 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.garden_cage_locked) { triggerDeath('สุนัขพุ่งออกมากัดตาย!'); return; }
@@ -144,7 +144,7 @@ window.RoomData.fence_gate = {
       }
     },
     {
-      id: 'net', name: 'กระชอนตักใบไม้', bounds: { left: 85, top: 50, width: 5, height: 20 },
+      id: 'net', name: 'กระชอนตักใบไม้', bounds: { left: 2.2, top: 30.8, width: 5.2, height: 17.8 },
       onInteract: (element) => {
         if (!GameState.flags.fence_net_taken) {
           GameState.flags.fence_net_taken = true;
@@ -155,14 +155,14 @@ window.RoomData.fence_gate = {
       }
     },
     {
-      id: 'shoes', name: 'รองเท้า', bounds: { left: 75, top: 50, width: 10, height: 10 },
+      id: 'shoes', name: 'รองเท้า', bounds: { left: 53.0, top: 49.0, width: 5.8, height: 10.2 },
       onInteract: (element) => {
         showDialogue('รองเท้าเปรอะเปื้อนมีกระดาษโน้ต: "มีคนอยู่ในบ้าน"');
         addLog('มีคนอยู่ในบ้าน!');
       }
     },
     {
-      id: 'house_door', name: 'ประตูบ้าน', bounds: { left: 0, top: 20, width: 10, height: 60 },
+      id: 'house_door', name: 'ประตูบ้าน', bounds: { left: 45.8, top: 24.5, width: 9.5, height: 30.0 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.fence_house_door_opened) {
@@ -185,13 +185,19 @@ window.RoomData.fence_gate = {
       }
     },
     {
-      id: 'spiky_fence', name: 'รั้วเหล็กแหลม', bounds: { left: 30, top: 0, width: 40, height: 20 },
+      id: 'spiky_fence_left', name: 'รั้วเหล็กแหลม (ซ้าย)', bounds: { left: 0.2, top: 61.8, width: 36.0, height: 31.5 },
       onInteract: (element) => {
         triggerDeath('คุณพยายามปีนรั้ว แต่ลื่นสะดุด ถูกเหล็กแหลมทิ่มแทงทะลุตัว!');
       }
     },
     {
-      id: 'garden_return', name: 'กลับเข้าสวนหน้าบ้าน', bounds: { left: 80, top: 85, width: 20, height: 15 },
+      id: 'spiky_fence_right', name: 'รั้วเหล็กแหลม (ขวา)', bounds: { left: 60.0, top: 61.8, width: 39.4, height: 31.5 },
+      onInteract: (element) => {
+        triggerDeath('คุณพยายามปีนรั้ว แต่ลื่นสะดุด ถูกเหล็กแหลมทิ่มแทงทะลุตัว!');
+      }
+    },
+    {
+      id: 'garden_return', name: 'กลับเข้าสวนหน้าบ้าน', bounds: { left: 91.5, top: 16.8, width: 8.2, height: 37.2 },
       onInteract: (element) => {
         if (!GameState.flags.garden_cage_locked) {
           triggerDeath('สุนัขดันประตูหลุดออกมารออยู่! กัดคุณตายตอนเดินกลับเข้าไป!');

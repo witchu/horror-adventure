@@ -37,7 +37,7 @@ window.RoomData.living_room = {
   `,
   objects: [
     {
-      id: 'phone', name: 'โทรศัพท์บ้าน', bounds: { left: 20, top: 50, width: 10, height: 10 },
+      id: 'phone', name: 'โทรศัพท์บ้าน', bounds: { left: 19.8, top: 53.0, width: 9.8, height: 12.8 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.living_room_phone_missed && flags.living_room_phone_timer < 30) {
@@ -50,7 +50,7 @@ window.RoomData.living_room = {
       }
     },
     {
-      id: 'tv', name: 'ทีวี', bounds: { left: 40, top: 40, width: 25, height: 20 },
+      id: 'tv', name: 'ทีวี', bounds: { left: 83.5, top: 42.2, width: 14.2, height: 23.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (hasItem('tv_remote')) {
@@ -75,7 +75,7 @@ window.RoomData.living_room = {
       }
     },
     {
-      id: 'sofa_blanket', name: 'ผ้าห่มบนโซฟา', bounds: { left: 40, top: 65, width: 30, height: 20 },
+      id: 'sofa_blanket', name: 'ผ้าห่มบนโซฟา', bounds: { left: 40.2, top: 50.2, width: 14.5, height: 17.5 },
       onInteract: (element) => {
         if (!GameState.flags.living_room_blanket_checked) {
           GameState.flags.living_room_blanket_checked = true;
@@ -87,7 +87,7 @@ window.RoomData.living_room = {
       }
     },
     {
-      id: 'dishes', name: 'จานชามสกปรก', bounds: { left: 50, top: 85, width: 20, height: 10 },
+      id: 'dishes', name: 'จานชามสกปรก', bounds: { left: 42.5, top: 67.2, width: 14.8, height: 15.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.living_room_dishes_checked) {
@@ -103,7 +103,7 @@ window.RoomData.living_room = {
       }
     },
     {
-      id: 'tv_drawer', name: 'ลิ้นชักชั้นวางทีวี', bounds: { left: 40, top: 60, width: 25, height: 10 },
+      id: 'tv_drawer', name: 'ลิ้นชักชั้นวางทีวี', bounds: { left: 82.2, top: 67.5, width: 17.2, height: 22.8 },
       onInteract: (element) => {
         if (!GameState.flags.living_room_drawer_open) {
           const ui = document.getElementById('living-room-ui-container');
@@ -114,7 +114,7 @@ window.RoomData.living_room = {
       }
     },
     {
-      id: 'dog_bed', name: 'เบาะนอนสุนัข', bounds: { left: 80, top: 75, width: 15, height: 15 },
+      id: 'dog_bed', name: 'เบาะนอนสุนัข', bounds: { left: 14.2, top: 73.2, width: 18.8, height: 18.2 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.living_room_dogbed_check_count === 0) {
@@ -131,7 +131,7 @@ window.RoomData.living_room = {
       }
     },
     {
-      id: 'dog_bowl', name: 'ชามอาหารสุนัข', bounds: { left: 75, top: 85, width: 8, height: 8 },
+      id: 'dog_bowl', name: 'ชามอาหารสุนัข', bounds: { left: 61.2, top: 88.5, width: 9.5, height: 10.5 },
       onInteract: (element) => {
         showDialogue('คุณตักอาหารสุนัขที่เหลือเข้ากระเป๋า [ได้อาหารสุนัข]');
         if (!hasItem('dog_food')) {
@@ -140,7 +140,7 @@ window.RoomData.living_room = {
       }
     },
     {
-      id: 'door_hallway', name: 'ประตูโถงทางเดิน', bounds: { left: 5, top: 15, width: 15, height: 50 },
+      id: 'door_hallway', name: 'ประตูโถงทางเดิน', bounds: { left: 3.2, top: 21.8, width: 11.2, height: 68.2 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.living_room_door_broken) {
@@ -161,7 +161,7 @@ window.RoomData.living_room = {
       }
     },
     {
-      id: 'door_dining', name: 'ประตูทางเชื่อมห้องทานข้าว', bounds: { left: 80, top: 15, width: 15, height: 50 },
+      id: 'door_dining', name: 'ประตูทางเชื่อมห้องทานข้าว', bounds: { left: 78.5, top: 24.8, width: 5.8, height: 55.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.living_room_dining_door_closed) {
@@ -175,7 +175,7 @@ window.RoomData.living_room = {
       }
     },
     {
-      id: 'door_dining_close', name: 'บานประตูห้องทานข้าว', bounds: { left: 70, top: 20, width: 10, height: 10 },
+      id: 'door_dining_close', name: 'บานประตูห้องทานข้าว', bounds: { left: 71.5, top: 25.5, width: 6.8, height: 54.5 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (!flags.living_room_dining_door_closed) {
@@ -193,7 +193,7 @@ window.RoomData.living_room = {
       }
     },
     {
-      id: 'fire_extinguisher_obj', name: 'ถังดับเพลิง', bounds: { left: 75, top: 25, width: 10, height: 20 },
+      id: 'fire_extinguisher_obj', name: 'ถังดับเพลิง', bounds: { left: 65.5, top: 42.2, width: 9.2, height: 20.2 },
       onInteract: (element) => {
         const flags = GameState.flags;
         if (flags.living_room_dining_door_closed && !flags.living_room_extinguisher_taken) {

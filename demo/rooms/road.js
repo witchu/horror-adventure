@@ -17,7 +17,7 @@ window.RoomData.road = {
 .traffic-red { color: red !important; background-color: red !important; }
   `,
   objects: [
-    { id: 'traffic_light', name: 'ไฟจราจร', bounds: { left: 45, top: 10, width: 10, height: 10 },
+    { id: 'traffic_light', name: 'ไฟจราจร', bounds: { left: 50.5, top: 13.0, width: 9.2, height: 22.5 },
       onInteract: (element) => {
          const flags = GameState.flags;
          let color = getTrafficColor(flags.road_traffic_timer);
@@ -26,7 +26,7 @@ window.RoomData.road = {
          addLog("ไฟจราจรยังคงใช้งานได้ รอจังหวะไฟแดงค่อยข้าม");
       }
     },
-    { id: 'man', name: 'ชายสูบบุหรี่', bounds: { left: 10, top: 50, width: 15, height: 40 },
+    { id: 'man', name: 'ชายสูบบุหรี่', bounds: { left: 11.5, top: 21.0, width: 16.2, height: 76.5 },
       onInteract: (element) => {
          if (GameState.flags.road_attacked_man) {
              showDialogue('ชายคนนี้นอนจมกองเลือด...');
@@ -55,7 +55,7 @@ window.RoomData.road = {
          }
       }
     },
-    { id: 'crosswalk', name: 'ข้ามทางม้าลาย', bounds: { left: 40, top: 60, width: 20, height: 40 },
+    { id: 'crosswalk', name: 'ข้ามทางม้าลาย', bounds: { left: 42.5, top: 65.0, width: 41.2, height: 11.5 },
       onInteract: (element) => {
          let color = getTrafficColor(GameState.flags.road_traffic_timer);
          if (GameState.flags.road_crossed) {
@@ -88,7 +88,7 @@ window.RoomData.road = {
          }
       }
     },
-    { id: 'road_outside', name: 'ข้ามนอกทางม้าลาย', bounds: { left: 70, top: 60, width: 30, height: 40 },
+    { id: 'road_outside', name: 'ข้ามนอกทางม้าลาย', bounds: { left: 34.2, top: 78.5, width: 65.2, height: 19.8 },
       onInteract: (element) => {
          let color = getTrafficColor(GameState.flags.road_traffic_timer);
          if (color === 'green' || color === 'yellow') {
@@ -98,7 +98,7 @@ window.RoomData.road = {
          }
       }
     },
-    { id: 'woman', name: 'ผู้หญิงในเงามืด', bounds: { left: 70, top: 40, width: 15, height: 40 },
+    { id: 'woman', name: 'ผู้หญิงในเงามืด', bounds: { left: 84.0, top: 39.5, width: 5.2, height: 33.2 },
       onInteract: (element) => {
          if (!GameState.flags.road_crossed) {
              showDialogue('เธออยู่ไกลเกินไป ต้องข้ามถนนไปก่อน');

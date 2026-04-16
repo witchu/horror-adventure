@@ -52,7 +52,6 @@
   "room_objects_bounding_boxes": [
     {
       "name": "สวิตช์ไฟ (Light Switch)",
-      "color_reference": "สีเหลือง",
       "bounding_box": {
         "left": 62.0,
         "top": 47.0,
@@ -62,7 +61,6 @@
     },
     {
       "name": "โต๊ะทานข้าว (Dining Table)",
-      "color_reference": "สีน้ำเงิน",
       "bounding_box": {
         "left": 36.8,
         "top": 72.8,
@@ -72,7 +70,6 @@
     },
     {
       "name": "โคมไฟเพดาน (Ceiling Lamp) และ กุญแจ (Storage Key)",
-      "color_reference": "สีเขียว",
       "bounding_box": {
         "left": 44.5,
         "top": 5.5,
@@ -82,7 +79,6 @@
     },
     {
       "name": "หนังสือพิมพ์ (Newspaper)",
-      "color_reference": "สีแดง",
       "bounding_box": {
         "left": 37.5,
         "top": 61.5,
@@ -92,7 +88,6 @@
     },
     {
       "name": "ชุดเครื่องดื่ม (Drinks Set)",
-      "color_reference": "สีส้ม",
       "bounding_box": {
         "left": 50.2,
         "top": 56.5,
@@ -102,7 +97,6 @@
     },
     {
       "name": "นาฬิกาลูกตุ้ม (Grandfather Clock)",
-      "color_reference": "สีขาว",
       "bounding_box": {
         "left": 83.2,
         "top": 28.5,
@@ -112,7 +106,6 @@
     },
     {
       "name": "ประตูห้องนั่งเล่น (Door to Living Room)",
-      "color_reference": "สีน้ำตาล",
       "bounding_box": {
         "left": 89.8,
         "top": 19.5,
@@ -122,7 +115,6 @@
     },
     {
       "name": "ประตูห้องครัว (Door back to Kitchen)",
-      "color_reference": "สีม่วง",
       "bounding_box": {
         "left": 66.2,
         "top": 28.2,
